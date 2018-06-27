@@ -17,20 +17,107 @@ html, body {
     margin: 0;
 }
 
-#nav {
+#addcontainer {
     position: fixed;
     top: 3em;
     left: 0;
     bottom: 0;
     width: 15em;
     background: #EDEDED;
+    padding: .5em;
 }
-#nav input, #nav select {
-    width: 10em;
+#addcontainer h3, #addcontainer form {
+    margin-left: .5em;
+}
+#addcontainer form > input {
+    width: 15em;
+    margin-left: 1em;
+}
+
+#payee_transactions {
+    width: 100%;
+    margin-top: 1em;
 }
 
 label {
-    display: inline-block;
+    display: block;
     margin-top: .5em;
     font-weight: bold;
+}
+input[type=checkbox]+ label {
+    display: inline;
+}
+
+button, input[type=button], input[type=submit] {
+    margin-top: .5em;
+}
+
+p.message {
+    font-size: 80%;
+    padding: .25em;
+    color: darkgreen;
+    border: solid 2px darkgreen;
+    background: #98ce98;
+}
+p.message:empty {
+    display: none;
+}
+p.message.error {
+    color: darkred;
+    border: solid 2px darkred;
+    background: #f29d9d;
+}
+p.message.warning {
+    color: #846e0a;
+    border: solid 2px #846e0a;
+    background: #ede2af;
+}
+p.message label {
+    font-weight: normal;
+}
+
+#dashboard {
+    position: absolute;
+    left: 17em;
+    top: 4em;
+    right: 1em;
+    bottom: 1em;
+}
+#dashboard > div > h2 {
+    font-weight: normal;
+    font-variant: small-caps;
+    border-bottom: solid 1px #88c6ef;
+    margin: 0;
+    padding: 0 0 0 .4em;
+}
+#dashboard > *, #dashboard > div.dataTables_wrapper > table {
+    margin: 0;
+}
+
+#mtdcompare {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 30%;
+}
+#last10trn {
+    position: relative;
+    top: 2em;
+    left: 0;
+    width: 30%;
+}
+
+
+#monthtodate {
+    position: absolute;
+    top: 0;
+    left: 32%;
+    width: 68%;
+    height: 15em;
+}
+#trnbyday {
+    position: absolute;
+    top: 18em;
+    left: 32%;
+    width: 30%;
 }

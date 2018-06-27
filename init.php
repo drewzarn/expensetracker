@@ -5,3 +5,5 @@ try {
     echo 'Connection failed: ' . $e->getMessage();
 	exit();
 }
+
+$DUPECHECK = ['before' => -8, 'after' => 6];

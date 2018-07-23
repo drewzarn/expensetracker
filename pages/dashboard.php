@@ -1,10 +1,6 @@
 <div id="trnbyday" class="widget">
 	<h2>Transactions By Day</h2>
-	<table class="display compact">
-		<thead>
-			<tr><th>Payee</th><th>Category</th><th>Amount</th></tr>
-		</thead>
-	</table>
+	<div id="pie"></div>
 </div>
 
 
@@ -28,5 +24,5 @@
 
 <div id="monthtodate">
 	<h2>Spending By Month</h2>
-	<div id="12monthrein"></div>
+	<div id="spendingbymonth"></div>
 </div>

@@ -27,6 +27,6 @@
 </div>
 
 <div id="monthtodate">
-	<h2>Spending This Month</h2>
-	<canvas></canvas>
+	<h2>Spending By Month</h2>
+	<div id="12monthrein"></div>
 </div>

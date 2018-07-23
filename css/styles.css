@@ -3,6 +3,9 @@ html, body {
     padding: 0;
     font-family: sans-serif;
 }
+a {
+    text-decoration: none;
+}
 #header {
     position: fixed;
     top: 0;
@@ -115,9 +118,21 @@ p.message label {
     width: 68%;
     height: 15em;
 }
+#monthtodate #months span {
+    border: solid 1px black;
+    padding: .25em;
+    border-radius: .5em;
+}
+#monthtodate #months {
+    margin: .5em 0 0 0;
+}
+#monthtodate #months svg {
+    margin-left: .25em;
+}
+
 #trnbyday {
     position: absolute;
     top: 18em;
     left: 32%;
-    width: 30%;
+    width: 40%;
 }

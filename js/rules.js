@@ -98,6 +98,7 @@ function updateDashboard() {
 }
 
 function fetchMonthToDate() {
+    return;
     $.get('/transaction/list/preset=spendbymonth')
         .done(function(json){
             var ctx = $('#monthtodate canvas');

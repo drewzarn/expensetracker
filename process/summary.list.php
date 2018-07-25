@@ -3,9 +3,8 @@ $transactions = [];
 if(isset($args['preset'])) {
 	switch($args['preset']) {
 		case 'spendingbymonth':
-			$sql = "SELECT *, income+`returns`-expenses AS net FROM (
+			$sql = "SELECT *, income-expenses AS net FROM (
 SELECT MONTHNAME(trn_date) AS `month`,
--SUM(CASE WHEN cat_income_flag=0 AND trn_amount<0 THEN trn_amount ELSE 0 END) AS `returns`,
 SUM(CASE WHEN cat_income_flag=0 AND trn_amount>0 THEN trn_amount ELSE 0 END) AS `expenses`,
 -SUM(CASE WHEN cat_income_flag=1 THEN trn_amount ELSE 0 END) AS income
 FROM `transaction`

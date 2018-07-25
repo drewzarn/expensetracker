@@ -17,53 +17,16 @@ ORDER BY _day";
 			$sqlVars['year'] = isset($args['year']) ? $args['year'] : date('Y');
 			$sqlVars['month'] = isset($args['month']) ? $args['month'] : date('n');
 			break;
-		case 'mtdcompare':
-			$sql = "SELECT 'Current' AS Month, (SELECT -1*SUM(trn_amount) FROM `transaction`
+		case 'sixmonthtable':
+			$sql = "SELECT MONTHNAME(trn_date) AS `month`,
+-SUM(CASE WHEN cat_income_flag=1 THEN trn_amount ELSE 0 END) AS income,
+SUM(CASE WHEN cat_income_flag=0 AND trn_amount>0 THEN trn_amount ELSE 0 END) AS `expenses`,
+SUM(CASE WHEN cat_income_flag=0 AND trn_amount>0 AND DAY(trn_date)<=DAY(NOW()) THEN trn_amount ELSE 0 END) AS `expensestodate`
+FROM `transaction`
 JOIN category ON cat_id=trn_cat_id
-WHERE cat_income_flag=1
-AND YEAR(trn_date)=YEAR(NOW())
-AND MONTH(trn_date)=MONTH(NOW())) AS Income,
-(SELECT SUM(trn_amount) FROM `transaction`
-JOIN category ON cat_id=trn_cat_id
-WHERE cat_income_flag=0
-AND YEAR(trn_date)=YEAR(NOW())
-AND MONTH(trn_date)=MONTH(NOW())
-AND DAY(trn_date)<=DAY(NOW())) AS Expenses,
--1*((SELECT SUM(trn_amount) FROM `transaction`
-JOIN category ON cat_id=trn_cat_id
-WHERE cat_income_flag=1
-AND YEAR(trn_date)=YEAR(NOW())
-AND MONTH(trn_date)=MONTH(NOW())
-AND DAY(trn_date)<=DAY(NOW())) + (SELECT SUM(trn_amount) FROM `transaction`
-JOIN category ON cat_id=trn_cat_id
-WHERE cat_income_flag=0
-AND YEAR(trn_date)=YEAR(NOW())
-AND MONTH(trn_date)=MONTH(NOW())
-AND DAY(trn_date)<=DAY(NOW()))) AS Net
-UNION
-SELECT 'Previous', (SELECT -1*SUM(trn_amount) FROM `transaction`
-JOIN category ON cat_id=trn_cat_id
-WHERE cat_income_flag=1
-AND YEAR(trn_date)=YEAR(DATE_ADD(NOW(), INTERVAL -1 MONTH))
-AND MONTH(trn_date)=MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH))
-AND DAY(trn_date)<=DAY(NOW())) AS Income,
-(SELECT SUM(trn_amount) FROM `transaction`
-JOIN category ON cat_id=trn_cat_id
-WHERE cat_income_flag=0
-AND YEAR(trn_date)=YEAR(DATE_ADD(NOW(), INTERVAL -1 MONTH))
-AND MONTH(trn_date)=MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH))
-AND DAY(trn_date)<=DAY(NOW())) AS Expenses,
--1*((SELECT SUM(trn_amount) FROM `transaction`
-JOIN category ON cat_id=trn_cat_id
-WHERE cat_income_flag=1
-AND YEAR(trn_date)=YEAR(DATE_ADD(NOW(), INTERVAL -1 MONTH))
-AND MONTH(trn_date)=MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH))
-AND DAY(trn_date)<=DAY(NOW())) + (SELECT SUM(trn_amount) FROM `transaction`
-JOIN category ON cat_id=trn_cat_id
-WHERE cat_income_flag=0
-AND YEAR(trn_date)=YEAR(DATE_ADD(NOW(), INTERVAL -1 MONTH))
-AND MONTH(trn_date)=MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH))
-AND DAY(trn_date)<=DAY(NOW()))) AS Net";
+WHERE trn_date BETWEEN DATE_FORMAT(DATE_ADD(NOW(), INTERVAL -6 MONTH) ,'%Y-%m-01') AND LAST_DAY(NOW())
+GROUP BY MONTH(trn_date)
+ORDER BY MONTH(trn_date) DESC";
 			break;
 	}
 	$stmt = $DB->prepare($sql);

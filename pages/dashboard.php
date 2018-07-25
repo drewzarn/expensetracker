@@ -1,10 +1,4 @@
-<div id="trnbyday" class="widget">
-	<h2>Transactions By Day</h2>
-	<div id="pie"></div>
-</div>
-
-
-<div id="mtdcompare">
+<div id="sixmonthtable">
 	<h2>Month-to-date comparison</h2>
 	<table class="display compact">
 		<thead>
@@ -13,7 +7,12 @@
 	</table>
 </div>
 
-<div id="last10trn">
+<div id="sixmonthgraph">
+	<h2>Spending By Month</h2>
+	<div id="spendingbymonth"></div>
+</div>
+
+<div id="transactionlist">
 	<h2>Last 10 Transactions</h2>
 	<table class="display compact">
 		<thead>
@@ -22,7 +21,7 @@
 	</table>
 </div>
 
-<div id="monthtodate">
-	<h2>Spending By Month</h2>
-	<div id="spendingbymonth"></div>
+<div id="categorypie">
+	<h2>Category Breakdown</h2>
+	<div></div>
 </div>

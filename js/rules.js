@@ -1,5 +1,4 @@
 var CATEGORIES = [], CAT_IDS = {}, PAYEES = [], PAY_IDS = {};
-var monthBarChart;
 
 $( document ).ready(function() {
     $('input[type=date]').val(new Date().toISOString().substring(0, 10));
@@ -84,10 +83,10 @@ function loadTransactionsByPayee(event, ui) {
 function updateDashboard() {
     $('#last6months table').DataTable().destroy();
     $('#last6months table').DataTable({paging: false, searching: false, info: false, order: [0, "desc"]});
-    $('#mtdcompare table').DataTable().destroy();
-    $('#mtdcompare table').DataTable({paging: false, searching: false, info: false, order: [0, "asc"], ajax: "transaction/list/preset=mtdcompare", columns: [{data: "Month"}, {data: "Income"}, {data: "Expenses"}, {data: "Net"}]});
-    $('#last10trn table').DataTable().destroy();
-    $('#last10trn table').DataTable({paging: false, searching: false, info: false, order: [0, "desc"], ajax: "transaction/list/datatable/cols=trn_date,pay_name,trn_amount/limit=10/orderby=trn_date desc", columns: [{data: "trn_date"}, {data: "pay_name"}, {data: "trn_amount"}]});
+    $('#sixmonthtable table').DataTable().destroy();
+    $('#sixmonthtable table').DataTable({paging: false, searching: false, info: false, ajax: "transaction/list/preset=sixmonthtable", columns: [{data: "month"}, {data: "income"}, {data: "expenses"}, {data: "expensestodate"}]});
+    $('#transactionlist table').DataTable().destroy();
+    $('#transactionlist table').DataTable({paging: false, searching: false, info: false, order: [0, "desc"], ajax: "transaction/list/datatable/cols=trn_date,pay_name,trn_amount/limit=0/orderby=trn_date desc", columns: [{data: "trn_date"}, {data: "pay_name"}, {data: "trn_amount"}]});
 
     fetchMonthToDate();
 

@@ -2,6 +2,7 @@ html, body {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
+    overflow: hidden;
 }
 a {
     text-decoration: none;
@@ -107,9 +108,9 @@ p.message label {
     margin: 0;
 }
 
-#sixmonthtable {
+#mtdcomparison {
     grid-column: span 3;
-    grid-row: span 3;
+    grid-row: span 2;
 }
 #sixmonthgraph {
     grid-column: span 5;
@@ -117,7 +118,7 @@ p.message label {
 }
 #transactionlist {
     grid-column: span 3;
-    grid-row: span 5;
+    grid-row: span 6;
     overflow-y: scroll;
 }
 #categorypie {
@@ -126,4 +127,8 @@ p.message label {
 }
 #categorypie div {
     height: 92%;
+}
+
+span.income {
+    font-weight: bold;
 }

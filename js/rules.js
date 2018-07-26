@@ -26,7 +26,7 @@ $( document ).ready(function() {
             $('form#addtransaction input[type="text"]').val('');
             $('#add_amount').val('');
             $('#add_payee').focus();
-            updateDashboard();
+            drawCharts();
             $('#payee_transactions').DataTable().destroy();
         })
         .fail(function(d){
@@ -43,8 +43,6 @@ $( document ).ready(function() {
 
     loadCategories();
     loadPayees();
-
-    updateDashboard();
 });
 
 function loadCategories() {
@@ -78,63 +76,4 @@ function loadTransactionsByPayee(event, ui) {
     $('#payee_transactions tbody').empty();
     $('#payee_transactions').DataTable().destroy();
     $('#payee_transactions').DataTable({paging: false, searching: false, info: false, order: [0, "desc"], "ajax": "/transaction/list/datatable/limit=10/payee=" + pay_id, columns: [{data: "trn_date"}, {data: "trn_amount"}]});
-}
-
-function updateDashboard() {
-    $('#last6months table').DataTable().destroy();
-    $('#last6months table').DataTable({paging: false, searching: false, info: false, order: [0, "desc"]});
-    $('#sixmonthtable table').DataTable().destroy();
-    $('#sixmonthtable table').DataTable({paging: false, searching: false, info: false, ajax: "transaction/list/preset=sixmonthtable", columns: [{data: "month"}, {data: "income"}, {data: "expenses"}, {data: "expensestodate"}]});
-    $('#transactionlist table').DataTable().destroy();
-    $('#transactionlist table').DataTable({paging: false, searching: false, info: false, order: [0, "desc"], ajax: "transaction/list/datatable/cols=trn_date,pay_name,trn_amount/limit=0/orderby=trn_date desc", columns: [{data: "trn_date"}, {data: "pay_name"}, {data: "trn_amount"}]});
-
-    fetchMonthToDate();
-
-    var labels = [], data = [];
-
-
-
-}
-
-function fetchMonthToDate() {
-    return;
-    $.get('/transaction/list/preset=spendbymonth')
-        .done(function(json){
-            var ctx = $('#monthtodate canvas');
-            var ctxParent = $('#monthtodate');
-            ctx[0].style.width = $('#monthtodate').width() + 'px';
-            ctx[0].style.height = $('#monthtodate').height() + 'px';
-            ctx[0].width  = ctx[0].offsetWidth;
-            ctx[0].height = ctx[0].offsetHeight;
-
-            var mtdPoints = [];
-            var mtdDays = [];
-            for(d=1; d<= new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate(); d++) {
-                mtdDays.push(d);
-            }
-            for(i=0; i<json.data.length;i++) {
-                mtdPoints.push(json.data[i].Expense);
-            }
-            var data = {
-                labels: mtdDays,
-                datasets: [{
-                        label: 'Expenses',
-                        backgroundColor: '#cc2222',
-                        data: mtdPoints
-                }]
-            };
-            monthBarChart = new Chart(ctx, {
-                type: 'bar',
-                data: data,
-                options: {}
-            });
-            ctx.on('click', function(evt) {
-                var day = monthBarChart.getElementsAtEvent(evt)[0]._model.label;
-                var d = new Date();
-                var trnDate = d.getFullYear() + '-' + (d.getMonth() < 9 ? '0' + (d.getMonth() + 1) : (d.getMonth() + 1)) + '-' + day;
-                $('#trnbyday h2').text('Transactions for ' + trnDate);
-                $('#trnbyday table').DataTable().destroy();
-                $('#trnbyday table').DataTable({paging: false, searching: false, info: false, order: [0, "desc"], ajax: "transaction/list/datatable/cols=pay_name,cat_name,trn_amount/orderby=pay_name desc/datefrom=" + trnDate + "/dateto=" + trnDate, columns: [{data: "pay_name"}, {data: "cat_name"}, {data: "trn_amount"}]});
-            });
-        })
 }

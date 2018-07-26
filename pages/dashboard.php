@@ -1,10 +1,6 @@
-<div id="sixmonthtable">
+<div id="mtdcomparison">
 	<h2>Month-to-date comparison</h2>
-	<table class="display compact">
-		<thead>
-			<tr><th>Month</th><th>Income</th><th>Expense</th><th>Net</th></tr>
-		</thead>
-	</table>
+	<div></div>
 </div>
 
 <div id="sixmonthgraph">
@@ -13,12 +9,8 @@
 </div>
 
 <div id="transactionlist">
-	<h2>Last 10 Transactions</h2>
-	<table class="display compact">
-		<thead>
-			<tr><th>Date</th><th>Payee</th><th>Amount</th></tr>
-		</thead>
-	</table>
+	<h2>Transaction List</h2>
+	<div></div>
 </div>
 
 <div id="categorypie">

@@ -21,8 +21,4 @@
 	<input type="submit" value="Add" />
 </form>
 <hr />
-<table id="payee_transactions" class="display compact">
-	<thead>
-		<tr><th style="width: 65%;">Date</th><th style="width: 30%;">Amount</th></tr>
-	</thead>
-</table>
+<div id="payee_transactions"></div>

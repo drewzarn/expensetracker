@@ -67,13 +67,6 @@ function loadPayees() {
             PAY_IDS[v] = i;
         });
         PAYEES.sort();
-        $("#add_payee").autocomplete({source: PAYEES, select: loadTransactionsByPayee});
+        $("#add_payee").autocomplete({source: PAYEES, select: fetchTransactionsByPayee});
     });
-}
-
-function loadTransactionsByPayee(event, ui) {
-    var pay_id = PAY_IDS[ui.item.value];
-    $('#payee_transactions tbody').empty();
-    $('#payee_transactions').DataTable().destroy();
-    $('#payee_transactions').DataTable({paging: false, searching: false, info: false, order: [0, "desc"], "ajax": "/transaction/list/datatable/limit=10/payee=" + pay_id, columns: [{data: "trn_date"}, {data: "trn_amount"}]});
 }

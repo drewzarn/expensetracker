@@ -110,7 +110,7 @@ p.message label {
 
 #mtdcomparison {
     grid-column: span 3;
-    grid-row: span 2;
+    grid-row: span 3;
 }
 #sixmonthgraph {
     grid-column: span 5;
@@ -118,7 +118,7 @@ p.message label {
 }
 #transactionlist {
     grid-column: span 3;
-    grid-row: span 6;
+    grid-row: span 5;
     overflow-y: scroll;
 }
 #categorypie {

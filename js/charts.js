@@ -150,3 +150,31 @@ function drawTransactionList(json) {
     };
     table.draw(data, options);
 }
+
+function fetchTransactionsByPayee(event, ui) {
+    var pay_id = PAY_IDS[ui.item.value];
+    $.get("/transaction/list/datatable/columns=trn_date,cat_name,trn_amount/limit=10/payee=" + pay_id)
+        .done(drawTransactionsByPayee);
+}
+
+function drawTransactionsByPayee(json) {
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Date');
+    data.addColumn('string', 'Category');
+    data.addColumn('number', 'Amount');
+    $.each(json.data, function(i, o){
+        data.addRow([
+            o.trn_date,
+            o.cat_name,
+            parseFloat(o.trn_amount)
+        ]);
+    });
+
+    var table = new google.visualization.Table($('#payee_transactions')[0]);
+    var options = {
+        width: '100%',
+        height: '100%',
+        allowHtml: true
+    };
+    table.draw(data, options);
+}

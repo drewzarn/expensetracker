@@ -1,9 +1,21 @@
 var CATEGORIES = [], CAT_IDS = {}, PAYEES = [], PAY_IDS = {};
+var NOW = new Date();
 
 $( document ).ready(function() {
     $('input[type=date]').val(new Date().toISOString().substring(0, 10));
 
     $('button,input[type=button],input[type=submit]').addClass('ui-button');
+
+    for(var i=1; i<=12; i++) {
+        $('#translist_month').append('<option value="' + i + '">' + i + '</option>');
+    }
+    for(var i=2018; i<= new Date().getFullYear(); i++) {
+        $('#translist_year').append('<option value="' + i + '">' + i + '</option>');
+    }
+    $('#translist_month option:contains(' + (NOW.getMonth() + 1) + ')').prop('selected', true);
+    $('#translist_year option:contains(' + NOW.getFullYear() + ')').prop('selected', true);
+    $('#translist_month').change(fetchTransactionList);
+    $('#translist_year').change(fetchTransactionList);
 
     $('form#addtransaction').submit(function(e){
         e.preventDefault();

@@ -9,7 +9,7 @@
 </div>
 
 <div id="transactionlist">
-	<h2>Transaction List</h2>
+	<h2>Transaction List <select id="translist_month"></select><select id="translist_year"></select></h2>
 	<div></div>
 </div>
 

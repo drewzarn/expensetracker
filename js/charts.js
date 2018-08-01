@@ -1,11 +1,21 @@
 var charts = {
     spendingByMonth: null
 };
+var dollarFormat, dollarFormatRed;
 
 google.charts.load('current', {'packages':['corechart', 'table']});
 google.charts.setOnLoadCallback(drawCharts);
 
 function drawCharts() {
+    dollarFormat = new google.visualization.NumberFormat({
+        prefix: '$'
+    });
+    dollarFormatRed = new google.visualization.NumberFormat({
+        prefix: '$',
+        negativeColor: '#F00',
+        negativeParens: true
+    });
+
     fetchSpendingByMonth();
     fetchMTDComparison();
     fetchTransactionList();
@@ -109,19 +119,29 @@ function drawMTDComparison(json) {
         ])
     });
 
+    dollarFormat.format(data, 1);
+    dollarFormat.format(data, 2);
+    dollarFormat.format(data, 3);
     var table = new google.visualization.Table($('#mtdcomparison div')[0]);
     var options = {
         showRowNumber: true,
         width: '100%',
-        height: '100%'
+        height: '100%',
+        allowHtml: true
     };
     table.draw(data, options);
 }
 
 function fetchTransactionList() {
-    var d = new Date();
-    d.setUTCDate(1);
-    $.get('transaction/list/datatable/cols=trn_date,pay_name,trn_amount,trn_description,cat_name,cat_income_flag/limit=0/datefrom=' + d.toISOString().substring(0, 10) + '/orderby=trn_date desc')
+    var dFrom = new Date();
+    var dTo = new Date();
+    dFrom.setUTCMonth(parseInt($('#translist_month').val()) - 1);
+    dFrom.setUTCFullYear($('#translist_year').val());
+    dFrom.setUTCDate(1);
+    dTo.setUTCMonth(parseInt($('#translist_month').val()));
+    dFrom.setUTCFullYear($('#translist_year').val());
+    dTo.setUTCDate(0);
+    $.get('transaction/list/datatable/cols=trn_date,pay_name,trn_amount,trn_description,cat_name,cat_income_flag/limit=0/datefrom=' + dFrom.toISOString().substring(0, 10) + '/dateto=' + dTo.toISOString().substring(0, 10) + '/orderby=trn_date desc')
         .done(drawTransactionList);
 }
 
@@ -141,7 +161,9 @@ function drawTransactionList(json) {
             data.setFormattedValue(i, 2, '<span class="income">' + Math.abs(parseFloat(o.trn_amount)) + '</span>');
         }
     });
+    data.setProperty(0, 0, 'style', 'width:6em');
 
+    dollarFormat.format(data, 2);
     var table = new google.visualization.Table($('#transactionlist div')[0]);
     var options = {
         width: '100%',
@@ -170,6 +192,8 @@ function drawTransactionsByPayee(json) {
         ]);
     });
 
+    data.setProperty(0, 0, 'style', 'width:6em');
+    dollarFormatRed.format(data, 2);
     var table = new google.visualization.Table($('#payee_transactions')[0]);
     var options = {
         width: '100%',

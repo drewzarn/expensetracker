@@ -30,6 +30,7 @@ ORDER BY _day";
 	$sqlVars = [];
 	$limit = isset($args['limit']) ? $args['limit'] : 10;
 	$orderby = isset($args['order']) ? $args['order'] : "trn_date DESC";
+	$dateFormat = $args['dateformat'] == 'short'? 'n/d/y' : 'Y-m-d';
 
 	if(isset($args['category'])) {
 		$sqlWhere[] = "trn_cat_id=:cat_id";
@@ -58,7 +59,7 @@ ORDER BY _day";
 	$stmt = $DB->prepare($sql);
 	$stmt->execute($sqlVars);
 	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		$row['trn_date'] = substr($row['trn_date'], 0, 10);
+		$row['trn_date'] = date($dateFormat, strtotime($row['trn_date']));
 		if(isset($args['datatable'])) {
 			$transactions['data'][] = $row;
 		} else {

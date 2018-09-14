@@ -1,6 +1,7 @@
 <?php
 $page = $_REQUEST['page'];
 if($page == '') $page = 'index';
+$layout = $page == 'bootstrap' ? 'bootstrap' : '';
 if(isset($_REQUEST['cmd'])) $command = $_REQUEST['cmd'];
 $args = [];
 if(isset($_REQUEST['extra'])) {
@@ -33,13 +34,13 @@ if(!file_exists("pages/{$page}.php")) {
 
 
 if($_SERVER["HTTP_X_REQUESTED_WITH"] != 'XMLHttpRequest') {
-	include("pages/_head.php");
+	include("pages/_{$layout}head.php");
 }
 
 include("pages/{$page}.php");
 
 if($_SERVER["HTTP_X_REQUESTED_WITH"] != 'XMLHttpRequest') {
-	include("pages/_tail.php");
+	include("pages/_{$layout}tail.php");
 }
 
 function jsonheader() {

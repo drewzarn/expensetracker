@@ -175,8 +175,9 @@ function drawTransactionList(json) {
 
 function fetchTransactionsByPayee(event, ui) {
     var pay_id = PAY_IDS[ui.item.value];
-    $.get("/transaction/list/datatable/columns=trn_date,cat_name,trn_amount/limit=10/payee=" + pay_id)
+    $.get("/transaction/list/datatable/columns=trn_date,cat_name,trn_amount/dateformat=short/limit=10/payee=" + pay_id)
         .done(drawTransactionsByPayee);
+    $("#add_category").focus();
 }
 
 function drawTransactionsByPayee(json) {

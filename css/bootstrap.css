@@ -1,11 +1,11 @@
-#header {
-    height: 3em;
-    background: #88c6ef;
-    line-height: 3em;
+.container-fluid > .row > .col {
+    padding: 0;
 }
-#title {
-    font-size: 200%;
-    font-weight: 150%;
+.nav {
+    background: #88c6ef;
+}
+.nav a {
+    color: #001577;
 }
 
 #addcontainer {
@@ -18,12 +18,16 @@
     margin-bottom: .5em;
 }
 
-.dashboard > div {
+.default > div {
     margin-top: 1em;
 }
 
 h3 select {
     font-size: 50%;
+}
+
+#catlist button {
+    margin: .2em;
 }
 
 @media (min-width: 576px) {

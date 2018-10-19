@@ -21,6 +21,9 @@ function drawCharts() {
     fetchTransactionList();
 
     fetchTransactionsByMonthAndType(true);
+
+
+    showDashboard();
 }
 
 function fetchSpendingByMonth() {
@@ -202,4 +205,43 @@ function drawTransactionsByPayee(json) {
         allowHtml: true
     };
     table.draw(data, options);
+}
+
+function fetchCategoriesByMonth() {
+    var categories = [];
+    $('#catlist button.btn-info').each(function(i, el){
+        var $el = $(el);
+        categories.push($el.text());
+    });
+    $.get("/summary/list/preset=catbymonth/categories=" + JSON.stringify(categories))
+        .done(drawCategoriesByMonth);
+}
+
+function drawCategoriesByMonth(json) {
+    console.log(json);
+    var categories = [];
+    var months = [];
+
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Month');
+    $.each(json.data, function(i, o){
+        if(categories.indexOf(o.category) < 0) {
+            categories.push(o.category);
+            data.addColumn('number', o.category);
+        }
+        if(months.indexOf(o.month) < 0) {
+            months.push(o.month);
+            data.addRow();
+            data.setCell(months.length - 1, 0, o.month)
+        }
+        data.setCell(months.indexOf(o.month), categories.indexOf(o.category) + 1, parseFloat(o.amount))
+    });
+    var options = {
+        title: 'Spending by Category over Month',
+        legend: { position: 'right' }
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById('catbymonthchart'));
+
+    chart.draw(data, options);
 }

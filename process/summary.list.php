@@ -46,6 +46,14 @@ WHERE trn_date BETWEEN DATE_FORMAT(DATE_ADD(NOW(), INTERVAL -6 MONTH) ,'%Y-%m-01
 GROUP BY MONTH(trn_date)
 ORDER BY MONTH(trn_date) DESC";
 			break;
+		case 'catbymonth':
+			$sql = "SELECT MONTHNAME(trn_date) AS `month`, SUM(trn_amount) AS `amount`, cat_name AS `category`
+FROM `transaction`
+JOIN category ON cat_id=trn_cat_id AND FIND_IN_SET(cat_name, :categories)
+GROUP BY MONTH(trn_date), trn_cat_id
+ORDER BY MONTH(trn_date), cat_name";
+			$sqlVars['categories'] = implode(',', json_decode($args['categories']));
+			break;
 	}
 	$stmt = $DB->prepare($sql);
 	$stmt->execute($sqlVars);

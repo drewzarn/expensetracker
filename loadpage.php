@@ -2,6 +2,7 @@
 $page = $_REQUEST['page'];
 if($page == '') $page = 'index';
 if(isset($_REQUEST['cmd'])) $command = $_REQUEST['cmd'];
+
 $args = [];
 if(isset($_REQUEST['extra'])) {
 	$_args = explode('/', $_REQUEST['extra']);

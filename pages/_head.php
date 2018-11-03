@@ -16,4 +16,4 @@
 	<script src="js/rules.js"></script>
 	<script src="js/charts.js"></script>
 </head>
-<body>
+<body <?= (strpos($_SERVER['SERVER_NAME'], 'dev.') >= 0) ? 'class="dev"' : '' ?>>

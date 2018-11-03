@@ -1,3 +1,7 @@
+body.dev {
+    background-image: url('../img/development.png');
+}
+
 .container-fluid > .row > .col {
     padding: 0;
 }

@@ -9,6 +9,7 @@ if($page == 'user' && $command == 'logout') {
 	exit();
 }
 
+
 try {
 	$DB = new PDO("mysql:dbname={$DBNAME};host={$DBHOST}", $DBUSER, $DBPASS);
 } catch (PDOException $e) {

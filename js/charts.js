@@ -21,9 +21,6 @@ function drawCharts() {
     fetchTransactionList();
 
     fetchTransactionsByMonthAndType(true);
-
-
-    showDashboard();
 }
 
 function fetchSpendingByMonth() {

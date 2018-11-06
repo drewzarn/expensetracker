@@ -13,6 +13,7 @@
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
 	<link rel="stylesheet" href="css/bootstrap.css" />
+	<script type="text/javascript" src="js/typeahead.js"></script>
 	<script src="js/rules.js"></script>
 	<script src="js/charts.js"></script>
 </head>

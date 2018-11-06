@@ -15,12 +15,12 @@ $(document).ready(function () {
     $('#translist_month').change(fetchTransactionList);
     $('#translist_year').change(fetchTransactionList);
 
-    $('#mainnav .nav-link').click(function(){
+    $('#mainnav ul .nav-link').click(function () {
         var content = $(this).attr('href').substring(1);
         $('div[id^="content-"]').hide();
         $('div[id^="content-' + content + '"]').show();
     });
-    if(location.hash != '') {
+    if (location.hash != '') {
         $('.nav-link[href="' + location.hash + '"]').click();
     }
 
@@ -52,11 +52,12 @@ $(document).ready(function () {
                 )
                 .done(function () {
                     $('form#addtransaction p.message').removeClass('error').empty();
-                    $('form#addtransaction input[type="text"]').val('');
+                    $('#add_category').val('');
                     $('#add_amount').val('');
+                    $('#add_description').val('');
                     $('#add_payee').focus();
+                    fetchTransactionsByPayee($('#add_payee').val());
                     drawCharts();
-                    $('#payee_transactions').DataTable().destroy();
                 })
                 .fail(function (d) {
                     var d = JSON.parse(d.responseText);
@@ -89,7 +90,7 @@ function loadCategories() {
             CAT_IDS[v] = i;
         });
         CATEGORIES.sort();
-        $("#add_category").autocomplete({source: CATEGORIES});
+        $("#add_category").typeahead({source: CATEGORIES});
         $('#catlist').empty();
         $.each(CATEGORIES, function (i, v) {
             $('#catlist').append('<button class="btn-sm">' + v + '</button>');
@@ -106,6 +107,6 @@ function loadPayees() {
             PAY_IDS[v] = i;
         });
         PAYEES.sort();
-        $("#add_payee").autocomplete({source: PAYEES, select: fetchTransactionsByPayee});
+        $("#add_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
     });
 }

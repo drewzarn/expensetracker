@@ -1,8 +1,6 @@
 <nav id="mainnav" class="navbar navbar-expand-lg navbar-light bg-light">
 	<span class="navbar-brand">Expenses</span>
-	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-		<span class="navbar-toggler-icon"></span>
-	</button>
+	<a class="nav-link text-muted" href="#"  data-toggle="modal" data-target="#addtransaction">Add Transaction</a>
 	<div class="collapse navbar-collapse" id="navbarSupportedContent">
 		<ul class="navbar-nav mr-auto">
 			<li class="nav-item">
@@ -14,18 +12,15 @@
 			<li class="nav-item">
 				<a class="nav-link" href="#balances">Balances</a>
 			</li>
-			<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					Add Transaction
-				</a>
-				<div id="addcontainer" class="dropdown-menu p-3" aria-labelledby="navbarDropdown">
-					<?php include('addtransaction.php'); ?>
-				</div>
-			</li>
 		</ul>
 		<a href="/user/logout" class="btn btn-light">Logout</a>
 	</div>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
 </nav>
+
+<?php include('addtransaction.php'); ?>
 
 <div id="content-dashboard" class="container-fluid">
 	<div class="row">
@@ -85,6 +80,7 @@
 		<div class="tab-pane fade" id="balancesheet" role="tabpanel" aria-labelledby="balancesheet-tab">sheet</div>
 		<div class="tab-pane fade" id="balanceaccounts" role="tabpanel" aria-labelledby="balanceaccounts-tab">
 			<h2>Asset Accounts</h2>
+			<input type="text" id="asset_act_name" /> <input type="button" value="Add Account" id="btn_add_asset_act" class="btn btn-primary"/>
 			<h2>Loan Accounts</h2>
 			<h2>Credit Card Accounts</h2>
 		</div>

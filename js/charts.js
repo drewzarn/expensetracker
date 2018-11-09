@@ -18,7 +18,7 @@ function drawCharts() {
 
     fetchSpendingByMonth();
     fetchMTDComparison();
-    fetchTransactionList();
+    //fetchTransactionList();
 
     fetchTransactionsByMonthAndType(true);
 }
@@ -132,7 +132,7 @@ function drawMTDComparison(json) {
     table.draw(data, options);
 }
 
-function fetchTransactionList() {
+function xfetchTransactionList() {
     var dFrom = new Date();
     var dTo = new Date();
     dFrom.setUTCMonth(parseInt($('#translist_month').val()) - 1);

@@ -18,6 +18,14 @@ if(isset($_REQUEST['extra'])) {
 
 require('init.php');
 
+if($page == 'dbscripts' && $DEVELOPMENT) {
+	if(file_exists("dbscripts/{$command}.php")) {
+		require("dbscripts/{$command}.php");
+		echo $command . ' Done';
+	}
+	exit();
+}
+
 if($command == 'list') {
 	jsonheader();
 }

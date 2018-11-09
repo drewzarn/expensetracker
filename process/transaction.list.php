@@ -5,11 +5,11 @@ if(isset($args['preset'])) {
 		case 'spendbymonth':
 			$sql = "SELECT _day AS Day, SUM(Income) AS Income, SUM(Expense) AS Expense
 FROM (SELECT _day,
-CASE WHEN cat_income_flag=1 THEN -1 * IFNULL(trn_amount, 0) ELSE 0 END AS Income,
-CASE WHEN cat_income_flag=0 THEN IFNULL(trn_amount, 0) ELSE 0 END AS Expense
+CASE WHEN income=1 THEN -1 * IFNULL(amount, 0) ELSE 0 END AS Income,
+CASE WHEN income=0 THEN IFNULL(amount, 0) ELSE 0 END AS Expense
 FROM _days
-LEFT JOIN `transaction` ON DAY(trn_date)=_day AND YEAR(trn_date)=:year AND MONTH(trn_date)=:month
-LEFT JOIN category ON cat_id=trn_cat_id
+LEFT JOIN `transaction` ON DAY(date)=_day AND YEAR(date)=:year AND MONTH(date)=:month
+LEFT JOIN category ON id=category_id
 WHERE _day<=LAST_DAY(CONCAT(:year, '-', :month, '-01'))
 ) a
 GROUP BY _day
@@ -24,48 +24,20 @@ ORDER BY _day";
 		$transactions['data'][] = $row;
 	}
 } else {
-	$columns = isset($args['cols']) ? $args['cols'] : '*';
-	$sql = "SELECT {$columns} FROM transaction JOIN category ON cat_id=trn_cat_id JOIN payee ON pay_id=trn_pay_id WHERE 1=1 ";
-	$sqlWhere = [];
-	$sqlVars = [];
-	$limit = isset($args['limit']) ? $args['limit'] : 10;
-	$orderby = isset($args['order']) ? $args['order'] : "trn_date DESC";
-	$dateFormat = $args['dateformat'] == 'short'? 'n/d/y' : 'Y-m-d';
-
-	if(isset($args['category'])) {
-		$sqlWhere[] = "trn_cat_id=:cat_id";
-		$sqlVars["cat_id"] = $args['category'];
+	$beans = R::find('transaction', 'date BETWEEN ? AND ?', [$args['datefrom'], $args['dateto']]);
+	foreach($beans as $transaction) {
+		$transactions[] = [
+			'id' => $transaction->id,
+			'date' => substr($transaction->date, 0, 10),
+			'payee' => $transaction->payee->name,
+			'category' => $transaction->category->name,
+			'amount' => $transaction->amount,
+			'description' => $transaction->description
+		];
 	}
-	if(isset($args['payee'])) {
-		$sqlWhere[] = "trn_pay_id=:pay_id";
-		$sqlVars["pay_id"] = $args['payee'];
-	}
-	if(isset($args['datefrom'])) {
-		$sqlWhere[] = "trn_date>=:datefrom";
-		$sqlVars["datefrom"] = $args['datefrom'];
-	}
-	if(isset($args['dateto'])) {
-		$sqlWhere[] = "trn_date<=:dateto";
-		$sqlVars["dateto"] = $args['dateto'];
-	}
-	foreach($sqlWhere as $where) {
-		$sql .= " AND {$where} ";
-	}
-	$sql .= " ORDER BY {$orderby}";
-	if($limit != 0) {
-		$sql .= " LIMIT {$limit} ";
-	}
-
-	$stmt = $DB->prepare($sql);
-	$stmt->execute($sqlVars);
-	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		$row['trn_date'] = date($dateFormat, strtotime($row['trn_date']));
-		if(isset($args['datatable'])) {
-			$transactions['data'][] = $row;
-		} else {
-			$transactions[] = $row;
-		}
-	}
+	$output = new stdClass();
+	$output->data = $transactions;
+	$transactions = $output;
 }
 
 echo json_encode($transactions);

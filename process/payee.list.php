@@ -1,8 +1,9 @@
 <?php
-$payees = [];
-$stmt = $DB->query("SELECT pay_id, pay_name FROM payee WHERE pay_delete_flag=0 ORDER BY pay_name");
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-	$payees[$row['pay_id']] = $row['pay_name'];
+
+$output = [];
+$payees = R::find( 'payee', 'deleted=0 AND site=:site ORDER BY name', [':site' => SITE]);
+foreach($payees as $payee) {
+	$output[$payee->id] = $payee->name;
 }
 
-echo json_encode($payees);
+echo json_encode($output);

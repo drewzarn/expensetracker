@@ -2,10 +2,29 @@ body.dev {
     background-image: url('../img/development.png');
 }
 
-.ui-front {
-    z-index: 1000;
-}
-
 div[id^="content-"] {
     display: none;
+}
+
+div#transactionlistrange input {
+    width: 12em;
+    flex: none;
+}
+div#transactionlistrange span.input-group-addon {
+    padding: .25em .5em;
+}
+div#transactionlistrange button {
+    width: 8em;
+    margin-left: .5em;
+}
+#transactionlisttable_wrapper {
+    margin-top: 1em;
+}
+#transactionlisttable tr td:first-of-type {
+    min-width: 8em;
+}
+#transactionlisttable tbody i.fa-edit {
+    margin-right: .25em;
+    cursor: pointer;
+    opacity: .5;
 }

@@ -1,8 +1,31 @@
 var CATEGORIES = [], CAT_IDS = {}, PAYEES = [], PAY_IDS = {};
 var NOW = new Date();
 
+var transactionlisttable;
+var transactionEditIcon = function ( data, type, row ) {
+        if ( type === 'display' ) {
+            return '<i class="fas fa-edit" data-transactionid="' + row.id + '"></i>' + data;
+        }
+        return data;
+    };
+
 $(document).ready(function () {
     $('input[type=date]').val(new Date().toISOString().substring(0, 10));
+
+    $('#transactionlistrange').datepicker({format: 'yyyy-mm-dd'});
+    $('#loadtransactionlist').click(fetchTransactionList);
+    transactionlisttable = $('#transactionlisttable').DataTable({
+        scrollY: '65vh',
+        scrollCollapse: true,
+        paging: false,
+        ajax: '',
+        columns: [
+            {data:'date', render: transactionEditIcon},
+            {data:'payee'},
+            {data:'category'},
+            {data:'description'},
+            {data:'amount'}
+        ]});
 
     for (var i = 1; i <= 12; i++) {
         $('#translist_month').append('<option value="' + i + '">' + i + '</option>');
@@ -34,13 +57,13 @@ $(document).ready(function () {
     $('form#addtransaction').submit(function (e) {
         e.preventDefault();
         var addData = {
-            add_payee: $('#add_payee').val().trim(),
-            add_category: $('#add_category').val().trim(),
-            add_amount: $('#add_amount').val(),
-            add_date: $('#add_date').val(),
-            add_description: $('#add_description').val()
+            payee: $('#add_payee').val().trim(),
+            category: $('#add_category').val().trim(),
+            amount: $('#add_amount').val(),
+            date: $('#add_date').val(),
+            description: $('#add_description').val()
         };
-        if (addData.add_payee == '' || addData.add_category == '' || addData.add_amount == '')
+        if (addData.payee == '' || addData.category == '' || addData.amount == '')
             return;
 
         if ($('#add_skipdupe').prop('checked')) {
@@ -109,4 +132,12 @@ function loadPayees() {
         PAYEES.sort();
         $("#add_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
     });
+}
+
+function fetchTransactionList() {
+    var start = $('#transactionlistrange input[name=start]').val();
+    var end = $('#transactionlistrange input[name=end]').val();
+    var url = "transaction/list/datefrom=" + start + "/dateto=" + end;
+
+    transactionlisttable.ajax.url(url).load();
 }

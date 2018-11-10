@@ -23,8 +23,7 @@ div#transactionlistrange button {
 #transactionlisttable tr td:first-of-type {
     min-width: 8em;
 }
-#transactionlisttable tbody i.fa-edit {
+#transactionlisttable tbody a.fa-edit {
     margin-right: .25em;
-    cursor: pointer;
     opacity: .5;
 }

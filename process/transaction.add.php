@@ -24,5 +24,4 @@ $transaction->description = $_REQUEST['description'];
 $transaction->date = new DateTime();
 R::store($transaction);
 
-header('Location: /');
 exit();

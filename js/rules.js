@@ -4,16 +4,16 @@ var NOW = new Date();
 var transactionlisttable;
 var transactionEditIcon = function (data, type, row) {
     if (type === 'display') {
-        return '<a class="fas fa-edit" data-toggle="modal" data-target="#addtransactionmodal" data-transactionid="' + row.id + '"></a>' + data;
+        return '<a href="#" class="fas fa-edit text-dark mr-2 light" data-toggle="modal" data-target="#modal_edittransaction" data-transactionid="' + row.id + '"></a>' + data;
     }
     return data;
 };
 
 function dateToToday(selectorOrElement) {
-    if(selectorOrElement == null) {
+    if (selectorOrElement == null) {
         selectorOrElement = 'input[type=date]';
     }
-    if(typeof selectorOrElement == 'string') {
+    if (typeof selectorOrElement == 'string') {
         $(selectorOrElement).val(new Date().toISOString().substring(0, 10));
     } else {
         selectorOrElement.val(new Date().toISOString().substring(0, 10));
@@ -22,6 +22,30 @@ function dateToToday(selectorOrElement) {
 
 $(document).ready(function () {
     dateToToday();
+
+    $('form').each(function () {
+        $(this).validate({
+            submitHandler: formAjaxSubmit,
+            showErrors: showFormErrors
+        });
+    });
+
+    $('#modal_editaccount').on('shown.bs.modal', function (e) {
+        $('#editaccount_name').val($(e.relatedTarget).prev().text());
+        $('#editaccount_id').val($(e.relatedTarget).parent().data('accountid'));
+    });
+
+    $('#modal_addtransaction').on('shown.bs.modal', function (e) {
+        $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
+    })
+
+    $('#modal_edittransaction').on('shown.bs.modal', function (e) {
+        $('#edittransaction_id').val($(e.relatedTarget).data('transactionid'));
+        var trnDetails = transactionlisttable.row($(e.relatedTarget).parent().parent()[0]).data();
+        $.each(trnDetails, function (i, v) {
+            $('#edittransaction_' + i).val(v);
+        });
+    })
 
     $('#transactionlistrange').datepicker({format: 'yyyy-mm-dd'});
     $('#loadtransactionlist').click(fetchTransactionList);
@@ -41,36 +65,25 @@ $(document).ready(function () {
     $('#transactionlisttable').on('click', 'i.fa-edit', function () {
         loadTransactionToEdit($(this).data('transactionid'));
     });
-    $('#addtransactionmodal').on('shown.bs.modal', function (e) {
-        if($(e.relatedTarget).data('transactionid') == null) {
-            $('#addtransaction').attr('action', 'transaction/add');
-            $('#addtransactionmodal h5.modal-title').text('Add Transaction');
-            $('#addtransactionmodal input[type=submit]').val('Add');
-            $('#addtransactionmodal input[id]').val('');
-            dateToToday('#addtransactionmodal input[type=date]');
-            $('#trn_id').val('');
-        } else {
-            $('#addtransaction').attr('action', 'transaction/edit');
-            $('#addtransactionmodal h5.modal-title').text('Edit Transaction');
-            $('#addtransactionmodal input[type=submit]').val('Update');
-            $('#trn_id').val($(e.relatedTarget).data('transactionid'));
-            var trnDetails = transactionlisttable.row($(e.relatedTarget).parent().parent()[0]).data();
-            $.each(trnDetails, function(i, v){
-                $('#trn_' + i).val(v);
-            });
-        }
-    })
 
-    for (var i = 1; i <= 12; i++) {
-        $('#translist_month').append('<option value="' + i + '">' + i + '</option>');
-    }
-    for (var i = 2018; i <= new Date().getFullYear(); i++) {
-        $('#translist_year').append('<option value="' + i + '">' + i + '</option>');
-    }
-    $('#translist_month option:contains(' + (NOW.getMonth() + 1) + ')').prop('selected', true);
-    $('#translist_year option:contains(' + NOW.getFullYear() + ')').prop('selected', true);
-    $('#translist_month').change(fetchTransactionList);
-    $('#translist_year').change(fetchTransactionList);
+    $('#addaccount').click(function () {
+        var data = {
+            name: $('#addaccountname').val(),
+            type: $('input[name=addaccounttype]:checked').val()
+        };
+        if (data.name == '' || data.value == '') {
+            return;
+        }
+        $.post(
+                'account/add',
+                data
+                )
+                .done(function () {
+                    $('#addaccountname').val('').focus();
+                    loadAccounts();
+                });
+    });
+
 
     $('#mainnav ul .nav-link').click(function () {
         var content = $(this).attr('href').substring(1);
@@ -81,98 +94,142 @@ $(document).ready(function () {
         $('.nav-link[href="' + location.hash + '"]').click();
     }
 
-    $('#addcontainer').on("click", function (e) {
-        e.stopPropagation();
-    });
-    $('body').on("click", ".ui-autocomplete", function (e) {
-        e.stopPropagation();
-    });
-
-    $('form#addtransaction').submit(function (e) {
-        e.preventDefault();
-        var addData = {
-            id: $('#trn_id').val().trim(),
-            payee: $('#trn_payee').val().trim(),
-            category: $('#trn_category').val().trim(),
-            amount: $('#trn_amount').val(),
-            date: $('#trn_date').val(),
-            description: $('#trn_description').val()
-        };
-        if (addData.payee == '' || addData.category == '' || addData.amount == '')
-            return;
-
-        if ($('#trn_skipdupe').prop('checked')) {
-            addData.skipdupe = 1;
-        }
-        $.post(
-                $(this).attr('action'),
-                addData
-                )
-                .done(function (d) {
-                    if ($('#addtransaction').attr('action') == 'transaction/edit') {
-                        $('#addtransactionmodal').modal('hide');
-                        transactionlisttable.row($('#transactionlisttable a[data-transactionid=' + $('#trn_id').val() + ']').parent().parent()[0]).data(d).draw();
-                    } else {
-                        fetchTransactionsByPayee($('#trn_payee').val());
-                    $('#trn_payee').focus();
-                    }
-                    $('form#addtransaction p.message').removeClass('error').empty();
-                    $('#trn_id').val('');
-                    $('#trn_category').val('');
-                    $('#trn_amount').val('');
-                    $('#trn_description').val('');
-                    drawCharts();
-                })
-                .fail(function (d) {
-                    var d = JSON.parse(d.responseText);
-                    var dupe = d.dupe;
-                    var msg = '<strong>Possible dupe</strong><br />' + dupe.date.substring(0, 10);
-                    if (dupe.description != '') {
-                        msg += '<br /><em>' + dupe.description + '</em>';
-                    }
-                    msg += '<br /><input type="checkbox" id="trn_skipdupe" /><label for="trn_skipdupe">Allow Dupe Entry</label>';
-                    $('form#addtransaction p.message').html(msg).addClass('warning');
-                });
-    });
-
     $('#catlist').on('click', 'button', function () {
         var $btn = $(this);
         $btn.toggleClass('btn-info');
         fetchCategoriesByMonth();
     });
 
-    loadCategories();
-    loadPayees();
+    loadInfrastructure();
 });
 
-function loadCategories() {
-    $.ajax({
-        url: "category/list"
-    }).done(function (d) {
-        $.each(d, function (i, v) {
-            CATEGORIES.push(v);
-            CAT_IDS[v] = i;
-        });
-        CATEGORIES.sort();
-        $("#trn_category").typeahead({source: CATEGORIES});
-        $('#catlist').empty();
-        $.each(CATEGORIES, function (i, v) {
-            $('#catlist').append('<button class="btn-sm">' + v + '</button>');
-        });
+function formAjaxSubmit(form, event) {
+    $form = $(form);
+    $form.find('div.formerror').remove();
+    var replacePrefix = form.id.replace('frm_', '') + '_';
+    var data = {};
+    $form.find('input').each(function (i, el) {
+        if (el.type == 'submit' || el.type == 'button' || (el.name == '' && el.id == ''))
+            return;
+        if (el.type == 'radio') {
+            data[el.name.replace(replacePrefix, '')] = $('input[name=' + el.name + ']:checked').val();
+        } else {
+            data[el.id.replace(replacePrefix, '')] = $(el).val();
+        }
     });
+    $form.find('select').each(function (i, el) {
+        data[el.id.replace(replacePrefix, '')] = $(el).val();
+    });
+
+    var doneHandler = function (d) {
+        $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
+        $form.find('input[type=checkbox]').prop('checked', false);
+        $form.find('input[type=radio]').prop('checked', false);
+        $form.find('select').val('');
+        loadInfrastructure($form.data('reload'));
+        if (form.action.indexOf('/edit') >= 0) {
+            $form.closest('div.modal').modal('hide');
+        }
+    };
+    var failHandler = function (d) {
+        $form.prepend('<div class="formerror rounded border border-danger bg-light text-danger p-2">There was an error saving this data</div>');
+    };
+    switch (form.id) {
+        case 'frm_addtransaction':
+            doneHandler = function (d) {
+                $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
+                $form.find('input[type=checkbox]').prop('checked', false);
+                $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
+            };
+            failHandler = function (d) {
+                d = JSON.parse(d.responseText);
+                var dupe = d.dupe;
+                var msg = 'Allow dupe? On ' + dupe.date.substring(0, 10);
+                if (dupe.description != '') {
+                    msg += ' (<em>' + dupe.description + '</em>)';
+                }
+                $form.find('label[for=addtransaction_allowdupe]').html(msg).parent().removeClass('d-none');
+            };
+            break;
+        case 'frm_edittransaction':
+            doneHandler = function (d) {
+                $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
+                $form.find('input[type=checkbox]').prop('checked', false);
+                transactionlisttable.row($('#transactionlisttable a[data-transactionid=' + d.id + ']').parent().parent()[0]).data(d).draw();
+                $('#modal_edittransaction').modal('hide');
+            };
+            break;
+    }
+
+    $.ajax(form.action, {method: "POST", data: {data: data}})
+            .done(doneHandler)
+            .fail(failHandler);
 }
 
-function loadPayees() {
-    $.ajax({
-        url: "payee/list"
-    }).done(function (d) {
-        $.each(d, function (i, v) {
-            PAYEES.push(v);
-            PAY_IDS[v] = i;
+function showFormErrors(errorMap, errorList) {
+    if (errorList[0] == null)
+        return;
+    $(errorList[0].element).closest('form').find('div.formerror').remove();
+    $(errorList[0].element).closest('form').find('input[type=submit]').before('<div class="formerror rounded border border-danger bg-light text-danger p-2 mb-3">You seem to be missing some data...</div>');
+}
+
+function loadInfrastructure(loadOnly) {
+    if (typeof loadOnly == 'string') {
+        loadOnly = loadOnly.split(',');
+    }
+    if (loadOnly == null || loadOnly.indexOf('account') >= 0) {
+        $.ajax({
+            url: "account/list"
+        }).done(function (d) {
+            $('#accountlist li ul').empty();
+            $.each(d, function (i, v) {
+                $('#accountlist li[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + i + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
+            });
         });
-        PAYEES.sort();
-        $("#trn_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
-    });
+    }
+    if (loadOnly == null || loadOnly.indexOf('accounttype') >= 0) {
+        $.ajax({
+            url: "accounttype/list"
+        }).done(function (d) {
+            $.each(d, function (i, v) {
+                $('#addaccount_type').append('<option value="' + i + '">' + v.name + '</option>')
+                $('#accountlist').append('<li data-accounttypeid="' + i + '">' + v.name + ' Accounts<ul></ul></li>');
+            });
+            loadInfrastructure('account');
+        });
+    }
+
+    if (loadOnly == null || loadOnly.indexOf('category') >= 0) {
+        $.ajax({
+            url: "category/list"
+        }).done(function (d) {
+            $.each(d, function (i, v) {
+                CATEGORIES.push(v);
+                CAT_IDS[v] = i;
+            });
+            CATEGORIES.sort();
+            $("#addtransaction_category").typeahead({source: CATEGORIES});
+            $("#edittransaction_category").typeahead({source: CATEGORIES});
+            $('#catlist').empty();
+            $.each(CATEGORIES, function (i, v) {
+                $('#catlist').append('<button class="btn-sm">' + v + '</button>');
+            });
+        });
+    }
+
+    if (loadOnly == null || loadOnly.indexOf('payee') >= 0) {
+        $.ajax({
+            url: "payee/list"
+        }).done(function (d) {
+            $.each(d, function (i, v) {
+                PAYEES.push(v);
+                PAY_IDS[v] = i;
+            });
+            PAYEES.sort();
+            $("#addtransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
+            $("#edittransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
+        });
+    }
 }
 
 function fetchTransactionList() {

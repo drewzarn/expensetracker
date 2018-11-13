@@ -24,7 +24,7 @@ ORDER BY _day";
 		$transactions['data'][] = $row;
 	}
 } else {
-	$beans = R::find('transaction', 'date BETWEEN ? AND ?', [$args['datefrom'], $args['dateto']]);
+	$beans = R::find('transaction', 'site=? AND date BETWEEN ? AND ?', [SITE, $args['datefrom'], $args['dateto']]);
 	foreach($beans as $transaction) {
 		$transactions[] = [
 			'id' => $transaction->id,

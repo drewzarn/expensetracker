@@ -14,17 +14,8 @@
 		<div class="tab-pane fade show active" id="balancedashboard" role="tabpanel" aria-labelledby="balancedashboard-tab">Dashboard</div>
 		<div class="tab-pane fade" id="balancesheet" role="tabpanel" aria-labelledby="balancesheet-tab">sheet</div>
 		<div class="tab-pane fade" id="balanceaccounts" role="tabpanel" aria-labelledby="balanceaccounts-tab">
-			<h2>Asset Accounts</h2>
-			<input type="text" id="asset_act_name" /> <input type="button" value="Add Account" id="btn_add_asset_act" class="btn btn-primary"/>
-			<h2>Loan Accounts</h2>
-			<h2>Credit Card Accounts</h2>
+			<ul id="accountlist" class="mt-3"></ul>
+			<button class="btn btn-secondary mt-3" data-toggle="modal" data-target="#modal_addaccount">Add New Account</button>
 		</div>
 	</div>
-</div><?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
+</div>

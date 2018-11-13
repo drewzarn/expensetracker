@@ -31,11 +31,18 @@ $transaction->description = str_pad('', 100);
 $transaction->amount = 1000000.00;
 R::store($transaction);
 
+$accounttype = R::dispense('accounttype');
+$accounttype->site = 0;
+$accounttype->name = str_pad('', 30);
+$accounttype->asset = 1;
+R::store($accounttype);
+
 $account = R::dispense('account');
 $account->site = 0;
 $account->name = str_pad('', 30);
-$account->type = str_pad('', 15);
+$account->type = $accounttype;
 $account->active = 0;
+$account->setMeta('default', 1);
 R::store($account);
 
 $balance = R::dispense('balance');

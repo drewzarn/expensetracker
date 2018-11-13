@@ -29,3 +29,10 @@ define('SITE', $_SESSION['user']->site);
 
 $PWRESETLIMIT = 60 * 15;
 $DUPECHECK = ['before' => -8, 'after' => 6];
+
+$modalContent = '';
+$files = scandir(getcwd() . '/modals/');
+foreach($files as $file) {
+	if($file == '.' || $file == '..' || file == 'modals.php') continue;
+	$modalContent .= file_get_contents(getcwd() . '/modals/' . $file);
+}

@@ -30,8 +30,16 @@ if($command == 'list') {
 	jsonheader();
 }
 
+if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_REQUEST['data'])) {
+	$POSTDATA = $_REQUEST['data'];
+}
+
 if($_SERVER["REQUEST_METHOD"] == "POST" || file_exists("process/{$page}.{$command}.php")) {
 	include("process/{$page}.{$command}.php");
+	exit();
+}
+if($command == 'list' && !file_exists("process/{$page}.{$command}.php")) {
+	include("process/_default.{$command}.php");
 	exit();
 }
 if(!file_exists("pages/{$page}.php")) {

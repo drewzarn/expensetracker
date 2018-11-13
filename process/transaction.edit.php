@@ -1,15 +1,15 @@
 <?php
-$category = R::findOrCreate('category', ['name' => $_REQUEST['category'], 'site' => SITE]);
-$payee = R::findOrCreate('payee', ['name' => $_REQUEST['payee'], 'site' => SITE]);
+$category = R::findOrCreate('category', ['name' => $POSTDATA['category'], 'site' => SITE]);
+$payee = R::findOrCreate('payee', ['name' => $POSTDATA['payee'], 'site' => SITE]);
 
-$amount = $category->income ? -1 * $_REQUEST['amount'] : $_REQUEST['amount'];
-$trnDate = $_REQUEST['date'];
+$amount = $category->income ? -1 * $POSTDATA['amount'] : $POSTDATA['amount'];
+$trnDate = $POSTDATA['date'];
 
-$transaction = R::load('transaction', $_REQUEST['id']);
+$transaction = R::load('transaction', $POSTDATA['id']);
 $transaction->category = $category;
 $transaction->payee = $payee;
 $transaction->amount = $amount;
-$transaction->description = $_REQUEST['description'];
+$transaction->description = $POSTDATA['description'];
 $transaction->date = $trnDate;
 R::store($transaction);
 

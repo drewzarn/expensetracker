@@ -2,6 +2,13 @@ body.dev {
     background-image: url('../img/development.png');
 }
 
+a.fas:hover, a.fas:focus {
+    text-decoration: none;
+}
+.fas.light {
+    opacity: .5;
+}
+
 div[id^="content-"] {
     display: none;
 }
@@ -22,8 +29,4 @@ div#transactionlistrange button {
 }
 #transactionlisttable tr td:first-of-type {
     min-width: 8em;
-}
-#transactionlisttable tbody a.fa-edit {
-    margin-right: .25em;
-    opacity: .5;
 }

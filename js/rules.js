@@ -185,7 +185,7 @@ function loadInfrastructure(loadOnly) {
             $('#accountlist li ul').empty();
             $('#addbalance_accountlist div').empty();
             $.each(d, function (i, v) {
-                $('#accountlist li[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
+                $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
                 $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
             });
         });
@@ -197,7 +197,7 @@ function loadInfrastructure(loadOnly) {
             d = sortBeans(d);
             $.each(d, function (i, v) {
                 $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
-                $('#accountlist').append('<li data-accounttypeid="' + v.id + '">' + v.name + ' Accounts<ul></ul></li>');
+                $('#accountlist div.row').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + ' Accounts</h5><ul></ul></div>');
                 $('#addbalance_accountlist').append('<h6>' + v.name + '</h6>');
                 $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
             });

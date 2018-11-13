@@ -16,7 +16,7 @@
 			<button class="btn btn-secondary" data-toggle="modal" data-target="#modal_addbalance">Add Balance Entry</button>
 		</div>
 		<div class="tab-pane fade" id="balanceaccounts" role="tabpanel" aria-labelledby="balanceaccounts-tab">
-			<ul id="accountlist" class="mt-3"></ul>
+			<div id="accountlist" class="mt-3 container-fluid"><div class="row"></div></div>
 			<button class="btn btn-secondary mt-3" data-toggle="modal" data-target="#modal_addaccount">Add New Account</button>
 		</div>
 	</div>

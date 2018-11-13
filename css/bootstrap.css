@@ -30,3 +30,9 @@ div#transactionlistrange button {
 #transactionlisttable tr td:first-of-type {
     min-width: 8em;
 }
+
+#addbalance_accountlist > div {
+    display: grid;
+    grid-template-columns: 49% 49%;
+    grid-column-gap: 2%;
+}

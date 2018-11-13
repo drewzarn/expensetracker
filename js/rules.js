@@ -181,9 +181,12 @@ function loadInfrastructure(loadOnly) {
         $.ajax({
             url: "account/list"
         }).done(function (d) {
+            d = sortBeans(d);
             $('#accountlist li ul').empty();
+            $('#addbalance_accountlist div').empty();
             $.each(d, function (i, v) {
-                $('#accountlist li[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + i + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
+                $('#accountlist li[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
+                $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
             });
         });
     }
@@ -191,9 +194,12 @@ function loadInfrastructure(loadOnly) {
         $.ajax({
             url: "accounttype/list"
         }).done(function (d) {
+            d = sortBeans(d);
             $.each(d, function (i, v) {
-                $('#addaccount_type').append('<option value="' + i + '">' + v.name + '</option>')
-                $('#accountlist').append('<li data-accounttypeid="' + i + '">' + v.name + ' Accounts<ul></ul></li>');
+                $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
+                $('#accountlist').append('<li data-accounttypeid="' + v.id + '">' + v.name + ' Accounts<ul></ul></li>');
+                $('#addbalance_accountlist').append('<h6>' + v.name + '</h6>');
+                $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
             });
             loadInfrastructure('account');
         });
@@ -230,6 +236,15 @@ function loadInfrastructure(loadOnly) {
             $("#edittransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
         });
     }
+}
+
+function sortBeans(beans, sortBy = 'name') {
+    var sorted = [];
+    for(var bean in beans) {
+        sorted.push(beans[bean]);
+    }
+    sorted.sort(function(a, b){ return a[sortBy].toLowerCase().localeCompare(b[sortBy].toLowerCase())});
+    return sorted;
 }
 
 function fetchTransactionList() {

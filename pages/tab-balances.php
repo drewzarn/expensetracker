@@ -12,7 +12,9 @@
 	</ul>
 	<div class="tab-content" id="balanceTabContent">
 		<div class="tab-pane fade show active" id="balancedashboard" role="tabpanel" aria-labelledby="balancedashboard-tab">Dashboard</div>
-		<div class="tab-pane fade" id="balancesheet" role="tabpanel" aria-labelledby="balancesheet-tab">sheet</div>
+		<div class="tab-pane fade" id="balancesheet" role="tabpanel" aria-labelledby="balancesheet-tab">
+			<button class="btn btn-secondary" data-toggle="modal" data-target="#modal_addbalance">Add Balance Entry</button>
+		</div>
 		<div class="tab-pane fade" id="balanceaccounts" role="tabpanel" aria-labelledby="balanceaccounts-tab">
 			<ul id="accountlist" class="mt-3"></ul>
 			<button class="btn btn-secondary mt-3" data-toggle="modal" data-target="#modal_addaccount">Add New Account</button>

@@ -20,6 +20,8 @@ function dateToToday(selectorOrElement) {
     }
 }
 
+var currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
 $(document).ready(function () {
     dateToToday();
 
@@ -32,6 +34,7 @@ $(document).ready(function () {
 
     $('#modal_editaccount').on('shown.bs.modal', function (e) {
         $('#editaccount_name').val($(e.relatedTarget).prev().text());
+        $('#editaccount_excludenetworth').prop('checked', $(e.relatedTarget).parent().data('accountexcludenetworth') == "1");
         $('#editaccount_id').val($(e.relatedTarget).parent().data('accountid'));
     });
 
@@ -100,7 +103,9 @@ $(document).ready(function () {
         fetchCategoriesByMonth();
     });
 
-    loadInfrastructure();
+    loadAccountTypes();
+    loadCategories();
+    loadPayees();
 });
 
 function formAjaxSubmit(form, event) {
@@ -173,40 +178,101 @@ function showFormErrors(errorMap, errorList) {
     $(errorList[0].element).closest('form').find('input[type=submit]').before('<div class="formerror rounded border border-danger bg-light text-danger p-2 mb-3">You seem to be missing some data...</div>');
 }
 
-function loadInfrastructure(loadOnly) {
-    if (typeof loadOnly == 'string') {
-        loadOnly = loadOnly.split(',');
+function loadInfrastructure(load) {
+    load = load.split(',');
+    if(load.includes('account')) {
+        loadAccounts();
     }
-    if (loadOnly == null || loadOnly.indexOf('account') >= 0) {
-        $.ajax({
-            url: "account/list"
-        }).done(function (d) {
-            d = sortBeans(d);
-            $('#accountlist li ul').empty();
-            $('#addbalance_accountlist div').empty();
-            $.each(d, function (i, v) {
-                $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
-                $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
-            });
-        });
+    if(load.includes('accounttype')) {
+        loadAccountTypes();
     }
-    if (loadOnly == null || loadOnly.indexOf('accounttype') >= 0) {
-        $.ajax({
-            url: "accounttype/list"
-        }).done(function (d) {
-            d = sortBeans(d);
-            $.each(d, function (i, v) {
-                $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
-                $('#accountlist div.row').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + ' Accounts</h5><ul></ul></div>');
-                $('#addbalance_accountlist').append('<h6>' + v.name + '</h6>');
-                $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
-            });
-            loadInfrastructure('account');
-        });
+    if(load.includes('balance')) {
+        loadBalances();
     }
+    if(load.includes('category')) {
+        loadCategories();
+    }
+    if(load.includes('payee')) {
+        loadPayees();
+    }
+}
 
-    if (loadOnly == null || loadOnly.indexOf('category') >= 0) {
-        $.ajax({
+function loadAccounts() {
+    $.ajax({
+        url: "account/list"
+    }).done(function (d) {
+        d = sortBeans(d);
+        $('#accountlist div ul').empty();
+        $('#addbalance_accountlist div').empty();
+        $('#balancetable tbody tr[data-accountid]').remove();
+        $.each(d, function (i, v) {
+            $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
+            $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
+            $('#balancetable tbody[data-accounttypeid=' + v.type_id + ']').append('<tr data-accountid="' + v.id + '"><td>' + v.name + '</td></tr>');
+        });
+        loadBalances();
+    });
+}
+
+function loadAccountTypes() {
+    $.ajax({
+        url: "accounttype/list"
+    }).done(function (d) {
+        d = sortBeans(d);
+        $('#balancetable tbody').remove();
+        $.each(d, function (i, v) {
+            $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
+            $('#accountlist div.row').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + ' Accounts</h5><ul></ul></div>');
+            $('#addbalance_accountlist').append('<h6>' + v.name + '</h6>');
+            $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
+            $('#balancetable thead').after('<tbody data-accounttypeid="' + v.id + '" data-accounttypeasset="' + v.asset + '"><tr class="table-secondary"><th>' + v.name + '</th></tr></tbody>');
+        });
+        loadAccounts();
+    });
+}
+
+function loadBalances() {
+    $.ajax({
+        url: "balance/list"
+    }).done(function (d) {
+        $('#balancetable th.balancedate, #balancetable td.entry').remove();
+        var entriesByDate = {};
+        $.each(d, function (i, v) {
+            v.date = v.date.substring(0, 10);
+            if (entriesByDate[v.date] == null) {
+                entriesByDate[v.date] = new Array();
+            }
+            entriesByDate[v.date].push(v);
+        });
+        var dates = Object.keys(entriesByDate).sort().reverse();
+        $('#balancetable tbody tr:first-of-type th').attr('colspan', dates.length + 1);
+        for (var date in dates) {
+            var entryDate = dates[date];
+            $('#balancetable thead tr').append('<th class="balancedate">' + entryDate + '</th>');
+            for(var key in entriesByDate[entryDate]) {
+                var entry = entriesByDate[entryDate][key];
+                $('#balancetable tr[data-accountid=' + entry.account_id + ']').append('<td class="entry">' + entry.amount + '</td>');
+            }
+        }
+
+        //Add color-coding
+        $('#balancetable td.entry').each(function(i, el) {
+            var $el = $(el);
+            var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
+            if($el.text() == $el.next().text()) {
+                $el.addClass('table-warning');
+            } else if($el.text() > $el.next().text()) {
+                $el.addClass(isAsset ? 'table-success' : 'table-danger');
+            } else if($el.text() < $el.next().text()) {
+                $el.addClass(isAsset ? 'table-danger' : 'table-success');
+            }
+            $el.text(currencyFormatter.format($el.text()));
+        });
+    });
+}
+
+function loadCategories() {
+    $.ajax({
             url: "category/list"
         }).done(function (d) {
             $.each(d, function (i, v) {
@@ -221,10 +287,10 @@ function loadInfrastructure(loadOnly) {
                 $('#catlist').append('<button class="btn-sm">' + v + '</button>');
             });
         });
-    }
+}
 
-    if (loadOnly == null || loadOnly.indexOf('payee') >= 0) {
-        $.ajax({
+function loadPayees() {
+    $.ajax({
             url: "payee/list"
         }).done(function (d) {
             $.each(d, function (i, v) {
@@ -235,15 +301,17 @@ function loadInfrastructure(loadOnly) {
             $("#addtransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
             $("#edittransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
         });
-    }
 }
+
 
 function sortBeans(beans, sortBy = 'name') {
     var sorted = [];
-    for(var bean in beans) {
+    for (var bean in beans) {
         sorted.push(beans[bean]);
     }
-    sorted.sort(function(a, b){ return a[sortBy].toLowerCase().localeCompare(b[sortBy].toLowerCase())});
+    sorted.sort(function (a, b) {
+        return a[sortBy].toLowerCase().localeCompare(b[sortBy].toLowerCase())
+    });
     return sorted;
 }
 

@@ -6,7 +6,7 @@
 				<input type="text" class="input-sm form-control" name="start" value="<?= date("Y-m-01") ?>" />
 				<span class="input-group-addon">to</span>
 				<input type="text" class="input-sm form-control" name="end" value="<?= date("Y-m-t") ?>" />
-				<button id="loadtransactionlist">Load</button>
+				<button id="loadtransactionlist" class="btn btn-secondary">Load</button>
 			</div>
 			<table id="transactionlisttable" class="display" style="width:100%">
 				<thead>

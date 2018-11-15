@@ -13,7 +13,7 @@
 	<div class="tab-content" id="balanceTabContent">
 		<div class="tab-pane fade show active" id="balancedashboard" role="tabpanel" aria-labelledby="balancedashboard-tab">Dashboard</div>
 		<div class="tab-pane fade" id="balancesheet" role="tabpanel" aria-labelledby="balancesheet-tab">
-			<button class="btn btn-secondary" data-toggle="modal" data-target="#modal_addbalance">Add Balance Entry</button>
+			<button class="btn btn-secondary m-3" data-toggle="modal" data-target="#modal_addbalance">Add Balance Entry</button>
 			<table id="balancetable" class="table table-striped table-bordered table-sm">
 				<thead>
 					<tr>
@@ -29,7 +29,8 @@
 		</div>
 		<div class="tab-pane fade" id="balanceaccounts" role="tabpanel" aria-labelledby="balanceaccounts-tab">
 			<div id="accountlist" class="mt-3 container-fluid"><div class="row"></div></div>
-			<button class="btn btn-secondary mt-3" data-toggle="modal" data-target="#modal_addaccount">Add New Account</button>
+			<button class="btn btn-secondary m-3" data-toggle="modal" data-target="#modal_addaccount">Add New Account</button>
+			<button class="btn btn-secondary m-3" data-toggle="modal" data-target="#modal_addaccounttype">Add New Account Type</button>
 		</div>
 	</div>
 </div>

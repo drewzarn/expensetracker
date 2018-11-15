@@ -116,10 +116,16 @@ function formAjaxSubmit(form, event) {
     $form.find('input').each(function (i, el) {
         if (el.type == 'submit' || el.type == 'button' || (el.name == '' && el.id == ''))
             return;
-        if (el.type == 'radio') {
-            data[el.name.replace(replacePrefix, '')] = $('input[name=' + el.name + ']:checked').val();
-        } else {
-            data[el.id.replace(replacePrefix, '')] = $(el).val();
+        switch (el.type) {
+            case 'radio':
+                data[el.name.replace(replacePrefix, '')] = $('input[name=' + el.name + ']:checked').val();
+                break;
+            case 'checkbox':
+                data[el.name.replace(replacePrefix, '')] = $(el).prop('checked');
+                break;
+            default:
+                data[el.id.replace(replacePrefix, '')] = $(el).val();
+                break;
         }
     });
     $form.find('select').each(function (i, el) {
@@ -137,7 +143,7 @@ function formAjaxSubmit(form, event) {
         }
     };
     var failHandler = function (d) {
-        $form.prepend('<div class="formerror rounded border border-danger bg-light text-danger p-2">There was an error saving this data</div>');
+        $form.prepend('<div class="formerror rounded border border-danger bg-light text-danger p-2 mb-3">There was an error saving this data</div>');
     };
     switch (form.id) {
         case 'frm_addtransaction':
@@ -219,6 +225,9 @@ function loadAccountTypes() {
         url: "accounttype/list"
     }).done(function (d) {
         d = sortBeans(d);
+        $('#addaccount_type').empty();
+        $('#accountlist div.row').empty();
+        $('#addbalance_accountlist').empty();
         $('#balancetable tbody').remove();
         $.each(d, function (i, v) {
             $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
@@ -299,7 +308,7 @@ function loadBalances() {
             } else if ($el.text() < $el.next().text()) {
                 $el.addClass(isAsset ? 'text-danger' : 'text-success');
             }
-           $el.text(currencyFormatter.format($el.text()));
+            $el.text(currencyFormatter.format($el.text()));
         });
     });
 }

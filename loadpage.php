@@ -35,7 +35,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_REQUEST['data'])) {
 }
 
 if($_SERVER["REQUEST_METHOD"] == "POST" || file_exists("process/{$page}.{$command}.php")) {
-	include("process/{$page}.{$command}.php");
+	require("process/{$page}.{$command}.php");
 	exit();
 }
 if($command == 'list' && !file_exists("process/{$page}.{$command}.php")) {

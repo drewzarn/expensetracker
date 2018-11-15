@@ -254,30 +254,43 @@ function loadBalances() {
             entriesByDate[v.date].push(v);
         });
         var dates = Object.keys(entriesByDate).sort().reverse();
+        var lastEntryCount = 0;
         for (var date in dates) {
             var entryDate = dates[date];
             $('#balancetable thead tr').append('<th class="balancedate">' + entryDate + '</th>');
             $('#balancetable tbody tr:first-of-type').append('<th data-balancedate="' + entryDate + '"></th>');
+
             for (var key in entriesByDate[entryDate]) {
                 var entry = entriesByDate[entryDate][key];
                 var td = $('<td class="entry" data-entrydate="' + entryDate + '">' + entry.amount + '</td>');
                 td.data('amount', entry.amount);
                 $('#balancetable tr[data-accountid=' + entry.account_id + ']').append(td);
             }
+
+            $('#balancetable tr[data-accountid').each(function (i, tr) {
+                var $tr = $(tr);
+                if ($tr.find('td.entry[data-entrydate=' + entryDate + ']').length == 0) {
+                    var td = $('<td class="entry empty" data-entrydate="' + entryDate + '">-</td>');
+                    td.data('amount', 0);
+                    $tr.append(td);
+                }
+            });
         }
 
         //Add color-coding to entry cells
         $('#balancetable td.entry').each(function (i, el) {
             var $el = $(el);
-            var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
-            if ($el.text() == $el.next().text()) {
-                $el.addClass('table-warning');
-            } else if ($el.text() > $el.next().text()) {
-                $el.addClass(isAsset ? 'table-success' : 'table-danger');
-            } else if ($el.text() < $el.next().text()) {
-                $el.addClass(isAsset ? 'table-danger' : 'table-success');
+            if ($el.text() != '-') {
+                var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
+                if ($el.data('amount') == $el.next().data('amount')) {
+                    $el.addClass('table-warning');
+                } else if ($el.data('amount') > $el.next().data('amount')) {
+                    $el.addClass(isAsset ? 'table-success' : 'table-danger');
+                } else if ($el.data('amount') < $el.next().data('amount')) {
+                    $el.addClass(isAsset ? 'table-danger' : 'table-success');
+                }
+                $el.text(currencyFormatter.format($el.text()));
             }
-            $el.text(currencyFormatter.format($el.text()));
         });
 
         $('#balancetable tbody').each(function (bi, tbodyEl) {
@@ -293,7 +306,7 @@ function loadBalances() {
                         sum += parseFloat($tdEl.data('amount'));
                     }
                 });
-                $tbodyEl.find('th[data-balancedate=' + $thEl.text() + ']').text(sum);
+                $tbodyEl.find('th[data-balancedate=' + $thEl.text() + ']').text(sum).data('amount', sum);
             });
         });
 
@@ -301,11 +314,11 @@ function loadBalances() {
         $('#balancetable th[data-balancedate]').each(function (i, el) {
             var $el = $(el);
             var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
-            if ($el.text() == $el.next().text()) {
+            if ($el.data('amount') == $el.next().data('amount')) {
                 $el.addClass('text-warning');
-            } else if ($el.text() > $el.next().text()) {
+            } else if ($el.data('amount') > $el.next().data('amount')) {
                 $el.addClass(isAsset ? 'text-success' : 'text-danger');
-            } else if ($el.text() < $el.next().text()) {
+            } else if ($el.data('amount') < $el.next().data('amount')) {
                 $el.addClass(isAsset ? 'text-danger' : 'text-success');
             }
             $el.text(currencyFormatter.format($el.text()));

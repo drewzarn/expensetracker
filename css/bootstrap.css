@@ -44,3 +44,7 @@ div#transactionlistrange button {
 td.dupebalance::after {
     content: " DUPE ENTRY";
 }
+
+.modal-footer {
+    flex-wrap: wrap;
+}

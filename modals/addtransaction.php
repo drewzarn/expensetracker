@@ -20,7 +20,12 @@
 				</div>
 				<div class="modal-footer">
 					<input type="submit" class="btn btn-primary" value="Add Transaction" />
-				<table class="payee_transactions table table-sm"></table>
+					<table class="payee_transactions table table-sm mt-3">
+						<thead>
+							<tr><th>Date</th><th>Category</th><th>Amount</th></tr>
+						</thead>
+						<tbody></tbody>
+					</table>
 				</div>
 			</div>
 		</form>

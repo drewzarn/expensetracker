@@ -1,7 +1,8 @@
 <?php
+
 $transactions = [];
-if(isset($args['preset'])) {
-	switch($args['preset']) {
+if (isset($args['preset'])) {
+	switch ($args['preset']) {
 		case 'spendbymonth':
 			$sql = "SELECT _day AS Day, SUM(Income) AS Income, SUM(Expense) AS Expense
 FROM (SELECT _day,
@@ -24,8 +25,33 @@ ORDER BY _day";
 		$transactions['data'][] = $row;
 	}
 } else {
-	$beans = R::find('transaction', 'site=? AND date BETWEEN ? AND ?', [SITE, $args['datefrom'], $args['dateto']]);
-	foreach($beans as $transaction) {
+	$where[] = "site=:site";
+	$sqlArgs[':site'] = SITE;
+	if (isset($args['datefrom'], $args['dateto'])) {
+		$where[] = "date BETWEEN :datefrom AND :dateto";
+		$sqlArgs[':datefrom'] = $args['datefrom'];
+		$sqlArgs[':dateto'] = $args['dateto'];
+	}
+	if (isset($args['category'])) {
+		$where[] = "category_id=:category";
+		$sqlArgs[':category'] = $args['category'];
+	}
+	if (isset($args['payee'])) {
+		$where[] = "payee_id=:payee";
+		$sqlArgs[':payee'] = $args['payee'];
+	}
+
+	$sql = implode(' AND ', $where);
+
+	$sql .= ' ORDER BY date DESC';
+	if (isset($args['limit'])) {
+		$sql .= ' LIMIT :limit';
+		$sqlArgs[':limit'] = intval($args['limit']);
+	}
+	
+	$beans = R::find('transaction', $sql, $sqlArgs);
+
+	foreach ($beans as $transaction) {
 		$transactions[] = [
 			'id' => $transaction->id,
 			'date' => substr($transaction->date, 0, 10),

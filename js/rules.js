@@ -56,6 +56,7 @@ $(document).ready(function () {
     $('#modal_edittransaction').on('shown.bs.modal', function (e) {
         $('#edittransaction_id').val($(e.relatedTarget).data('transactionid'));
         var trnDetails = transactionlisttable.row($(e.relatedTarget).parent().parent()[0]).data();
+        fetchTransactionsByPayee(trnDetails.payee);
         $.each(trnDetails, function (i, v) {
             $('#edittransaction_' + i).val(v);
         });
@@ -413,4 +414,17 @@ function fetchTransactionList() {
 function loadTransactionToEdit() {
     $('#addtransactionmodal').modal();
     $('#addtransactionmodal').attr('action', 'transaction/edit');
+}
+
+function fetchTransactionsByPayee(selected) {
+    var pay_id = PAY_IDS[selected];
+    $.get("/transaction/list/dateformat=short/limit=10/orderby=date DESC/payee=" + pay_id)
+        .done(drawTransactionsByPayee);
+}
+
+function drawTransactionsByPayee(json) {
+    $('.payee_transactions tbody').empty();
+    $.each(json.data, function(i, v){
+        $('.payee_transactions tbody').append('<tr><td>'+ v.date + '</td><td>' + v.category + '</td><td>' + currencyFormatter.format(v.amount) + '</td></tr>');
+    });
 }

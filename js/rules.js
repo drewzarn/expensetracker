@@ -384,7 +384,7 @@ function loadPayees() {
             PAY_IDS[v] = i;
         });
         PAYEES.sort();
-        $("#addtransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
+        $("#addtransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee}); //TODO: Load transactions
         $("#edittransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
     });
 }

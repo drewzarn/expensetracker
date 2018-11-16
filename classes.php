@@ -1,5 +1,7 @@
 <?php
+
 class User {
+
 	public $id;
 	public $name;
 	public $email;
@@ -19,29 +21,22 @@ class User {
 	}
 
 	static function Login($email, $password) {
-		global $DB;
-		$stmt = $DB->prepare("SELECT * FROM user WHERE usr_email=:email");
-		$args = [
-			'email' => $email
-		];
-		$stmt->execute($args);
-		$result = $stmt->fetch(PDO::FETCH_ASSOC);
-		if($result === false || password_verify($password, $result['usr_password']) !== true) {
+		$user = R::findOne('user', 'email = ?', [$email]);
+		if ($user === false || password_verify($password, $user->password) !== true) {
 			header("Location: /");
 			exit();
 		}
-		return new static($result['usr_id'], $result['usr_name'], $result['usr_email'], $result['usr_site']);
+		return new static($user->id, $user->name, $user->email, $user->site);
 	}
 
 	static function RequestReset($email) {
-		global $DB;
+		$user = R::findOne('user', 'email = ?', [$email]);
+		if ($user === FALSE) {
+			return;
+		}
 		$reset = time() . 'z' . bin2hex(random_bytes(16));
-		$stmt = $DB->prepare("UPDATE user SET usr_reset=:reset WHERE usr_email=:email");
-		$args = [
-			'email' => $email,
-			'reset' => $reset
-		];
-		$stmt->execute($args);
+		$user->reset = $reset;
+		R::store($user);
 
 		$headers = "From: Expenses <expenses@amovita.net>\r\n";
 		$headers .= "MIME-Version: 1.0\r\n";
@@ -53,24 +48,14 @@ class User {
 	}
 
 	static function ResetPassword($reset, $password) {
-		global $DB;
-		$stmt = $DB->prepare("SELECT usr_email FROM user WHERE usr_reset=:reset");
-		$args = [
-			'reset' => $reset
-		];
-		$stmt->execute($args);
-		$result = $stmt->fetch(PDO::FETCH_ASSOC);
-		if($result['usr_email'] == '') {
+		$user = R::findOne('user', 'reset = ?', [$reset]);
+		if ($user === FALSE) {
 			header("Location: /");
 			exit();
 		}
-
-		$stmt = $DB->prepare("UPDATE user SET usr_reset=null, usr_password=:password WHERE usr_reset=:reset");
-		$args = [
-			'password' => password_hash($password, PASSWORD_DEFAULT),
-			'reset' => $reset
-		];
-		$stmt->execute($args);
+		$user->password = password_hash($password, PASSWORD_DEFAULT);
+		$user->reset = null;
+		R::store($user);
 
 		$headers = "From: Expenses <expenses@amovita.net>\r\n";
 		$headers .= "MIME-Version: 1.0\r\n";
@@ -80,4 +65,5 @@ class User {
 		header("Location: /");
 		exit();
 	}
+
 }

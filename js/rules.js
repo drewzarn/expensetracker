@@ -26,6 +26,7 @@ $(document).ready(function () {
     dateToToday();
 
     $('form').each(function () {
+        if(this.id == "frm_login") return;
         $(this).validate({
             submitHandler: formAjaxSubmit,
             showErrors: showFormErrors

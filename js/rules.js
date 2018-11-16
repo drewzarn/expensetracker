@@ -32,9 +32,19 @@ $(document).ready(function () {
         });
     });
 
+    $('input[type=button][data-action=delete]').click(function(){
+        var $this = $(this);
+        $('input[name="__delete__"]').remove();
+        if(confirm('Are you sure you want to delete this item?')) {
+            $this.closest('form').append('<input type="hidden" value="1" name="__delete__" />');
+            formAjaxSubmit($this.closest('form')[0]);
+        }
+    });
+
     $('#modal_editaccount').on('shown.bs.modal', function (e) {
         $('#editaccount_name').val($(e.relatedTarget).prev().text());
         $('#editaccount_excludenetworth').prop('checked', $(e.relatedTarget).parent().data('accountexcludenetworth') == "1");
+        $('#editaccount_active').prop('checked', $(e.relatedTarget).parent().data('accountactive') == "1");
         $('#editaccount_id').val($(e.relatedTarget).parent().data('accountid'));
     });
 
@@ -67,6 +77,15 @@ $(document).ready(function () {
     });
     $('#transactionlisttable').on('click', 'i.fa-edit', function () {
         loadTransactionToEdit($(this).data('transactionid'));
+    });
+
+    $('#balancetable').on('dblclick', 'td.entry', function () {
+        var $td = $(this);
+        $('#editbalance_id').val($td.data('balanceid'));
+        $('#editbalance_account').val($td.parent().data('accountid'));
+        $('#editbalance_date').val($td.data('entrydate'));
+        $('#editbalance_amount').val($td.data('amount'));
+        $('#modal_editbalance').modal();
     });
 
     $('#addaccount').click(function () {
@@ -131,6 +150,10 @@ function formAjaxSubmit(form, event) {
     $form.find('select').each(function (i, el) {
         data[el.id.replace(replacePrefix, '')] = $(el).val();
     });
+    if($form.find('input[name="__delete__"]').val() == "1") {
+        data['DELETE'] = true;
+    }
+
 
     var doneHandler = function (d) {
         $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
@@ -185,6 +208,7 @@ function showFormErrors(errorMap, errorList) {
 }
 
 function loadInfrastructure(load) {
+    if(load == null) return;
     load = load.split(',');
     if (load.includes('account')) {
         loadAccounts();
@@ -212,9 +236,12 @@ function loadAccounts() {
         $('#addbalance_accountlist div').empty();
         $('#balancetable tbody tr[data-accountid]').remove();
         $.each(d, function (i, v) {
-            $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
-            $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
+            $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '" data-accountactive="' + v.active + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
+            if (v.active == '1') {
+                $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
+            }
             $('#balancetable tbody[data-accounttypeid=' + v.type_id + ']').append('<tr data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '"><td>' + v.name + '</td></tr>');
+            $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
         });
         loadBalances();
     });
@@ -235,6 +262,7 @@ function loadAccountTypes() {
             $('#addbalance_accountlist').append('<h6>' + v.name + '</h6>');
             $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
             $('#balancetable tfoot').before('<tbody data-accounttypeid="' + v.id + '" data-accounttypeasset="' + v.asset + '"><tr class="table-secondary"><th>' + v.name + '</th></tr></tbody>');
+            $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
         });
         loadAccounts();
     });
@@ -262,7 +290,10 @@ function loadBalances() {
 
             for (var key in entriesByDate[entryDate]) {
                 var entry = entriesByDate[entryDate][key];
-                var td = $('<td class="entry" data-entrydate="' + entryDate + '">' + entry.amount + '</td>');
+                if ($('#balancetable tr[data-accountid=' + entry.account_id + '] td.entry[data-entrydate=' + entryDate + ']').addClass('bg-dark').addClass('text-white').addClass('dupebalance').length > 0) {
+                    continue;
+                }
+                var td = $('<td class="entry" data-entrydate="' + entryDate + '" data-balanceid="' + entry.id + '">' + entry.amount + '</td>');
                 td.data('amount', entry.amount);
                 $('#balancetable tr[data-accountid=' + entry.account_id + ']').append(td);
             }

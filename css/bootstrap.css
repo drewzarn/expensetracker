@@ -36,3 +36,11 @@ div#transactionlistrange button {
     grid-template-columns: 49% 49%;
     grid-column-gap: 2%;
 }
+
+#accountlist div ul li[data-accountactive="0"] span:after {
+    content: " (Inactive)";
+}
+
+td.dupebalance::after {
+    content: " DUPE ENTRY";
+}

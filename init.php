@@ -15,7 +15,7 @@ if ($page == 'user' && $command == 'logout') {
 
 try {
 	R::setup("mysql:host={$DBHOST};dbname={$DBNAME}", $DBUSER, $DBPASS);
-	$DB = new PDO("mysql:dbname={$DBNAME};host={$DBHOST}", $DBUSER, $DBPASS);
+	$DB = R::getDatabaseAdapter()->getDatabase()->getPDO();
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
 	exit();

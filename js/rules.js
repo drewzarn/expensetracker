@@ -418,13 +418,13 @@ function loadTransactionToEdit() {
 
 function fetchTransactionsByPayee(selected) {
     var pay_id = PAY_IDS[selected];
-    $.get("/transaction/list/dateformat=short/limit=10/orderby=date DESC/payee=" + pay_id)
+    $.get("/transaction/list/dateformat=short/limit=10/payee=" + pay_id)
         .done(drawTransactionsByPayee);
 }
 
 function drawTransactionsByPayee(json) {
     $('.payee_transactions tbody').empty();
     $.each(json.data, function(i, v){
-        $('.payee_transactions tbody').append('<tr><td>'+ v.date + '</td><td>' + v.category + '</td><td>' + currencyFormatter.format(v.amount) + '</td></tr>');
+        $('.payee_transactions tbody').append('<tr><td>'+ v.date + '</td><td>' + v.category.name + '</td><td>' + currencyFormatter.format(v.amount) + '</td></tr>');
     });
 }

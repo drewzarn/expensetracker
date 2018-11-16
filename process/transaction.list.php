@@ -48,22 +48,16 @@ ORDER BY _day";
 		$sql .= ' LIMIT :limit';
 		$sqlArgs[':limit'] = intval($args['limit']);
 	}
-	
+
 	$beans = R::find('transaction', $sql, $sqlArgs);
 
 	foreach ($beans as $transaction) {
-		$transactions[] = [
-			'id' => $transaction->id,
-			'date' => substr($transaction->date, 0, 10),
-			'payee' => $transaction->payee->name,
-			'category' => $transaction->category->name,
-			'amount' => $transaction->amount,
-			'description' => $transaction->description
-		];
+		$transaction->category = R::load('category', $transaction->category_id);
+		$transaction->payee = R::load('payee', $transaction->payee_id);
+		$transactions[] = $transaction;
 	}
 	$output = new stdClass();
 	$output->data = $transactions;
-	$transactions = $output;
 }
 
-echo json_encode($transactions);
+echo json_encode($output);

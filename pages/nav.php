@@ -12,6 +12,9 @@
 			<li class="nav-item">
 				<a class="nav-link" href="#balances">Balances</a>
 			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#manage">Manage</a>
+			</li>
 		</ul>
 		<a href="/user/logout" class="btn btn-light">Logout</a>
 	</div>

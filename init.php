@@ -4,7 +4,7 @@ require('rb.php');
 require("db.config.php");
 require('classes.php');
 session_start();
-$DEVELOPMENT = strpos($_SERVER['SERVER_NAME'], 'dev.') >= 0;
+$DEVELOPMENT = strpos($_SERVER['SERVER_NAME'], 'dev.') !== false;
 
 if ($page == 'user' && $command == 'logout') {
 	session_destroy();

@@ -43,16 +43,16 @@ $(document).ready(function () {
         }
     });
 
+    $('#modal_addtransaction').on('shown.bs.modal', function (e) {
+        $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
+    })
+
     $('#modal_editaccount').on('shown.bs.modal', function (e) {
         $('#editaccount_name').val($(e.relatedTarget).prev().text());
         $('#editaccount_excludenetworth').prop('checked', $(e.relatedTarget).parent().data('accountexcludenetworth') == "1");
         $('#editaccount_active').prop('checked', $(e.relatedTarget).parent().data('accountactive') == "1");
         $('#editaccount_id').val($(e.relatedTarget).parent().data('accountid'));
     });
-
-    $('#modal_addtransaction').on('shown.bs.modal', function (e) {
-        $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
-    })
 
     $('#modal_edittransaction').on('shown.bs.modal', function (e) {
         $('#edittransaction_id').val($(e.relatedTarget).data('transactionid'));
@@ -61,7 +61,22 @@ $(document).ready(function () {
         $.each(trnDetails, function (i, v) {
             $('#edittransaction_' + i).val(v);
         });
-    })
+    });
+
+    $('#modal_editcategory').on('shown.bs.modal', function (e) {
+        $('#editcategory_id').val($(e.relatedTarget).data('categoryid'));
+        var details = $(e.relatedTarget).data('details');
+        $('#editcategory_name').val(details.name);
+        $('#editcategory_income').prop('checked', details.income == "1");
+        $('#editcategory_deleted').prop('checked', details.deleted == "1");
+    });
+
+    $('#modal_editpayee').on('shown.bs.modal', function (e) {
+        $('#editpayee_id').val($(e.relatedTarget).data('payeeid'));
+        var details = $(e.relatedTarget).data('details');
+        $('#editpayee_name').val(details.name);
+        $('#editpayee_deleted').prop('checked', details.deleted == "1");
+    });
 
     $('#transactionlistrange').datepicker({format: 'yyyy-mm-dd'});
     $('#loadtransactionlist').click(fetchTransactionList);
@@ -170,7 +185,7 @@ function formAjaxSubmit(form, event) {
         }
     };
     var failHandler = function (d) {
-        $form.prepend('<div class="formerror rounded border border-danger bg-light text-danger p-2 my-3">There was an error saving this data</div>');
+        $form.find('input[type=submit]').before('<div class="formerror rounded border border-danger bg-light text-danger p-2 my-3">There was an error saving this data</div>');
     };
     switch (form.id) {
         case 'frm_addtransaction':
@@ -367,9 +382,16 @@ function loadCategories() {
     $.ajax({
         url: "category/list"
     }).done(function (d) {
+        d = sortBeans(d);
+        $('#categorylist tbody').empty();
+        CATEGORIES = []; CAT_IDS = {}
         $.each(d, function (i, v) {
-            CATEGORIES.push(v);
-            CAT_IDS[v] = i;
+            if(v.deleted != '1') {
+                CATEGORIES.push(v.name);
+                CAT_IDS[v.name] = i;
+            }
+            $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td>' + (v.income == '1' ? '<i class="fas fa-check-circle" />' : '') + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
+            $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
         });
         CATEGORIES.sort();
         $("#addtransaction_category").typeahead({source: CATEGORIES});
@@ -385,9 +407,17 @@ function loadPayees() {
     $.ajax({
         url: "payee/list"
     }).done(function (d) {
+        d = sortBeans(d);
+        $('#payeelist tbody').empty();
+        PAYEES = []; PAY_IDS = {}
         $.each(d, function (i, v) {
-            PAYEES.push(v);
-            PAY_IDS[v] = i;
+            if(v.deleted != '1') {
+                PAYEES.push(v.name);
+                PAY_IDS[v.name] = i;
+            }
+
+            $('#payeelist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editpayee" data-payeeid="' + v.id + '" />' + v.name + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
+            $('#payeelist tbody').find('a[data-payeeid=' + v.id + ']').data('details', v);
         });
         PAYEES.sort();
         $("#addtransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});

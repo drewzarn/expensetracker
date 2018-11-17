@@ -14,7 +14,28 @@
 			<button class="btn btn-secondary m-3" data-toggle="modal" data-target="#modal_addaccounttype">Add New Account Type</button>
 		</div>
 		<div class="tab-pane fade" id="managecatpayees" role="tabpanel" aria-labelledby="managecatpayees-tab">
-			Categories and Payees
+			<div class="mt-3 container-fluid">
+				<div class="row">
+					<div class="col">
+						<h5>Categories</h5>
+						<table class="table table-sm table-striped table-bordered" id="categorylist">
+							<thead>
+								<tr><th>Name</th><th>Income</th><th>Inactive</th></tr>
+							</thead>
+							<tbody />
+						</table>
+					</div>
+					<div class="col">
+						<h5>Payees</h5>
+						<table class="table table-sm table-striped table-bordered" id="payeelist">
+							<thead>
+								<tr><th>Name</th><th>Inactive</th></tr>
+							</thead>
+							<tbody />
+						</table>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>

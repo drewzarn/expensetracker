@@ -86,12 +86,13 @@ $(document).ready(function () {
         paging: false,
         ajax: '',
         columns: [
-            {data: 'date', render: transactionEditIcon},
+            {data: 'shortdate', render: transactionEditIcon},
             {data: 'payee.name'},
             {data: 'category.name'},
             {data: 'description'},
             {data: 'amount'}
-        ]
+        ],
+        order: [[0, "desc"]]
     });
     $('#transactionlisttable').on('click', 'i.fa-edit', function () {
         loadTransactionToEdit($(this).data('transactionid'));

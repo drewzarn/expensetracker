@@ -1,41 +1,51 @@
-.container-fluid > .row > .col {
-    padding: 0;
-}
-.nav {
-    background: #88c6ef;
-}
-.nav a {
-    color: #001577;
+body.dev {
+    background-image: url('../img/development.png');
 }
 
-#addcontainer {
-    background-color: #EDEDED;
+a.fas:hover, a.fas:focus {
+    text-decoration: none;
+}
+.fas.light {
+    opacity: .5;
 }
 
-#addtransaction input {
-    width: 100%;
-    height: 3em;
-    margin-bottom: .5em;
+div[id^="content-"] {
+    display: none;
 }
 
-.default > div {
+div#transactionlistrange input {
+    width: 12em;
+    flex: none;
+}
+div#transactionlistrange span.input-group-addon {
+    padding: .25em .5em;
+}
+div#transactionlistrange button {
+    width: 8em;
+    margin-left: .5em;
+}
+#transactionlisttable_wrapper {
     margin-top: 1em;
 }
-
-h3 select {
-    font-size: 50%;
+#transactionlisttable tr td:first-of-type {
+    min-width: 8em;
 }
 
-#catlist button {
-    margin: .2em;
+#addbalance_accountlist > div {
+    display: grid;
+    grid-template-columns: 49% 49%;
+    grid-column-gap: 2%;
 }
 
-@media (min-width: 576px) {
-    #addtransaction input {
-        height: 2em;
-    }
+#accountlist div ul li[data-accountactive="0"] span:after {
+    content: " (Inactive)";
+}
 
-    .dashboard div {
-        margin-top: 0;
-    }
+td.dupebalance::after {
+    content: " DUPE ENTRY";
+}
+
+.modal-footer {
+    flex-wrap: wrap;
+    justify-content: space-between;
 }

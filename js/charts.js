@@ -18,12 +18,9 @@ function drawCharts() {
 
     fetchSpendingByMonth();
     fetchMTDComparison();
-    fetchTransactionList();
+    //fetchTransactionList();
 
     fetchTransactionsByMonthAndType(true);
-
-
-    showDashboard();
 }
 
 function fetchSpendingByMonth() {
@@ -135,7 +132,7 @@ function drawMTDComparison(json) {
     table.draw(data, options);
 }
 
-function fetchTransactionList() {
+function xfetchTransactionList() {
     var dFrom = new Date();
     var dTo = new Date();
     dFrom.setUTCMonth(parseInt($('#translist_month').val()) - 1);
@@ -176,36 +173,7 @@ function drawTransactionList(json) {
     table.draw(data, options);
 }
 
-function fetchTransactionsByPayee(event, ui) {
-    var pay_id = PAY_IDS[ui.item.value];
-    $.get("/transaction/list/datatable/columns=trn_date,cat_name,trn_amount/dateformat=short/limit=10/payee=" + pay_id)
-        .done(drawTransactionsByPayee);
-    $("#add_category").focus();
-}
 
-function drawTransactionsByPayee(json) {
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'Date');
-    data.addColumn('string', 'Category');
-    data.addColumn('number', 'Amount');
-    $.each(json.data, function(i, o){
-        data.addRow([
-            o.trn_date,
-            o.cat_name,
-            parseFloat(o.trn_amount)
-        ]);
-    });
-
-    data.setProperty(0, 0, 'style', 'width:6em');
-    dollarFormatRed.format(data, 2);
-    var table = new google.visualization.Table($('#payee_transactions')[0]);
-    var options = {
-        width: '100%',
-        height: '100%',
-        allowHtml: true
-    };
-    table.draw(data, options);
-}
 
 function fetchCategoriesByMonth() {
     var categories = [];

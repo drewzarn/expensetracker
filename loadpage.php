@@ -2,6 +2,7 @@
 $page = $_REQUEST['page'];
 if($page == '') $page = 'index';
 if(isset($_REQUEST['cmd'])) $command = $_REQUEST['cmd'];
+
 $args = [];
 if(isset($_REQUEST['extra'])) {
 	$_args = explode('/', $_REQUEST['extra']);
@@ -17,12 +18,28 @@ if(isset($_REQUEST['extra'])) {
 
 require('init.php');
 
+if($page == 'dbscripts' && $DEVELOPMENT) {
+	if(file_exists("dbscripts/{$command}.php")) {
+		require("dbscripts/{$command}.php");
+		echo $command . ' Done';
+	}
+	exit();
+}
+
 if($command == 'list') {
 	jsonheader();
 }
 
+if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_REQUEST['data'])) {
+	$POSTDATA = $_REQUEST['data'];
+}
+
 if($_SERVER["REQUEST_METHOD"] == "POST" || file_exists("process/{$page}.{$command}.php")) {
-	include("process/{$page}.{$command}.php");
+	require("process/{$page}.{$command}.php");
+	exit();
+}
+if($command == 'list' && !file_exists("process/{$page}.{$command}.php")) {
+	include("process/_default.{$command}.php");
 	exit();
 }
 if(!file_exists("pages/{$page}.php")) {

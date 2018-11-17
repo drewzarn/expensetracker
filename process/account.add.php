@@ -6,7 +6,7 @@ $account->site = SITE;
 $account->name = $POSTDATA['name'];
 $account->active = 1;
 $account->type = $type;
-$account->excludenetworth = $POSTDATA['excludenetworth'] != '';
+$account->excludenetworth = $POSTDATA['excludenetworth'] == 'true';
 R::store($account);
 
 exit();

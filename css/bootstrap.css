@@ -47,4 +47,5 @@ td.dupebalance::after {
 
 .modal-footer {
     flex-wrap: wrap;
+    justify-content: space-between;
 }

@@ -26,17 +26,18 @@ $(document).ready(function () {
     dateToToday();
 
     $('form').each(function () {
-        if(this.id == "frm_login") return;
+        if (this.id == "frm_login")
+            return;
         $(this).validate({
             submitHandler: formAjaxSubmit,
             showErrors: showFormErrors
         });
     });
 
-    $('input[type=button][data-action=delete]').click(function(){
+    $('input[type=button][data-action=delete]').click(function () {
         var $this = $(this);
         $('input[name="__delete__"]').remove();
-        if(confirm('Are you sure you want to delete this item?')) {
+        if (confirm('Are you sure you want to delete this item?')) {
             $this.closest('form').append('<input type="hidden" value="1" name="__delete__" />');
             formAjaxSubmit($this.closest('form')[0]);
         }
@@ -71,8 +72,8 @@ $(document).ready(function () {
         ajax: '',
         columns: [
             {data: 'date', render: transactionEditIcon},
-            {data: 'payee'},
-            {data: 'category'},
+            {data: 'payee.name'},
+            {data: 'category.name'},
             {data: 'description'},
             {data: 'amount'}
         ]
@@ -152,7 +153,7 @@ function formAjaxSubmit(form, event) {
     $form.find('select').each(function (i, el) {
         data[el.id.replace(replacePrefix, '')] = $(el).val();
     });
-    if($form.find('input[name="__delete__"]').val() == "1") {
+    if ($form.find('input[name="__delete__"]').val() == "1") {
         data['DELETE'] = true;
     }
 
@@ -163,19 +164,21 @@ function formAjaxSubmit(form, event) {
         $form.find('input[type=radio]').prop('checked', false);
         $form.find('select').val('');
         loadInfrastructure($form.data('reload'));
+        $form.find('input:first').focus();
         if (form.action.indexOf('/edit') >= 0) {
             $form.closest('div.modal').modal('hide');
         }
     };
     var failHandler = function (d) {
-        $form.prepend('<div class="formerror rounded border border-danger bg-light text-danger p-2 mb-3">There was an error saving this data</div>');
+        $form.prepend('<div class="formerror rounded border border-danger bg-light text-danger p-2 my-3">There was an error saving this data</div>');
     };
     switch (form.id) {
         case 'frm_addtransaction':
             doneHandler = function (d) {
-                $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
+                $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset], :input[type=date]').val('');
                 $form.find('input[type=checkbox]').prop('checked', false);
                 $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
+                $('#addtransaction_payee').focus();
             };
             failHandler = function (d) {
                 d = JSON.parse(d.responseText);
@@ -206,11 +209,12 @@ function showFormErrors(errorMap, errorList) {
     if (errorList[0] == null)
         return;
     $(errorList[0].element).closest('form').find('div.formerror').remove();
-    $(errorList[0].element).closest('form').find('input[type=submit]').before('<div class="formerror rounded border border-danger bg-light text-danger p-2 mb-3">You seem to be missing some data...</div>');
+    $(errorList[0].element).closest('form').find('input[type=submit]').before('<div class="formerror rounded border border-danger bg-light text-danger p-2 my-3">You seem to be missing some data...</div>');
 }
 
 function loadInfrastructure(load) {
-    if(load == null) return;
+    if (load == null)
+        return;
     load = load.split(',');
     if (load.includes('account')) {
         loadAccounts();
@@ -386,7 +390,7 @@ function loadPayees() {
             PAY_IDS[v] = i;
         });
         PAYEES.sort();
-        $("#addtransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee}); //TODO: Load transactions
+        $("#addtransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
         $("#edittransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
     });
 }
@@ -419,12 +423,12 @@ function loadTransactionToEdit() {
 function fetchTransactionsByPayee(selected) {
     var pay_id = PAY_IDS[selected];
     $.get("/transaction/list/dateformat=short/limit=10/payee=" + pay_id)
-        .done(drawTransactionsByPayee);
+            .done(drawTransactionsByPayee);
 }
 
 function drawTransactionsByPayee(json) {
     $('.payee_transactions tbody').empty();
-    $.each(json.data, function(i, v){
-        $('.payee_transactions tbody').append('<tr><td>'+ v.date + '</td><td>' + v.category.name + '</td><td>' + currencyFormatter.format(v.amount) + '</td></tr>');
+    $.each(json.data, function (i, v) {
+        $('.payee_transactions tbody').append('<tr><td>' + v.date + '</td><td>' + v.category.name + '</td><td>' + currencyFormatter.format(v.amount) + '</td></tr>');
     });
 }

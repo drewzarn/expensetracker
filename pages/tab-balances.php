@@ -21,9 +21,6 @@
 					</tr>
 				</thead>
 				<tfoot>
-					<tr>
-						<th>&nbsp;</th>
-					</tr>
 				</tfoot>
 			</table>
 		</div>

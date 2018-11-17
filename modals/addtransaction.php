@@ -10,7 +10,7 @@
 				</div>
 				<div class="modal-body">
 					<input autocomplete="false" name="hidden" type="text" style="display:none;">
-					<div class="form-group"><input type="text" class="form-control typeahead" data-provide="typeahead" id="addtransaction_payee" name="addtransaction_payy" placeholder="Payee"/></div>
+					<div class="form-group"><input type="text" class="form-control typeahead" data-provide="typeahead" id="addtransaction_payee" name="addtransaction_payee" placeholder="Payee"/></div>
 					<div class="form-group"><input type="text" class="form-control typeahead" data-provide="typeahead" id="addtransaction_category" name="addtransaction_category" placeholder="Category" /></div>
 					<div class="form-group"><input type="number" class="form-control" id="addtransaction_amount" name="addtransaction_amount" step="0.01" placeholder="Amount" /></div>
 					<div class="form-group"><input type="date" class="form-control" id="addtransaction_date" name="addtransaction_date" placeholder="Date" /></div>

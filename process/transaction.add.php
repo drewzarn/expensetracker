@@ -2,8 +2,8 @@
 
 if ($POSTDATA['amount'] == '' || $POSTDATA['category'] == '' || $POSTDATA['payee'] == '' || $POSTDATA['date'] == '')
 	exit();
-$category = R::findOrCreate('category', ['name' => $POSTDATA['category'], 'site' => SITE]);
-$payee = R::findOrCreate('payee', ['name' => $POSTDATA['payee'], 'site' => SITE]);
+$category = R::findOrCreate('category', ['name' => $POSTDATA['category'], 'site' => SITE, 'deleted' => 0]);
+$payee = R::findOrCreate('payee', ['name' => $POSTDATA['payee'], 'site' => SITE, 'deleted' => 0]);
 
 $amount = $category->income ? -1 * $POSTDATA['amount'] : $POSTDATA['amount'];
 $trnDate = $POSTDATA['date'];

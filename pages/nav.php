@@ -16,7 +16,7 @@
 				<a class="nav-link" href="#manage">Manage</a>
 			</li>
 		</ul>
-		<a href="/user/logout" class="btn btn-light">Logout</a>
+		<a id="logout" href="/user/logout" class="btn btn-light">Logout <?= $_SESSION['user']->name ?></a>
 	</div>
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 		<span class="navbar-toggler-icon"></span>

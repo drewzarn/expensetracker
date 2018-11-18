@@ -59,7 +59,8 @@ $(document).ready(function () {
         var trnDetails = transactionlisttable.row($(e.relatedTarget).parent().parent()[0]).data();
         fetchTransactionsByPayee(trnDetails.payee);
         $.each(trnDetails, function (i, v) {
-            $('#edittransaction_' + i).val(v);
+            if(i == "date") v = v.substring(0, 10); //Strip off time for setting input value
+            $('#edittransaction_' + i).val(v.hasOwnProperty('name') ? v.name : v);
         });
     });
 
@@ -335,11 +336,11 @@ function loadBalances() {
             var $el = $(el);
             if ($el.text() != '-') {
                 var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
-                if ($el.data('amount') == $el.next().data('amount')) {
+                if ($el.data('amount') == $el.nextAll(':not(.empty)').filter(':first').data('amount')) {
                     $el.addClass('table-warning');
-                } else if ($el.data('amount') > $el.next().data('amount')) {
+                } else if ($el.data('amount') > $el.nextAll(':not(.empty)').filter(':first').data('amount')) {
                     $el.addClass(isAsset ? 'table-success' : 'table-danger');
-                } else if ($el.data('amount') < $el.next().data('amount')) {
+                } else if ($el.data('amount') < $el.nextAll(':not(.empty)').filter(':first').data('amount')) {
                     $el.addClass(isAsset ? 'table-danger' : 'table-success');
                 }
                 $el.text(currencyFormatter.format($el.text()));
@@ -389,7 +390,7 @@ function loadCategories() {
         $.each(d, function (i, v) {
             if(v.deleted != '1') {
                 CATEGORIES.push(v.name);
-                CAT_IDS[v.name] = i;
+                CAT_IDS[v.name] = v.id;
             }
             $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td>' + (v.income == '1' ? '<i class="fas fa-check-circle" />' : '') + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
             $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
@@ -414,7 +415,7 @@ function loadPayees() {
         $.each(d, function (i, v) {
             if(v.deleted != '1') {
                 PAYEES.push(v.name);
-                PAY_IDS[v.name] = i;
+                PAY_IDS[v.name] = v.id;
             }
 
             $('#payeelist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editpayee" data-payeeid="' + v.id + '" />' + v.name + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');

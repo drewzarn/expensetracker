@@ -5,11 +5,8 @@ if ($POSTDATA['amount'] == '' || $POSTDATA['category'] == '' || $POSTDATA['payee
 $category = R::findOrCreate('category', ['name' => $POSTDATA['category'], 'site' => SITE, 'deleted' => 0]);
 $payee = R::findOrCreate('payee', ['name' => $POSTDATA['payee'], 'site' => SITE, 'deleted' => 0]);
 
-$amount = $category->income ? -1 * $POSTDATA['amount'] : $POSTDATA['amount'];
-$trnDate = $POSTDATA['date'];
-
 if (!isset($POSTDATA['allowdupe'])) {
-	$dupe = R::find('transaction', 'site=? AND category_id=? AND payee_id=? AND amount=? AND date BETWEEN DATE_ADD(?, INTERVAL ? DAY) AND DATE_ADD(?, INTERVAL ? DAY)', [SITE, $category->id, $payee->id, $amount, $trnDate, $DUPECHECK['before'], $trnDate, $DUPECHECK['after']]);
+	$dupe = R::find('transaction', 'site=? AND category_id=? AND payee_id=? AND amount=? AND date BETWEEN DATE_ADD(?, INTERVAL ? DAY) AND DATE_ADD(?, INTERVAL ? DAY)', [SITE, $category->id, $payee->id, $POSTDATA['amount'], $POSTDATA['date'], $DUPECHECK['before'], $trnDate, $DUPECHECK['after']]);
 	if (count($dupe) > 0) {
 		$dupe = $dupe[array_keys($dupe)[0]];
 		header("HTTP/1.0 409 Conflict");
@@ -23,9 +20,9 @@ $transaction = R::dispense('transaction');
 $transaction->site = SITE;
 $transaction->category = $category;
 $transaction->payee = $payee;
-$transaction->amount = $amount;
+$transaction->amount = $POSTDATA['amount'];
 $transaction->description = $POSTDATA['description'];
-$transaction->date = new DateTime();
+$transaction->date = $POSTDATA['date'];
 R::store($transaction);
 
 exit();

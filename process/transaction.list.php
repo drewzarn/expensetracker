@@ -43,7 +43,7 @@ ORDER BY _day";
 
 	$sql = implode(' AND ', $where);
 
-	$sql .= ' ORDER BY date DESC';
+	$sql .= ' ORDER BY date DESC, payee_id, amount DESC';
 	if (isset($args['limit'])) {
 		$sql .= ' LIMIT :limit';
 		$sqlArgs[':limit'] = intval($args['limit']);

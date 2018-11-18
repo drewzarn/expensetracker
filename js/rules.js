@@ -59,7 +59,8 @@ $(document).ready(function () {
         var trnDetails = transactionlisttable.row($(e.relatedTarget).parent().parent()[0]).data();
         fetchTransactionsByPayee(trnDetails.payee);
         $.each(trnDetails, function (i, v) {
-            $('#edittransaction_' + i).val(v);
+            if(i == "date") v = v.substring(0, 10); //Strip off time for setting input value
+            $('#edittransaction_' + i).val(v.hasOwnProperty('name') ? v.name : v);
         });
     });
 

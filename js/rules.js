@@ -25,6 +25,8 @@ var currencyFormatter = new Intl.NumberFormat('en-US', {style: 'currency', curre
 $(document).ready(function () {
     dateToToday();
 
+    $('a#logout:contains("Sandbox")').parent().parent().addClass('sandbox');
+
     $('form').each(function () {
         if (this.id == "frm_login")
             return;

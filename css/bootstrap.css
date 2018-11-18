@@ -1,6 +1,9 @@
 body.dev {
     background-image: url('../img/development.png');
 }
+#mainnav.sandbox {
+    border-bottom: double .5em red;
+}
 
 a.fas:hover, a.fas:focus {
     text-decoration: none;

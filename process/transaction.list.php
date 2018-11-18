@@ -48,7 +48,7 @@ ORDER BY _day";
 		$sql .= ' LIMIT :limit';
 		$sqlArgs[':limit'] = intval($args['limit']);
 	}
-
+	
 	$beans = R::find('transaction', $sql, $sqlArgs);
 
 	foreach ($beans as $transaction) {

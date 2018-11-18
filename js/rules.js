@@ -390,7 +390,7 @@ function loadCategories() {
         $.each(d, function (i, v) {
             if(v.deleted != '1') {
                 CATEGORIES.push(v.name);
-                CAT_IDS[v.name] = i;
+                CAT_IDS[v.name] = v.id;
             }
             $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td>' + (v.income == '1' ? '<i class="fas fa-check-circle" />' : '') + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
             $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
@@ -415,7 +415,7 @@ function loadPayees() {
         $.each(d, function (i, v) {
             if(v.deleted != '1') {
                 PAYEES.push(v.name);
-                PAY_IDS[v.name] = i;
+                PAY_IDS[v.name] = v.id;
             }
 
             $('#payeelist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editpayee" data-payeeid="' + v.id + '" />' + v.name + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');

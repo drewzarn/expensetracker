@@ -336,11 +336,11 @@ function loadBalances() {
             var $el = $(el);
             if ($el.text() != '-') {
                 var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
-                if ($el.data('amount') == $el.nextAll(':not(.empty)').filter(':first').data('amount')) {
+                if (parseFloat($el.data('amount')) == parseFloat($el.nextAll(':not(.empty)').filter(':first').data('amount'))) {
                     $el.addClass('table-warning');
-                } else if ($el.data('amount') > $el.nextAll(':not(.empty)').filter(':first').data('amount')) {
+                } else if (parseFloat($el.data('amount')) > parseFloat($el.nextAll(':not(.empty)').filter(':first').data('amount'))) {
                     $el.addClass(isAsset ? 'table-success' : 'table-danger');
-                } else if ($el.data('amount') < $el.nextAll(':not(.empty)').filter(':first').data('amount')) {
+                } else if (parseFloat($el.data('amount')) < parseFloat($el.nextAll(':not(.empty)').filter(':first').data('amount'))) {
                     $el.addClass(isAsset ? 'table-danger' : 'table-success');
                 }
                 $el.text(currencyFormatter.format($el.text()));
@@ -368,11 +368,11 @@ function loadBalances() {
         $('#balancetable th[data-balancedate]').each(function (i, el) {
             var $el = $(el);
             var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
-            if ($el.data('amount') == $el.next().data('amount')) {
+            if (parseFloat($el.data('amount')) == parseFloat($el.next().data('amount'))) {
                 $el.addClass('text-warning');
-            } else if ($el.data('amount') > $el.next().data('amount')) {
+            } else if (parseFloat($el.data('amount')) > parseFloat($el.next().data('amount'))) {
                 $el.addClass(isAsset ? 'text-success' : 'text-danger');
-            } else if ($el.data('amount') < $el.next().data('amount')) {
+            } else if (parseFloat($el.data('amount')) < parseFloat($el.next().data('amount'))) {
                 $el.addClass(isAsset ? 'text-danger' : 'text-success');
             }
             $el.text(currencyFormatter.format($el.text()));

@@ -25,7 +25,7 @@ var currencyFormatter = new Intl.NumberFormat('en-US', {style: 'currency', curre
 $(document).ready(function () {
     dateToToday();
 
-    $('a#logout:contains("Sandbox")').parent().parent().addClass('sandbox');
+    $('a#logout:contains("Sandbox")').closest('body').addClass('sandbox');
 
     $('form').each(function () {
         if (this.id == "frm_login")
@@ -61,7 +61,8 @@ $(document).ready(function () {
         var trnDetails = transactionlisttable.row($(e.relatedTarget).parent().parent()[0]).data();
         fetchTransactionsByPayee(trnDetails.payee);
         $.each(trnDetails, function (i, v) {
-            if(i == "date") v = v.substring(0, 10); //Strip off time for setting input value
+            if (i == "date")
+                v = v.substring(0, 10); //Strip off time for setting input value
             $('#edittransaction_' + i).val(v.hasOwnProperty('name') ? v.name : v);
         });
     });
@@ -297,7 +298,8 @@ function loadBalances() {
     $.ajax({
         url: "balance/list"
     }).done(function (d) {
-        $('#balancetable th.balancedate, #balancetable th[data-balancedate], #balancetable td.entry').remove();
+        $('#balancetable th.balancedate, #balancetable th[data-balancedate], #balancetable td.entry, #balancetable tr#netbalance').remove();
+        $('#balancetable tfoot').append('<tr id="netbalance" class="table-secondary"><th>Net</th></tr>');
         var entriesByDate = {};
         $.each(d, function (i, v) {
             v.date = v.date.substring(0, 10);
@@ -349,6 +351,7 @@ function loadBalances() {
             }
         });
 
+        //Calculate account type sums
         $('#balancetable tbody').each(function (bi, tbodyEl) {
             var $tbodyEl = $(tbodyEl);
             $('#balancetable thead th').each(function (hi, thEl) {
@@ -379,6 +382,34 @@ function loadBalances() {
             }
             $el.text(currencyFormatter.format($el.text()));
         });
+
+        //Set net sum text
+        $('#balancetable thead th.balancedate').each(function (i, el) {
+            var $el = $(el);
+            var netSum = 0;
+            $('#balancetable').find('th[data-balancedate=' + $el.text() + ']').each(function (typeI, typeEl) {
+                var $typeEl = $(typeEl);
+                if ($typeEl.parent().parent().data('accounttypeasset') == '1') {
+                    netSum += $typeEl.data('amount');
+                } else {
+                    netSum -= $typeEl.data('amount');
+                }
+            });
+            $('#netbalance').append('<th data-amount="' + netSum + '">' + netSum + '</th>');
+        });
+
+        //Color-code net balance row
+        $('#netbalance th[data-amount]').each(function (i, el) {
+            var $el = $(el);
+            if (parseFloat($el.data('amount')) == parseFloat($el.next().data('amount'))) {
+                $el.addClass('text-warning');
+            } else if (parseFloat($el.data('amount')) > parseFloat($el.next().data('amount'))) {
+                $el.addClass('text-success');
+            } else if (parseFloat($el.data('amount')) < parseFloat($el.next().data('amount'))) {
+                $el.addClass('text-danger');
+            }
+            $el.text(currencyFormatter.format($el.text()));
+        });
     });
 }
 
@@ -388,9 +419,10 @@ function loadCategories() {
     }).done(function (d) {
         d = sortBeans(d);
         $('#categorylist tbody').empty();
-        CATEGORIES = []; CAT_IDS = {}
+        CATEGORIES = [];
+        CAT_IDS = {}
         $.each(d, function (i, v) {
-            if(v.deleted != '1') {
+            if (v.deleted != '1') {
                 CATEGORIES.push(v.name);
                 CAT_IDS[v.name] = v.id;
             }
@@ -413,9 +445,10 @@ function loadPayees() {
     }).done(function (d) {
         d = sortBeans(d);
         $('#payeelist tbody').empty();
-        PAYEES = []; PAY_IDS = {}
+        PAYEES = [];
+        PAY_IDS = {}
         $.each(d, function (i, v) {
-            if(v.deleted != '1') {
+            if (v.deleted != '1') {
                 PAYEES.push(v.name);
                 PAY_IDS[v.name] = v.id;
             }

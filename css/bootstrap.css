@@ -1,7 +1,7 @@
 body.dev {
     background-image: url('../img/development.png');
 }
-#mainnav.sandbox {
+body.sandbox #mainnav, body.sandbox div.modal-header {
     border-bottom: double .5em red;
 }
 
@@ -44,6 +44,15 @@ div#transactionlistrange button {
     content: " (Inactive)";
 }
 
+#balancetable tbody {
+    border-bottom: solid 2px black;
+}
+th.balancedate {
+    min-width: 7em;
+}
+tr[data-accountid] > td:first-of-type {
+    min-width: 15em;
+}
 td.dupebalance::after {
     content: " DUPE ENTRY";
 }

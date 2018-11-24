@@ -45,6 +45,10 @@ $(document).ready(function () {
         }
     });
 
+    BalanceData = Object.create(DataObject);
+    BalanceData.Init('Balance');
+    var b = BalanceData.GetData('raw');
+    
     $('#modal_addtransaction').on('shown.bs.modal', function (e) {
         $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
     })
@@ -143,6 +147,13 @@ $(document).ready(function () {
         var $btn = $(this);
         $btn.toggleClass('btn-info');
         fetchCategoriesByMonth();
+    });
+
+    $(document).on("accounttype:added", function(event, accounttype){
+        $('#balancechart_accountlist').append('<div class="col" data-accounttype="' + accounttype.id + '"><h5>' + accounttype.name + '</h5><ul></ul></div>');
+    });
+
+    $(document).on("account:added", function(event, account){
     });
 
     loadAccountTypes();
@@ -262,6 +273,7 @@ function loadAccounts() {
         $('#addbalance_accountlist div').empty();
         $('#balancetable tbody tr[data-accountid]').remove();
         $.each(d, function (i, v) {
+            $(document).trigger("account:added", v);
             $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '" data-accountactive="' + v.active + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
             if (v.active == '1') {
                 $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
@@ -283,6 +295,7 @@ function loadAccountTypes() {
         $('#addbalance_accountlist').empty();
         $('#balancetable tbody').remove();
         $.each(d, function (i, v) {
+            $(document).trigger("accounttype:added", v);
             $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
             $('#accountlist div.row').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + ' Accounts</h5><ul></ul></div>');
             $('#addbalance_accountlist').append('<h6>' + v.name + '</h6>');
@@ -308,8 +321,9 @@ function loadBalances() {
             }
             entriesByDate[v.date].push(v);
         });
+        Charts.Balances.labels = Object.keys(entriesByDate).sort();
+        Charts.Balances.allseries = {};
         var dates = Object.keys(entriesByDate).sort().reverse();
-        var lastEntryCount = 0;
         for (var date in dates) {
             var entryDate = dates[date];
             $('#balancetable thead tr').append('<th class="balancedate">' + entryDate + '</th>');
@@ -320,6 +334,8 @@ function loadBalances() {
                 if ($('#balancetable tr[data-accountid=' + entry.account_id + '] td.entry[data-entrydate=' + entryDate + ']').addClass('bg-dark').addClass('text-white').addClass('dupebalance').length > 0) {
                     continue;
                 }
+                if(Charts.Balances.allseries[entry.account_id] == null) Charts.Balances.allseries[entry.account_id] = new Array();
+                Charts.Balances.allseries[entry.account_id].push(entry.amount);
                 var td = $('<td class="entry" data-entrydate="' + entryDate + '" data-balanceid="' + entry.id + '">' + entry.amount + '</td>');
                 td.data('amount', entry.amount);
                 $('#balancetable tr[data-accountid=' + entry.account_id + ']').append(td);
@@ -333,6 +349,11 @@ function loadBalances() {
                     $tr.append(td);
                 }
             });
+        }
+
+        for(var i in Object.keys(Charts.Balances.allseries)) {
+            var accountId = Object.keys(Charts.Balances.allseries)[i];
+            Charts.Balances.allseries[accountId].reverse();
         }
 
         //Add color-coding to entry cells

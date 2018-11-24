@@ -8,7 +8,14 @@
 		</li>
 	</ul>
 	<div class="tab-content" id="balanceTabContent">
-		<div class="tab-pane fade show active" id="balancedashboard" role="tabpanel" aria-labelledby="balancedashboard-tab">Dashboard</div>
+		<div class="tab-pane fade show active container-fluid" id="balancedashboard" role="tabpanel" aria-labelledby="balancedashboard-tab">
+			<div class="row">
+				<div class="col">
+					<div class="ct-chart ct-major-tenth" id="balancechart"></div>
+				</div>
+			</div>
+			<div class="row" id="balancechart_accountlist"></div>
+		</div>
 		<div class="tab-pane fade" id="balancesheet" role="tabpanel" aria-labelledby="balancesheet-tab">
 			<button class="btn btn-secondary m-3" data-toggle="modal" data-target="#modal_addbalance">Add Balance Entry</button>
 			<table id="balancetable" class="table table-striped table-bordered table-sm">

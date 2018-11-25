@@ -12,32 +12,32 @@ INSERT INTO transaction (id, site, date, category_id, payee_id, description, amo
 SELECT trn_id, trn_site, trn_date, trn_cat_id, trn_pay_id, trn_description, trn_amount FROM xtransaction
 
 --Add netgain to balance
-SELECT b1.id, amount, (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1) AS lastamt,
-CASE WHEN asset=1 THEN
+SELECT b1.id, amount, (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1) AS lastamt,
+CASE WHEN asset=0 THEN
 	CASE
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)=amount THEN 0
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)>amount THEN 1
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)<amount THEN -1
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)=amount THEN 0
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)>amount THEN 1
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)<amount THEN -1
 	END
 ELSE
 	CASE
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)=amount THEN 0
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)>amount THEN -1
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)<amount THEN 1
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)=amount THEN 0
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)>amount THEN -1
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)<amount THEN 1
 	END
 END AS netgain,
 CONCAT(
-'UPDATE balance SET netgain=', CASE WHEN asset=1 THEN
+'UPDATE balance SET netgain=', CASE WHEN asset=0 THEN
 	CASE
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)=amount THEN 0
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)>amount THEN 1
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)<amount THEN -1
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)=amount THEN 0
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)>amount THEN 1
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)<amount THEN -1
 	END
 ELSE
 	CASE
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)=amount THEN 0
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)>amount THEN -1
-	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date>b1.date ORDER BY b2.date ASC LIMIT 1)<amount THEN 1
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)=amount THEN 0
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)>amount THEN -1
+	WHEN (SELECT b2.amount FROM balance b2 WHERE b2.account_id=b1.account_id AND b2.date<b1.date ORDER BY b2.date DESC LIMIT 1)<amount THEN 1
 	END
 END, ' WHERE id=', b1.id, ';') AS cmd
 FROM balance b1

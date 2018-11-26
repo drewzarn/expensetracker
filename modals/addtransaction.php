@@ -10,16 +10,16 @@
 				</div>
 				<div class="modal-body">
 					<input autocomplete="false" name="hidden" type="text" style="display:none;">
-					<div class="form-group"><input type="text" class="form-control typeahead" data-provide="typeahead" id="addtransaction_payee" name="addtransaction_payee" placeholder="Payee"/></div>
-					<div class="form-group"><input type="text" class="form-control typeahead" data-provide="typeahead" id="addtransaction_category" name="addtransaction_category" placeholder="Category" /></div>
-					<div class="form-group"><input type="number" class="form-control" id="addtransaction_amount" name="addtransaction_amount" step="0.01" placeholder="Amount" /></div>
-					<div class="form-group"><input type="date" class="form-control" id="addtransaction_date" name="addtransaction_date" placeholder="Date" /></div>
+					<div class="form-group"><input type="text" class="form-control typeahead" data-provide="typeahead" id="addtransaction_payee" name="addtransaction_payee" placeholder="Payee" required /></div>
+					<div class="form-group"><input type="text" class="form-control typeahead" data-provide="typeahead" id="addtransaction_category" name="addtransaction_category" placeholder="Category" required /></div>
+					<div class="form-group"><input type="number" class="form-control" id="addtransaction_amount" name="addtransaction_amount" step="0.01" placeholder="Amount" required /></div>
+					<div class="form-group"><input type="date" class="form-control" id="addtransaction_date" name="addtransaction_date" placeholder="Date" required /></div>
 					<div class="form-group"><input type="text" class="form-control" id="addtransaction_description" name="addtransaction_description" placeholder="Description" /></div>
 					<div class="form-group d-none"><input type="checkbox" id="addtransaction_allowdupe" name="addtransaction_allowdupe" /> <label for="addtransaction_allowdupe">Allow dupe: </label></div>
 					<div class="form-group"></div>
 				</div>
 				<div class="modal-footer">
-					<input type="submit" class="btn btn-primary" value="Add Transaction" />
+					<div class="formmsg rounded border bg-light p-2 my-3 invisible"></div><input type="submit" class="btn btn-primary" value="Add Transaction" />
 					<table class="payee_transactions table table-sm mt-3">
 						<thead>
 							<tr><th>Date</th><th>Category</th><th>Amount</th></tr>

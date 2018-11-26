@@ -13,7 +13,6 @@ var DataObject = {
                 .then(function (cacheValue) {
                     if (cacheValue != null)
                         $(document).trigger(dataObject.objectName + ':dataloaded', cacheValue);
-                    return;
                     $.ajax(dataObject.URL)
                             .done(function (ajaxResponse) {
                                 localforage.setItem(dataObject.objectName + '_data', ajaxResponse);

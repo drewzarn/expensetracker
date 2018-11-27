@@ -62,10 +62,6 @@ td.dupebalance::after {
     justify-content: space-between;
 }
 
-div.card {
-    grid-column: span 2;
-}
-
 #card_datastats li i.fas {
     float: right;
     cursor: pointer;

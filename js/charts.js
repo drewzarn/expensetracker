@@ -4,14 +4,17 @@ var Charts = {
         labels: [],
         allseries: {},
         options: {},
-        Draw: function() {
-            var series = [];
-            for(var i in Object.keys(Charts.Balances.allseries)) {
-                var accountId = Object.keys(Charts.Balances.allseries)[i];
-                if(accountId == "51") continue;
-                series.push(Charts.Balances.allseries[accountId]);
-            }
-            new Chartist.Line(Charts.Balances.selector, {labels: Charts.Balances.labels, series: series}, Charts.Balances.options);
+        Draw: function () {
+            BalanceData.GetData().then(function (balances) {
+                var series = [];
+                for (var i in Object.keys(balances.byaccount)) {
+                    var accountId = Object.keys(balances.byaccount)[i];
+                    if($('#balancechart_accountlist input#bca' + accountId).prop('checked') == false)
+                        continue;
+                    series.push(balances.byaccount[accountId]);
+                }
+                new Chartist.Line(Charts.Balances.selector, {labels: Charts.Balances.labels, series: series}, Charts.Balances.options);
+            });
         }
     }
 };

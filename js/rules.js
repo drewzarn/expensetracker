@@ -26,16 +26,25 @@ var CategoryData = Object.create(DataObject);
 var PayeeData = Object.create(DataObject);
 var TransactionData = Object.create(DataObject);
 $(document).ready(function () {
-    $(document).on('account:dataloaded', DataLoadedHandler.Account);
-    $(document).on('accounttype:dataloaded', DataLoadedHandler.AccountType);
-    $(document).on('balance:dataloaded', DataLoadedHandler.Balance);
-    $(document).on('category:dataloaded', DataLoadedHandler.Category);
-    $(document).on('payee:dataloaded', DataLoadedHandler.Payee);
-    $(document).on('transaction:dataloaded', DataLoadedHandler.Transaction);
+    $(document).on('account:dataloading', DataHandler.Loading.Account);
+    $(document).on('accounttype:dataloading', DataHandler.Loading.AccountType);
+    $(document).on('balance:dataloading', DataHandler.Loading.Balance);
+    $(document).on('category:dataloading', DataHandler.Loading.Category);
+    $(document).on('payee:dataloading', DataHandler.Loading.Payee);
+    $(document).on('transaction:dataloading', DataHandler.Loading.Transaction);
+
+    $(document).on('account:dataloaded', DataHandler.Loaded.Account);
+    $(document).on('accounttype:dataloaded', DataHandler.Loaded.AccountType);
+    $(document).on('balance:dataloaded', DataHandler.Loaded.Balance);
+    $(document).on('category:dataloaded', DataHandler.Loaded.Category);
+    $(document).on('payee:dataloaded', DataHandler.Loaded.Payee);
+    $(document).on('transaction:dataloaded', DataHandler.Loaded.Transaction);
+
     AccountTypeData.Init('AccountType');
     CategoryData.Init('Category');
     PayeeData.Init('Payee');
     TransactionData.Init('Transaction');
+
     dateToToday();
     $('a#logout:contains("Sandbox")').closest('body').addClass('sandbox');
     $('form').each(function () {
@@ -60,6 +69,11 @@ $(document).ready(function () {
     $('#modal_editpayee').on('shown.bs.modal', ModalHandler.Shown.editpayee);
     $('#modal_addtransaction').on('shown.bs.modal', ModalHandler.Shown.addtransaction);
     $('#modal_edittransaction').on('shown.bs.modal', ModalHandler.Shown.edittransaction);
+
+    $('#card_datastats i').click(function(){
+        Utils.GetDataObject($(this).parent().data('ref')).Refresh();
+    });
+
     $('#transactionlistrange').datepicker({format: 'yyyy-mm-dd'});
     $('#loadtransactionlist').click(fetchTransactionList);
     transactionlisttable = $('#transactionlisttable').DataTable({
@@ -146,206 +160,275 @@ var ModalHandler = {
     }
 }
 
-var DataLoadedHandler = {
-    Account: function (e, data) {
-        var d = sortBeans(data.list);
-        $('#accountlist div ul').empty();
-        $('#addbalance_accountlist div').empty();
-        $('#balancetable tbody tr[data-accountid]').remove();
-        $('#balancechart_accountlist div.col div label').remove();
-        $.each(d, function (i, v) {
-            $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '" data-accountactive="' + v.active + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
-            if (v.active == '1') {
-                $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
-            }
-            $('#balancetable tbody[data-accounttypeid=' + v.type_id + ']').append('<tr data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '"><td>' + v.name + '</td></tr>');
-            $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
-            $('#balancechart_accountlist div.col[data-accounttypeid=' + v.type_id + '] div').append('<label class="d-block" for="bca' + v.id + '"><input type="checkbox" data-accountid="' + v.id + '" id="bca' + v.id + '"> ' + v.name + '</label></div>');
-        });
-        BalanceData.Init('Balance');
+var DataHandler = {
+    Loading: {
+        Account: function (e) {
+            $('#card_datastats').find('li[data-ref=account] i').addClass('fa-spin');
+        },
+        AccountType: function (e) {
+            $('#card_datastats').find('li[data-ref=accounttype] i').addClass('fa-spin');
+        },
+        Balance: function (e) {
+            $('#card_datastats').find('li[data-ref=balance] i').addClass('fa-spin');
+        },
+        Category: function (e) {
+            $('#card_datastats').find('li[data-ref=category] i').addClass('fa-spin');
+        },
+        Payee: function (e) {
+            $('#card_datastats').find('li[data-ref=payee] i').addClass('fa-spin');
+        },
+        Transaction: function (e) {
+            $('#card_datastats').find('li[data-ref=transaction] i').addClass('fa-spin');
+        }
     },
-    AccountType: function (e, data) {
-        var d = sortBeans(data.list);
-        $('#addaccount_type').empty();
-        $('#accountlist div.row').empty();
-        $('#addbalance_accountlist').empty();
-        $('#balancetable tbody').remove();
-        $('#balancechart_accountlist div.col').remove();
-        $.each(d, function (i, v) {
-            $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
-            $('#accountlist div.row').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + ' Accounts</h5><ul></ul></div>');
-            $('#addbalance_accountlist').append('<h6>' + v.name + '</h6>');
-            $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
-            $('#balancetable tfoot').before('<tbody data-accounttypeid="' + v.id + '" data-accounttypeasset="' + v.asset + '"><tr class="table-secondary"><th>' + v.name + '</th></tr></tbody>');
-            $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
-            $('#balancechart_accountlist').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + '</h5><div></div></div>');
+    Loaded: {
+        Account: function (e, data) {
+            var date = new Date(data.timestamp * 1000);
+            $('#card_datastats').find('li[data-ref=account] span').html(Object.keys(data.list).length + ' accounts<br />' + moment(date).calendar());
+            $('#card_datastats').find('li[data-ref=account] i').removeClass('fa-spin');
 
-        });
-        AccountData.Init('Account');
-    },
-    Balance: function (e, data) {
-        var d = data.list;
-        $('#balancetable th.balancedate, #balancetable th[data-balancedate], #balancetable td.entry, #balancetable tr#netbalance').remove();
-        $('#balancetable tfoot').append('<tr id="netbalance" class="table-secondary"><th>Net</th></tr>');
-        var entriesByDate = {};
-        $.each(d, function (i, v) {
-            v.date = v.date.substring(0, 10);
-            if (entriesByDate[v.date] == null) {
-                entriesByDate[v.date] = new Array();
-            }
-            entriesByDate[v.date].push(v);
-        });
-        Charts.Balances.labels = Object.keys(entriesByDate).sort();
-        Charts.Balances.allseries = {};
-        var dates = Object.keys(entriesByDate).sort().reverse();
-        for (var date in dates) {
-            var entryDate = dates[date];
-            $('#balancetable thead tr').append('<th class="balancedate">' + entryDate + '</th>');
-            $('#balancetable tbody tr:first-of-type').append('<th data-balancedate="' + entryDate + '"></th>');
-            for (var key in entriesByDate[entryDate]) {
-                var entry = entriesByDate[entryDate][key];
-                if ($('#balancetable tr[data-accountid=' + entry.account_id + '] td.entry[data-entrydate=' + entryDate + ']').addClass('bg-dark').addClass('text-white').addClass('dupebalance').length > 0) {
-                    continue;
+            var d = sortBeans(data.list);
+            $('#accountlist div ul').empty();
+            $('#addbalance_accountlist div').empty();
+            $('#balancetable tbody tr[data-accountid]').remove();
+            $('#balancechart_accountlist div.col div label').remove();
+            $.each(d, function (i, v) {
+                $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '" data-accountactive="' + v.active + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
+                if (v.active == '1') {
+                    $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
                 }
-                if (Charts.Balances.allseries[entry.account_id] == null)
-                    Charts.Balances.allseries[entry.account_id] = new Array();
-                Charts.Balances.allseries[entry.account_id].push(entry.amount);
-                var td = $('<td class="entry" data-entrydate="' + entryDate + '" data-balanceid="' + entry.id + '" data-netgain="' + entry.netgain + '">' + entry.amount + '</td>');
-                td.data('amount', entry.amount);
-                $('#balancetable tr[data-accountid=' + entry.account_id + ']').append(td);
-            }
-
-            $('#balancetable tr[data-accountid').each(function (i, tr) {
-                var $tr = $(tr);
-                if ($tr.find('td.entry[data-entrydate=' + entryDate + ']').length == 0) {
-                    var td = $('<td class="entry empty" data-entrydate="' + entryDate + '">-</td>');
-                    td.data('amount', 0);
-                    $tr.append(td);
-                }
+                $('#balancetable tbody[data-accounttypeid=' + v.type_id + ']').append('<tr data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '"><td>' + v.name + '</td></tr>');
+                $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
+                $('#balancechart_accountlist div.col[data-accounttypeid=' + v.type_id + '] div').append('<label class="d-block" for="bca' + v.id + '"><input type="checkbox" data-accountid="' + v.id + '" id="bca' + v.id + '"> ' + v.name + '</label></div>');
             });
-        }
+            BalanceData.Init('Balance');
+        },
+        AccountType: function (e, data) {
+            var date = new Date(data.timestamp * 1000);
+            $('#card_datastats').find('li[data-ref=accounttype] span').html(Object.keys(data.list).length + ' account types<br />' + moment(date).calendar());
+$('#card_datastats').find('li[data-ref=accounttype] i').removeClass('fa-spin');
 
-        for (var i in Object.keys(Charts.Balances.allseries)) {
-            var accountId = Object.keys(Charts.Balances.allseries)[i];
-            Charts.Balances.allseries[accountId].reverse();
-        }
+            var d = sortBeans(data.list);
+            $('#addaccount_type').empty();
+            $('#accountlist div.row').empty();
+            $('#addbalance_accountlist').empty();
+            $('#balancetable tbody').remove();
+            $('#balancechart_accountlist div.col').remove();
+            $.each(d, function (i, v) {
+                $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
+                $('#accountlist div.row').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + ' Accounts</h5><ul></ul></div>');
+                $('#addbalance_accountlist').append('<h6>' + v.name + '</h6>');
+                $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
+                $('#balancetable tfoot').before('<tbody data-accounttypeid="' + v.id + '" data-accounttypeasset="' + v.asset + '"><tr class="table-secondary"><th>' + v.name + '</th></tr></tbody>');
+                $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
+                $('#balancechart_accountlist').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + '</h5><div></div></div>');
 
-        //Add color-coding to entry cells
-        $('#balancetable td.entry').each(function (i, el) {
-            var $el = $(el);
-            if ($el.text() != '-') {
-                if ($el.data('netgain') == '0') {
-                    $el.addClass('table-warning');
-                } else if ($el.data('netgain') == '1') {
-                    $el.addClass('table-success');
-                } else if ($el.data('netgain') == '-1') {
-                    $el.addClass('table-danger');
+            });
+            AccountData.Init('Account');
+        },
+        Balance: function (e, data) {
+            var date = new Date(data.timestamp * 1000);
+            $('#card_datastats').find('li[data-ref=balance] span').html(Object.keys(data.list).length + ' balance entries<br />' + moment(date).calendar());
+$('#card_datastats').find('li[data-ref=balance] i').removeClass('fa-spin');
+
+            var d = data.list;
+            $('#balancetable th.balancedate, #balancetable th[data-balancedate], #balancetable td.entry, #balancetable tr#netbalance').remove();
+            $('#balancetable tfoot').append('<tr id="netbalance" class="table-secondary"><th>Net</th></tr>');
+            var entriesByDate = {};
+            $.each(d, function (i, v) {
+                v.date = v.date.substring(0, 10);
+                if (entriesByDate[v.date] == null) {
+                    entriesByDate[v.date] = new Array();
+                }
+                entriesByDate[v.date].push(v);
+            });
+            Charts.Balances.labels = Object.keys(entriesByDate).sort();
+            Charts.Balances.allseries = {};
+            var dates = Object.keys(entriesByDate).sort().reverse();
+            for (var date in dates) {
+                var entryDate = dates[date];
+                $('#balancetable thead tr').append('<th class="balancedate">' + entryDate + '</th>');
+                $('#balancetable tbody tr:first-of-type').append('<th data-balancedate="' + entryDate + '"></th>');
+                for (var key in entriesByDate[entryDate]) {
+                    var entry = entriesByDate[entryDate][key];
+                    if ($('#balancetable tr[data-accountid=' + entry.account_id + '] td.entry[data-entrydate=' + entryDate + ']').addClass('bg-dark').addClass('text-white').addClass('dupebalance').length > 0) {
+                        continue;
+                    }
+                    if (Charts.Balances.allseries[entry.account_id] == null)
+                        Charts.Balances.allseries[entry.account_id] = new Array();
+                    Charts.Balances.allseries[entry.account_id].push(entry.amount);
+                    var td = $('<td class="entry" data-entrydate="' + entryDate + '" data-balanceid="' + entry.id + '" data-netgain="' + entry.netgain + '">' + entry.amount + '</td>');
+                    td.data('amount', entry.amount);
+                    $('#balancetable tr[data-accountid=' + entry.account_id + ']').append(td);
                 }
 
-                $el.text(currencyFormatter.format($el.text()));
-            }
-        });
-        $('#balancetable tr[data-accountid] td:last-of-type').removeClass('table-danger').removeClass('table-warning').removeClass('table-success');
-        //Calculate account type sums
-        $('#balancetable tbody').each(function (bi, tbodyEl) {
-            var $tbodyEl = $(tbodyEl);
-            $('#balancetable thead th').each(function (hi, thEl) {
-                var $thEl = $(thEl);
-                if ($thEl.text().trim() == '')
-                    return;
-                var sum = 0;
-                $tbodyEl.find('td[data-entrydate=' + $thEl.text() + ']').each(function (di, tdEl) {
-                    var $tdEl = $(tdEl);
-                    if ($tdEl.parent().data('accountexcludenetworth') != "1") {
-                        sum += parseFloat($tdEl.data('amount'));
+                $('#balancetable tr[data-accountid').each(function (i, tr) {
+                    var $tr = $(tr);
+                    if ($tr.find('td.entry[data-entrydate=' + entryDate + ']').length == 0) {
+                        var td = $('<td class="entry empty" data-entrydate="' + entryDate + '">-</td>');
+                        td.data('amount', 0);
+                        $tr.append(td);
                     }
                 });
-                $tbodyEl.find('th[data-balancedate=' + $thEl.text() + ']').text(sum).data('amount', sum);
-            });
-        });
-        //Add color-coding to sum cells
-        $('#balancetable th[data-balancedate]').each(function (i, el) {
-            var $el = $(el);
-            var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
-            if (parseFloat($el.data('amount')) == parseFloat($el.next().data('amount'))) {
-                $el.addClass('text-warning');
-            } else if (parseFloat($el.data('amount')) > parseFloat($el.next().data('amount'))) {
-                $el.addClass(isAsset ? 'text-success' : 'text-danger');
-            } else if (parseFloat($el.data('amount')) < parseFloat($el.next().data('amount'))) {
-                $el.addClass(isAsset ? 'text-danger' : 'text-success');
-            }
-            $el.text(currencyFormatter.format($el.text()));
-        });
-        //Set net sum text
-        $('#balancetable thead th.balancedate').each(function (i, el) {
-            var $el = $(el);
-            var netSum = 0;
-            $('#balancetable').find('th[data-balancedate=' + $el.text() + ']').each(function (typeI, typeEl) {
-                var $typeEl = $(typeEl);
-                if ($typeEl.parent().parent().data('accounttypeasset') == '1') {
-                    netSum += $typeEl.data('amount');
-                } else {
-                    netSum -= $typeEl.data('amount');
-                }
-            });
-            $('#netbalance').append('<th data-amount="' + netSum + '">' + netSum + '</th>');
-        });
-        //Color-code net balance row
-        $('#netbalance th[data-amount]').each(function (i, el) {
-            var $el = $(el);
-            if (parseFloat($el.data('amount')) == parseFloat($el.next().data('amount'))) {
-                $el.addClass('text-warning');
-            } else if (parseFloat($el.data('amount')) > parseFloat($el.next().data('amount'))) {
-                $el.addClass('text-success');
-            } else if (parseFloat($el.data('amount')) < parseFloat($el.next().data('amount'))) {
-                $el.addClass('text-danger');
-            }
-            $el.text(currencyFormatter.format($el.text()));
-        });
-    },
-    Category: function (e, data) {
-        var d = sortBeans(data.list);
-        $('#categorylist tbody').empty();
-        CATEGORIES = [];
-        CAT_IDS = {}
-        $.each(d, function (i, v) {
-            if (v.deleted != '1') {
-                CATEGORIES.push(v.name);
-                CAT_IDS[v.name] = v.id;
-            }
-            $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td>' + (v.income == '1' ? '<i class="fas fa-check-circle" />' : '') + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
-            $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
-        });
-        CATEGORIES.sort();
-        $("#addtransaction_category").typeahead({source: CATEGORIES});
-        $("#edittransaction_category").typeahead({source: CATEGORIES});
-        $('#catlist').empty();
-        $.each(CATEGORIES, function (i, v) {
-            $('#catlist').append('<button class="btn-sm">' + v + '</button>');
-        });
-    },
-    Payee: function (e, data) {
-        var d = sortBeans(data.list);
-        $('#payeelist tbody').empty();
-        PAYEES = [];
-        PAY_IDS = {}
-        $.each(d, function (i, v) {
-            if (v.deleted != '1') {
-                PAYEES.push(v.name);
-                PAY_IDS[v.name] = v.id;
             }
 
-            $('#payeelist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editpayee" data-payeeid="' + v.id + '" />' + v.name + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
-            $('#payeelist tbody').find('a[data-payeeid=' + v.id + ']').data('details', v);
-        });
-        PAYEES.sort();
-        $("#addtransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
-        $("#edittransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
-    },
-    Transaction: function (e, data) {}
+            for (var i in Object.keys(Charts.Balances.allseries)) {
+                var accountId = Object.keys(Charts.Balances.allseries)[i];
+                Charts.Balances.allseries[accountId].reverse();
+            }
+
+            //Add color-coding to entry cells
+            $('#balancetable td.entry').each(function (i, el) {
+                var $el = $(el);
+                if ($el.text() != '-') {
+                    if ($el.data('netgain') == '0') {
+                        $el.addClass('table-warning');
+                    } else if ($el.data('netgain') == '1') {
+                        $el.addClass('table-success');
+                    } else if ($el.data('netgain') == '-1') {
+                        $el.addClass('table-danger');
+                    }
+
+                    $el.text(currencyFormatter.format($el.text()));
+                }
+            });
+            $('#balancetable tr[data-accountid] td:last-of-type').removeClass('table-danger').removeClass('table-warning').removeClass('table-success');
+            //Calculate account type sums
+            $('#balancetable tbody').each(function (bi, tbodyEl) {
+                var $tbodyEl = $(tbodyEl);
+                $('#balancetable thead th').each(function (hi, thEl) {
+                    var $thEl = $(thEl);
+                    if ($thEl.text().trim() == '')
+                        return;
+                    var sum = 0;
+                    $tbodyEl.find('td[data-entrydate=' + $thEl.text() + ']').each(function (di, tdEl) {
+                        var $tdEl = $(tdEl);
+                        if ($tdEl.parent().data('accountexcludenetworth') != "1") {
+                            sum += parseFloat($tdEl.data('amount'));
+                        }
+                    });
+                    $tbodyEl.find('th[data-balancedate=' + $thEl.text() + ']').text(sum).data('amount', sum);
+                });
+            });
+            //Add color-coding to sum cells
+            $('#balancetable th[data-balancedate]').each(function (i, el) {
+                var $el = $(el);
+                var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
+                if (parseFloat($el.data('amount')) == parseFloat($el.next().data('amount'))) {
+                    $el.addClass('text-warning');
+                } else if (parseFloat($el.data('amount')) > parseFloat($el.next().data('amount'))) {
+                    $el.addClass(isAsset ? 'text-success' : 'text-danger');
+                } else if (parseFloat($el.data('amount')) < parseFloat($el.next().data('amount'))) {
+                    $el.addClass(isAsset ? 'text-danger' : 'text-success');
+                }
+                $el.text(currencyFormatter.format($el.text()));
+            });
+            //Set net sum text
+            $('#balancetable thead th.balancedate').each(function (i, el) {
+                var $el = $(el);
+                var netSum = 0;
+                $('#balancetable').find('th[data-balancedate=' + $el.text() + ']').each(function (typeI, typeEl) {
+                    var $typeEl = $(typeEl);
+                    if ($typeEl.parent().parent().data('accounttypeasset') == '1') {
+                        netSum += $typeEl.data('amount');
+                    } else {
+                        netSum -= $typeEl.data('amount');
+                    }
+                });
+                $('#netbalance').append('<th data-amount="' + netSum + '">' + netSum + '</th>');
+            });
+            //Color-code net balance row
+            $('#netbalance th[data-amount]').each(function (i, el) {
+                var $el = $(el);
+                if (parseFloat($el.data('amount')) == parseFloat($el.next().data('amount'))) {
+                    $el.addClass('text-warning');
+                } else if (parseFloat($el.data('amount')) > parseFloat($el.next().data('amount'))) {
+                    $el.addClass('text-success');
+                } else if (parseFloat($el.data('amount')) < parseFloat($el.next().data('amount'))) {
+                    $el.addClass('text-danger');
+                }
+                $el.text(currencyFormatter.format($el.text()));
+            });
+        },
+        Category: function (e, data) {
+            var date = new Date(data.timestamp * 1000);
+            $('#card_datastats').find('li[data-ref=category] span').html(Object.keys(data.list).length + ' categories<br />' + moment(date).calendar());
+$('#card_datastats').find('li[data-ref=category] i').removeClass('fa-spin');
+
+            var d = sortBeans(data.list);
+            $('#categorylist tbody').empty();
+            CATEGORIES = [];
+            CAT_IDS = {}
+            $.each(d, function (i, v) {
+                if (v.deleted != '1') {
+                    CATEGORIES.push(v.name);
+                    CAT_IDS[v.name] = v.id;
+                }
+                $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td>' + (v.income == '1' ? '<i class="fas fa-check-circle" />' : '') + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
+                $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
+            });
+            CATEGORIES.sort();
+            $("#addtransaction_category").typeahead({source: CATEGORIES});
+            $("#edittransaction_category").typeahead({source: CATEGORIES});
+            $('#catlist').empty();
+            $.each(CATEGORIES, function (i, v) {
+                $('#catlist').append('<button class="btn-sm">' + v + '</button>');
+            });
+        },
+        Payee: function (e, data) {
+            var date = new Date(data.timestamp * 1000);
+            $('#card_datastats').find('li[data-ref=payee] span').html(Object.keys(data.list).length + ' payees<br />' + moment(date).calendar());
+$('#card_datastats').find('li[data-ref=payee] i').removeClass('fa-spin');
+
+            var d = sortBeans(data.list);
+            $('#payeelist tbody').empty();
+            PAYEES = [];
+            PAY_IDS = {}
+            $.each(d, function (i, v) {
+                if (v.deleted != '1') {
+                    PAYEES.push(v.name);
+                    PAY_IDS[v.name] = v.id;
+                }
+
+                $('#payeelist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editpayee" data-payeeid="' + v.id + '" />' + v.name + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
+                $('#payeelist tbody').find('a[data-payeeid=' + v.id + ']').data('details', v);
+            });
+            PAYEES.sort();
+            $("#addtransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
+            $("#edittransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
+        },
+        Transaction: function (e, data) {
+            var date = new Date(data.timestamp * 1000);
+            //$('#card_datastats').find('li[data-ref=transaction] span').html(Object.keys(data.list).length + ' transactions<br />' + moment(date).calendar());
+            $('#card_datastats').find('li[data-ref=transaction] i').removeClass('fa-spin');
+
+        }
+    }
 }
 
 var Utils = {
+    GetDataObject: function(name) {
+        switch(name) {
+            case 'account':
+                return AccountData;
+                break;
+            case 'accounttype':
+                return AccountTypeData;
+                break;
+            case 'balance':
+                return BalanceData;
+                break;
+            case 'category':
+                return CategoryData;
+                break;
+            case 'payee':
+                return PayeeData;
+                break;
+            case 'transaction':
+                return TransactionData;
+                break;
+        }
+    },
     HideFormMessage: function ($el) {
         $el.addClass('invisible').removeClass('border-danger text-danger border-success text-success');
     },

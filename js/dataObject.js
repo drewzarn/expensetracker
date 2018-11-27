@@ -1,3 +1,4 @@
+var CACHETIMEOUT = 15 * 60;
 localforage.config({
     name: 'expenses'
 });
@@ -9,19 +10,23 @@ var DataObject = {
         this.URL = '/' + this.objectName + '/list';
 
         var dataObject = this;
+        $(document).trigger(dataObject.objectName + ':dataloading');
         localforage.getItem(dataObject.objectName + '_data')
                 .then(function (cacheValue) {
-                    if (cacheValue != null)
+                    if (cacheValue != null && (Math.round((new Date()).getTime() / 1000) - cacheValue.timestamp) < CACHETIMEOUT) {
                         $(document).trigger(dataObject.objectName + ':dataloaded', cacheValue);
-                    $.ajax(dataObject.URL)
-                            .done(function (ajaxResponse) {
-                                localforage.setItem(dataObject.objectName + '_data', ajaxResponse);
-                                $(document).trigger(dataObject.objectName + ':dataloaded', ajaxResponse);
-                            });
+                    } else {
+                        $.ajax(dataObject.URL)
+                                .done(function (ajaxResponse) {
+                                    localforage.setItem(dataObject.objectName + '_data', ajaxResponse);
+                                    $(document).trigger(dataObject.objectName + ':dataloaded', ajaxResponse);
+                                });
+                    }
                 });
     },
     Refresh: function () {
         var dataObject = this;
+        $(document).trigger(dataObject.objectName + ':dataloading');
         $.ajax(dataObject.URL)
                 .done(function (ajaxResponse) {
                     localforage.setItem(dataObject.objectName + '_data', ajaxResponse);

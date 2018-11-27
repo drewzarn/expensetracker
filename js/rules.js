@@ -70,7 +70,7 @@ $(document).ready(function () {
     $('#modal_addtransaction').on('shown.bs.modal', ModalHandler.Shown.addtransaction);
     $('#modal_edittransaction').on('shown.bs.modal', ModalHandler.Shown.edittransaction);
 
-    $('#card_datastats i').click(function(){
+    $('#card_datastats i').click(function () {
         Utils.GetDataObject($(this).parent().data('ref')).Refresh();
     });
 
@@ -102,12 +102,17 @@ $(document).ready(function () {
         $('#modal_editbalance').modal();
     });
     $('#mainnav ul .nav-link').click(function () {
-        var content = $(this).attr('href').substring(1);
+        var $this = $(this);
+        $('.nav-link').removeClass('border-bottom border-success');
+        $this.addClass('border-bottom border-success');
+        var content = $this.attr('href').substring(1);
         $('div[id^="content-"]').hide();
         $('div[id^="content-' + content + '"]').show();
     });
     if (location.hash != '') {
         $('.nav-link[href="' + location.hash + '"]').click();
+    } else {
+        $('.nav-link[href="#dashboard"]').click();
     }
 
     $('#catlist').on('click', 'button', function () {
@@ -206,7 +211,7 @@ var DataHandler = {
         AccountType: function (e, data) {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=accounttype] span').html(Object.keys(data.list).length + ' account types<br />' + moment(date).calendar());
-$('#card_datastats').find('li[data-ref=accounttype] i').removeClass('fa-spin');
+            $('#card_datastats').find('li[data-ref=accounttype] i').removeClass('fa-spin');
 
             var d = sortBeans(data.list);
             $('#addaccount_type').empty();
@@ -229,7 +234,7 @@ $('#card_datastats').find('li[data-ref=accounttype] i').removeClass('fa-spin');
         Balance: function (e, data) {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=balance] span').html(Object.keys(data.list).length + ' balance entries<br />' + moment(date).calendar());
-$('#card_datastats').find('li[data-ref=balance] i').removeClass('fa-spin');
+            $('#card_datastats').find('li[data-ref=balance] i').removeClass('fa-spin');
 
             var d = data.list;
             $('#balancetable th.balancedate, #balancetable th[data-balancedate], #balancetable td.entry, #balancetable tr#netbalance').remove();
@@ -353,7 +358,7 @@ $('#card_datastats').find('li[data-ref=balance] i').removeClass('fa-spin');
         Category: function (e, data) {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=category] span').html(Object.keys(data.list).length + ' categories<br />' + moment(date).calendar());
-$('#card_datastats').find('li[data-ref=category] i').removeClass('fa-spin');
+            $('#card_datastats').find('li[data-ref=category] i').removeClass('fa-spin');
 
             var d = sortBeans(data.list);
             $('#categorylist tbody').empty();
@@ -378,7 +383,7 @@ $('#card_datastats').find('li[data-ref=category] i').removeClass('fa-spin');
         Payee: function (e, data) {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=payee] span').html(Object.keys(data.list).length + ' payees<br />' + moment(date).calendar());
-$('#card_datastats').find('li[data-ref=payee] i').removeClass('fa-spin');
+            $('#card_datastats').find('li[data-ref=payee] i').removeClass('fa-spin');
 
             var d = sortBeans(data.list);
             $('#payeelist tbody').empty();
@@ -407,8 +412,8 @@ $('#card_datastats').find('li[data-ref=payee] i').removeClass('fa-spin');
 }
 
 var Utils = {
-    GetDataObject: function(name) {
-        switch(name) {
+    GetDataObject: function (name) {
+        switch (name) {
             case 'account':
                 return AccountData;
                 break;

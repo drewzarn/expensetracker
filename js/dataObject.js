@@ -13,7 +13,10 @@ var DataObject = {
         $(document).trigger(dataObject.objectName + ':dataloading');
         localforage.getItem(dataObject.objectName + '_data')
                 .then(function (cacheValue) {
-                    if (cacheValue != null && (Math.round((new Date()).getTime() / 1000) - cacheValue.timestamp) < CACHETIMEOUT) {
+                    if (cacheValue != null
+                            && (Math.round((new Date()).getTime() / 1000) - cacheValue.timestamp) < CACHETIMEOUT
+                            && Object.keys(cacheValue.list).length > 0
+                            ) {
                         $(document).trigger(dataObject.objectName + ':dataloaded', cacheValue);
                     } else {
                         $.ajax(dataObject.URL)
@@ -32,6 +35,9 @@ var DataObject = {
                     localforage.setItem(dataObject.objectName + '_data', ajaxResponse);
                     $(document).trigger(dataObject.objectName + ':dataloaded', ajaxResponse);
                 });
+    },
+    Nuke: function () {
+        localforage.clear();
     },
     GetData: function () {
         var dataObject = this;

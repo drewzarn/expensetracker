@@ -49,6 +49,7 @@ $(document).ready(function () {
     $('a#logout:contains("Sandbox")').closest('body').addClass('sandbox');
     $('form').each(function () {
         if (this.id == "frm_login")
+            DataObject.Nuke();
             return;
         $(this).validate({
             submitHandler: formAjaxSubmit,

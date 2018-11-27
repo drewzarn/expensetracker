@@ -1,5 +1,4 @@
 <?php
-
 $beans = R::find('transaction', "site=:site", [':site' => SITE]);
 $transactions = ['timestamp' => time(), 'list' => []];
 
@@ -7,7 +6,7 @@ foreach ($beans as $transaction) {
 	$transaction->shortdate = substr($transaction->date, 0, 10);
 	$transaction->category = R::load('category', $transaction->category_id);
 	$transaction->payee = R::load('payee', $transaction->payee_id);
-	$transactions['list'] = $transaction;
+	$transactions['list'][] = $transaction;
 }
 jsonheader();
 echo json_encode($transactions);

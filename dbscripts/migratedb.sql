@@ -44,3 +44,9 @@ FROM balance b1
 JOIN account ON account.id=account_id
 JOIN accounttype ON accounttype.id=type_id
 WHERE parity IS NULL
+
+--Update transaction amount for income categories to be positive
+UPDATE `transaction`
+SET amount=(amount * -1)
+WHERE category_id IN (SELECT id FROM category WHERE income=1)
+AND amount<0

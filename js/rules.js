@@ -40,7 +40,9 @@ $(document).ready(function () {
     $(document).on('payee:dataloaded', DataHandler.Loaded.Payee);
     $(document).on('transaction:dataloaded', DataHandler.Loaded.Transaction);
 
+    AccountData.Init('Account');
     AccountTypeData.Init('AccountType');
+    BalanceData.Init('Balance');
     CategoryData.Init('Category');
     PayeeData.Init('Payee');
     TransactionData.Init('Transaction');
@@ -207,7 +209,7 @@ var DataHandler = {
                 $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
                 $('#balancechart_accountlist div.col[data-accounttypeid=' + v.type_id + '] div').append('<label class="d-block" for="bca' + v.id + '"><input type="checkbox" data-accountid="' + v.id + '" id="bca' + v.id + '"> ' + v.name + '</label></div>');
             });
-            BalanceData.Init('Balance');
+            BalanceData.Refresh();
         },
         AccountType: function (e, data) {
             var date = new Date(data.timestamp * 1000);
@@ -230,7 +232,7 @@ var DataHandler = {
                 $('#balancechart_accountlist').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + '</h5><div></div></div>');
 
             });
-            AccountData.Init('Account');
+            AccountData.Refresh();
         },
         Balance: function (e, data) {
             var date = new Date(data.timestamp * 1000);

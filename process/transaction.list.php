@@ -1,5 +1,18 @@
 <?php
 
+$beans = R::find('transaction', "site=:site", [':site' => SITE]);
+$transactions = ['timestamp' => time(), 'list' => []];
+
+foreach ($beans as $transaction) {
+	$transaction->shortdate = substr($transaction->date, 0, 10);
+	$transaction->category = R::load('category', $transaction->category_id);
+	$transaction->payee = R::load('payee', $transaction->payee_id);
+	$transactions['list'] = $transaction;
+}
+jsonheader();
+echo json_encode($transactions);
+exit();
+
 $transactions = [];
 if (isset($args['preset'])) {
 	switch ($args['preset']) {
@@ -48,7 +61,7 @@ ORDER BY _day";
 		$sql .= ' LIMIT :limit';
 		$sqlArgs[':limit'] = intval($args['limit']);
 	}
-	
+
 	$beans = R::find('transaction', $sql, $sqlArgs);
 
 	foreach ($beans as $transaction) {

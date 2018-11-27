@@ -404,7 +404,7 @@ var DataHandler = {
         },
         Transaction: function (e, data) {
             var date = new Date(data.timestamp * 1000);
-            //$('#card_datastats').find('li[data-ref=transaction] span').html(Object.keys(data.list).length + ' transactions<br />' + moment(date).calendar());
+            $('#card_datastats').find('li[data-ref=transaction] span').html(Object.keys(data.list).length + ' transactions<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=transaction] i').removeClass('fa-spin');
 
         }

@@ -1,24 +1,7 @@
 var CATEGORIES = [], CAT_IDS = {}, PAYEES = [], PAY_IDS = {};
 var NOW = new Date();
 var transactionlisttable;
-var transactionEditIcon = function (data, type, row) {
-    if (type === 'display') {
-        return '<a href="#" class="fas fa-edit text-dark mr-2 light" data-toggle="modal" data-target="#modal_edittransaction" data-transactionid="' + row.id + '"></a>' + data;
-    }
-    return data;
-};
-function dateToToday(selectorOrElement) {
-    if (selectorOrElement == null) {
-        selectorOrElement = 'input[type=date]';
-    }
-    if (typeof selectorOrElement == 'string') {
-        $(selectorOrElement).val(new Date().toISOString().substring(0, 10));
-    } else {
-        selectorOrElement.val(new Date().toISOString().substring(0, 10));
-    }
-}
 
-var currencyFormatter = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'});
 var AccountData = Object.create(DataObject);
 var AccountTypeData = Object.create(DataObject);
 var BalanceData = Object.create(DataObject);
@@ -47,12 +30,35 @@ $(document).ready(function () {
     PayeeData.Init('Payee');
     TransactionData.Init('Transaction');
 
-    dateToToday();
+    $('div.modal').on('hidden.bs.modal', ModalHandler.Hidden.default);
+    $('#modal_editaccount').on('shown.bs.modal', ModalHandler.Shown.editaccount);
+    $('#modal_editcategory').on('shown.bs.modal', ModalHandler.Shown.editcategory);
+    $('#modal_editpayee').on('shown.bs.modal', ModalHandler.Shown.editpayee);
+    $('#modal_addtransaction').on('shown.bs.modal', ModalHandler.Shown.addtransaction);
+    $('#modal_edittransaction').on('shown.bs.modal', ModalHandler.Shown.edittransaction);
+
+
+    $('#mainnav ul .nav-link').click(function () {
+        var $this = $(this);
+        $('.nav-link').removeClass('border-bottom border-success');
+        $this.addClass('border-bottom border-success');
+        var content = $this.attr('href').substring(1);
+        $('div[id^="content-"]').hide();
+        $('div[id^="content-' + content + '"]').show();
+    });
+    if (location.hash != '') {
+        $('.nav-link[href="' + location.hash + '"]').click();
+    } else {
+        $('.nav-link[href="#dashboard"]').click();
+    }
+    Utils.SetDateInputs();
+
     $('a#logout:contains("Sandbox")').closest('body').addClass('sandbox');
+
     $('form').each(function () {
         if (this.id == "frm_login")
             DataObject.Nuke();
-            return;
+        return;
         $(this).validate({
             submitHandler: formAjaxSubmit,
             showErrors: Utils.ShowValidationErrors
@@ -66,12 +72,6 @@ $(document).ready(function () {
             formAjaxSubmit($this.closest('form')[0]);
         }
     });
-    $('div.modal').on('hidden.bs.modal', ModalHandler.Hidden.default);
-    $('#modal_editaccount').on('shown.bs.modal', ModalHandler.Shown.editaccount);
-    $('#modal_editcategory').on('shown.bs.modal', ModalHandler.Shown.editcategory);
-    $('#modal_editpayee').on('shown.bs.modal', ModalHandler.Shown.editpayee);
-    $('#modal_addtransaction').on('shown.bs.modal', ModalHandler.Shown.addtransaction);
-    $('#modal_edittransaction').on('shown.bs.modal', ModalHandler.Shown.edittransaction);
 
     $('#card_datastats i').click(function () {
         Utils.GetDataObject($(this).parent().data('ref')).Refresh();
@@ -85,7 +85,7 @@ $(document).ready(function () {
         paging: false,
         ajax: '',
         columns: [
-            {data: 'shortdate', render: transactionEditIcon},
+            {data: 'shortdate', render: Utils.TransactionEditIcon},
             {data: 'payee.name'},
             {data: 'category.name'},
             {data: 'description'},
@@ -104,19 +104,7 @@ $(document).ready(function () {
         $('#editbalance_amount').val($td.data('amount'));
         $('#modal_editbalance').modal();
     });
-    $('#mainnav ul .nav-link').click(function () {
-        var $this = $(this);
-        $('.nav-link').removeClass('border-bottom border-success');
-        $this.addClass('border-bottom border-success');
-        var content = $this.attr('href').substring(1);
-        $('div[id^="content-"]').hide();
-        $('div[id^="content-' + content + '"]').show();
-    });
-    if (location.hash != '') {
-        $('.nav-link[href="' + location.hash + '"]').click();
-    } else {
-        $('.nav-link[href="#dashboard"]').click();
-    }
+
 
     $('#catlist').on('click', 'button', function () {
         var $btn = $(this);
@@ -126,6 +114,7 @@ $(document).ready(function () {
 
     $('#balancechart_accountlist').on('change', 'div.col div input', Charts.Balances.Draw);
 });
+
 var ModalHandler = {
     Hidden: {
         default: function (e) {
@@ -195,7 +184,7 @@ var DataHandler = {
             $('#card_datastats').find('li[data-ref=account] span').html(Object.keys(data.list).length + ' accounts<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=account] i').removeClass('fa-spin');
 
-            var d = sortBeans(data.list);
+            var d = Utils.SortBeans(data.list);
             $('#accountlist div ul').empty();
             $('#addbalance_accountlist div').empty();
             $('#balancetable tbody tr[data-accountid]').remove();
@@ -216,7 +205,7 @@ var DataHandler = {
             $('#card_datastats').find('li[data-ref=accounttype] span').html(Object.keys(data.list).length + ' account types<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=accounttype] i').removeClass('fa-spin');
 
-            var d = sortBeans(data.list);
+            var d = Utils.SortBeans(data.list);
             $('#addaccount_type').empty();
             $('#accountlist div.row').empty();
             $('#addbalance_accountlist').empty();
@@ -297,7 +286,7 @@ var DataHandler = {
                         $el.addClass('table-danger');
                     }
 
-                    $el.text(currencyFormatter.format($el.text()));
+                    $el.text(Utils.CurrencyFormatter.format($el.text()));
                 }
             });
             $('#balancetable tr[data-accountid] td:last-of-type').removeClass('table-danger').removeClass('table-warning').removeClass('table-success');
@@ -329,7 +318,7 @@ var DataHandler = {
                 } else if (parseFloat($el.data('amount')) < parseFloat($el.next().data('amount'))) {
                     $el.addClass(isAsset ? 'text-danger' : 'text-success');
                 }
-                $el.text(currencyFormatter.format($el.text()));
+                $el.text(Utils.CurrencyFormatter.format($el.text()));
             });
             //Set net sum text
             $('#balancetable thead th.balancedate').each(function (i, el) {
@@ -355,7 +344,7 @@ var DataHandler = {
                 } else if (parseFloat($el.data('amount')) < parseFloat($el.next().data('amount'))) {
                     $el.addClass('text-danger');
                 }
-                $el.text(currencyFormatter.format($el.text()));
+                $el.text(Utils.CurrencyFormatter.format($el.text()));
             });
         },
         Category: function (e, data) {
@@ -363,7 +352,7 @@ var DataHandler = {
             $('#card_datastats').find('li[data-ref=category] span').html(Object.keys(data.list).length + ' categories<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=category] i').removeClass('fa-spin');
 
-            var d = sortBeans(data.list);
+            var d = Utils.SortBeans(data.list);
             $('#categorylist tbody').empty();
             CATEGORIES = [];
             CAT_IDS = {}
@@ -388,7 +377,7 @@ var DataHandler = {
             $('#card_datastats').find('li[data-ref=payee] span').html(Object.keys(data.list).length + ' payees<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=payee] i').removeClass('fa-spin');
 
-            var d = sortBeans(data.list);
+            var d = Utils.SortBeans(data.list);
             $('#payeelist tbody').empty();
             PAYEES = [];
             PAY_IDS = {}
@@ -410,11 +399,48 @@ var DataHandler = {
             $('#card_datastats').find('li[data-ref=transaction] span').html(Object.keys(data.list).length + ' transactions<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=transaction] i').removeClass('fa-spin');
 
+            var mtd = {income: 0, expense: 0};
+            var ytd = {income: 0, expense: 0};
+            $.each(data.list, function(i, v){
+                var mDate = moment(v.date);
+                if(mDate.isSame(NOW, 'month')) {
+                    if(v.category.income == "1") {
+                        mtd.income += parseFloat(v.amount);
+                    } else {
+                        mtd.expense += parseFloat(v.amount);
+                    }
+                }
+                if(mDate.isSame(NOW, 'year')) {
+                    if(v.category.income == "1") {
+                        ytd.income += parseFloat(v.amount);
+                    } else {
+                        ytd.expense += parseFloat(v.amount);
+                    }
+                }
+            });
+            $('#dash_mtd li:contains("Income") span').text(Utils.CurrencyFormatter.format(mtd.income));
+            $('#dash_mtd li:contains("Expenses") span').text(Utils.CurrencyFormatter.format(mtd.expense));
+            $('#dash_mtd li:contains("Net") span').text(Utils.CurrencyFormatter.format(mtd.income - mtd.expense));
+
+            $('#dash_ytd li:contains("Income") span').text(Utils.CurrencyFormatter.format(ytd.income));
+            $('#dash_ytd li:contains("Expenses") span').text(Utils.CurrencyFormatter.format(ytd.expense));
+            $('#dash_ytd li:contains("Net") span').text(Utils.CurrencyFormatter.format(ytd.income - ytd.expense));
         }
     }
 }
 
 var Utils = {
+    CurrencyFormatter: new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}),
+    SetDateInputs: function (selectorOrElement) {
+        if (selectorOrElement == null) {
+            selectorOrElement = 'input[type=date]';
+        }
+        if (typeof selectorOrElement == 'string') {
+            $(selectorOrElement).val(new Date().toISOString().substring(0, 10));
+        } else {
+            selectorOrElement.val(new Date().toISOString().substring(0, 10));
+        }
+    },
     GetDataObject: function (name) {
         switch (name) {
             case 'account':
@@ -440,6 +466,26 @@ var Utils = {
     HideFormMessage: function ($el) {
         $el.addClass('invisible').removeClass('border-danger text-danger border-success text-success');
     },
+    LoadInfrastructure: function (load) {
+        if (load == null)
+            return;
+        load = load.split(',');
+        if (load.includes('account')) {
+            AccountData.Refresh();
+        }
+        if (load.includes('accounttype')) {
+            AccountTypeData.Refresh();
+        }
+        if (load.includes('balance')) {
+            BalanceData.Refresh();
+        }
+        if (load.includes('category')) {
+            CategoryData.Refresh();
+        }
+        if (load.includes('payee')) {
+            PayeeData.Refresh();
+        }
+    },
     ShowFormError: function ($el, text) {
         $el.addClass('border-danger text-danger').removeClass('border-success text-success invisible').text(text);
     },
@@ -450,6 +496,22 @@ var Utils = {
         if (errorList[0] == null)
             return;
         Utils.ShowFormError($(errorList[0].element).closest('form').find('div.formmsg'), 'You seem to be missing some data...');
+    },
+    SortBeans: function (beans, sortBy = 'name') {
+        var sorted = [];
+        for (var bean in beans) {
+            sorted.push(beans[bean]);
+        }
+        sorted.sort(function (a, b) {
+            return a[sortBy].toLowerCase().localeCompare(b[sortBy].toLowerCase())
+        });
+        return sorted;
+    },
+    TransactionEditIcon: function (data, type, row) {
+        if (type === 'display') {
+            return '<a href="#" class="fas fa-edit text-dark mr-2 light" data-toggle="modal" data-target="#modal_edittransaction" data-transactionid="' + row.id + '"></a>' + data;
+        }
+        return data;
     }
 }
 
@@ -487,7 +549,7 @@ function formAjaxSubmit(form, event) {
         $form.find('input[type=checkbox]').prop('checked', false);
         $form.find('input[type=radio]').prop('checked', false);
         $form.find('select').val('');
-        loadInfrastructure($form.data('reload'));
+        Utils.LoadInfrastructure($form.data('reload'));
         $form.find('input:first').focus();
         if (form.action.indexOf('/edit') >= 0) {
             $form.closest('div.modal').modal('hide');
@@ -531,38 +593,6 @@ function formAjaxSubmit(form, event) {
             .fail(failHandler);
 }
 
-function loadInfrastructure(load) {
-    if (load == null)
-        return;
-    load = load.split(',');
-    if (load.includes('account')) {
-        AccountData.Refresh();
-    }
-    if (load.includes('accounttype')) {
-        AccountTypeData.Refresh();
-    }
-    if (load.includes('balance')) {
-        BalanceData.Refresh();
-    }
-    if (load.includes('category')) {
-        CategoryData.Refresh();
-    }
-    if (load.includes('payee')) {
-        PayeeData.Refresh();
-    }
-}
-
-
-function sortBeans(beans, sortBy = 'name') {
-    var sorted = [];
-    for (var bean in beans) {
-        sorted.push(beans[bean]);
-    }
-    sorted.sort(function (a, b) {
-        return a[sortBy].toLowerCase().localeCompare(b[sortBy].toLowerCase())
-    });
-    return sorted;
-}
 
 function fetchTransactionList() {
     var start = $('#transactionlistrange input[name=start]').val();
@@ -585,6 +615,6 @@ function fetchTransactionsByPayee(selected) {
 function drawTransactionsByPayee(json) {
     $('.payee_transactions tbody').empty();
     $.each(json.data, function (i, v) {
-        $('.payee_transactions tbody').append('<tr><td>' + v.date + '</td><td>' + v.category.name + '</td><td>' + currencyFormatter.format(v.amount) + '</td></tr>');
+        $('.payee_transactions tbody').append('<tr><td>' + v.date + '</td><td>' + v.category.name + '</td><td>' + Utils.CurrencyFormatter.format(v.amount) + '</td></tr>');
     });
 }

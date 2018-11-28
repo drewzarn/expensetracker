@@ -113,7 +113,7 @@ $(document).ready(function () {
         fetchCategoriesByMonth();
     });
 
-    $('#balancechart_accountlist').on('change', 'div.col div input', Charts.Balances.Draw);
+    $('#balancechart_accountlist').on('change', 'div.col input', Charts.Balances.Draw);
 });
 
 var ModalHandler = {
@@ -219,7 +219,7 @@ var DataHandler = {
                 $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
                 $('#balancetable tfoot').before('<tbody data-accounttypeid="' + v.id + '" data-accounttypeasset="' + v.asset + '"><tr class="table-secondary"><th>' + v.name + '</th></tr></tbody>');
                 $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
-                $('#balancechart_accountlist').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + '</h5><div></div></div>');
+                $('#balancechart_accountlist').append('<div class="col" data-accounttypeid="' + v.id + '"><h5><input type="checkbox" data-accounttypeid="' + v.id + '" id="bcat' + v.id + '" checked /> <label for="bcat' + v.id + '">' + v.name + '</label></h5><div></div></div>');
 
             });
             AccountData.Refresh();

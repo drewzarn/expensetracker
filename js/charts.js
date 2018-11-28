@@ -7,6 +7,13 @@ var Charts = {
         Draw: function () {
             BalanceData.GetData().then(function (balances) {
                 var series = [];
+                series.push(balances.net);
+                for (var i in Object.keys(balances.byaccounttype)) {
+                    var accountTypeId = Object.keys(balances.byaccounttype)[i];
+                    if($('#balancechart_accountlist input#bcat' + accountTypeId).prop('checked') == false)
+                        continue;
+                    series.push(balances.byaccounttype[accountTypeId]);
+                }
                 for (var i in Object.keys(balances.byaccount)) {
                     var accountId = Object.keys(balances.byaccount)[i];
                     if($('#balancechart_accountlist input#bca' + accountId).prop('checked') == false)

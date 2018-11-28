@@ -2,7 +2,7 @@
 	<div class="row">
 		<div class="col-sm-2">
 			<div id="dash_mtd" class="card my-3">
-				<h3 class="card-header"><?= date('M Y'); ?></h3>
+				<h3 class="card-header"><?= date('F'); ?></h3>
 				<ul class="list-group list-group-flush">
 					<li class="list-group-item"><strong>Income: </strong> <span>$0</span></li>
 					<li class="list-group-item"><strong>Expenses: </strong> <span>$0</span></li>
@@ -12,7 +12,7 @@
 		</div>
 		<div class="col-sm-2">
 			<div id="dash_ytd" class="card my-3">
-				<h3 class="card-header"><?= date('Y'); ?></h3>
+				<h3 class="card-header">All of <?= date('Y'); ?></h3>
 				<ul class="list-group list-group-flush">
 					<li class="list-group-item"><strong>Income: </strong> <span>$0</span></li>
 					<li class="list-group-item"><strong>Expenses: </strong> <span>$0</span></li>

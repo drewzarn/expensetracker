@@ -1,6 +1,6 @@
 <div class="modal" tabindex="-1" role="dialog" id="modal_addtransaction">
 	<div class="modal-dialog" role="document">
-		<form id="frm_addtransaction" action="transaction/add" method="POST" autocomplete="off">
+		<form id="frm_addtransaction" action="transaction/add" method="POST" autocomplete="off" data-reload="transaction">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Add Transaction</h5>

@@ -56,9 +56,10 @@ $(document).ready(function () {
     $('a#logout:contains("Sandbox")').closest('body').addClass('sandbox');
 
     $('form').each(function () {
-        if (this.id == "frm_login")
+        if (this.id == "frm_login") {
             DataObject.Nuke();
-        return;
+            return;
+        }
         $(this).validate({
             submitHandler: formAjaxSubmit,
             showErrors: Utils.ShowValidationErrors
@@ -401,17 +402,17 @@ var DataHandler = {
 
             var mtd = {income: 0, expense: 0};
             var ytd = {income: 0, expense: 0};
-            $.each(data.list, function(i, v){
+            $.each(data.list, function (i, v) {
                 var mDate = moment(v.date);
-                if(mDate.isSame(NOW, 'month')) {
-                    if(v.category.income == "1") {
+                if (mDate.isSame(NOW, 'month')) {
+                    if (v.category.income == "1") {
                         mtd.income += parseFloat(v.amount);
                     } else {
                         mtd.expense += parseFloat(v.amount);
                     }
                 }
-                if(mDate.isSame(NOW, 'year')) {
-                    if(v.category.income == "1") {
+                if (mDate.isSame(NOW, 'year')) {
+                    if (v.category.income == "1") {
                         ytd.income += parseFloat(v.amount);
                     } else {
                         ytd.expense += parseFloat(v.amount);
@@ -484,6 +485,9 @@ var Utils = {
         }
         if (load.includes('payee')) {
             PayeeData.Refresh();
+        }
+        if (load.includes('transaction')) {
+            TransactionData.Refresh();
         }
     },
     ShowFormError: function ($el, text) {
@@ -566,6 +570,7 @@ function formAjaxSubmit(form, event) {
                 $form.find('input[type=checkbox]').prop('checked', false);
                 $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
                 $('#addtransaction_payee').focus();
+                Utils.LoadInfrastructure($form.data('reload'));
             };
             failHandler = function (d) {
                 d = JSON.parse(d.responseText);
@@ -584,6 +589,7 @@ function formAjaxSubmit(form, event) {
                 $form.find('input[type=checkbox]').prop('checked', false);
                 transactionlisttable.row($('#transactionlisttable a[data-transactionid=' + d.id + ']').parent().parent()[0]).data(d).draw();
                 $('#modal_edittransaction').modal('hide');
+                Utils.LoadInfrastructure($form.data('reload'));
             };
             break;
     }

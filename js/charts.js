@@ -3,22 +3,39 @@ var Charts = {
         selector: '#balancechart',
         labels: [],
         allseries: {},
-        options: {},
+        options: {
+            plugins: [
+                Chartist.plugins.tooltip({anchorToPoint: true, currency: '$'})
+            ]
+        },
         Draw: function () {
             BalanceData.GetData().then(function (balances) {
                 var series = [];
-                series.push(balances.net);
+                if ($('#balancechart_accountlist input#bcnet').prop('checked')) {
+                    series.push({
+                        name: 'Net',
+                        data: balances.net
+                    });
+                }
                 for (var i in Object.keys(balances.byaccounttype)) {
                     var accountTypeId = Object.keys(balances.byaccounttype)[i];
-                    if($('#balancechart_accountlist input#bcat' + accountTypeId).prop('checked') == false)
+                    if ($('#balancechart_accountlist input#bcat' + accountTypeId).prop('checked') == false)
                         continue;
-                    series.push(balances.byaccounttype[accountTypeId]);
+                    series.push(
+                            {
+                                name: DataReference.AccountTypeNamesByID[accountTypeId],
+                                data: balances.byaccounttype[accountTypeId]
+                            });
                 }
                 for (var i in Object.keys(balances.byaccount)) {
                     var accountId = Object.keys(balances.byaccount)[i];
-                    if($('#balancechart_accountlist input#bca' + accountId).prop('checked') == false)
+                    if ($('#balancechart_accountlist input#bca' + accountId).prop('checked') == false)
                         continue;
-                    series.push(balances.byaccount[accountId]);
+                    series.push(
+                            {
+                                name: DataReference.AccountNamesByID[accountId],
+                                data: balances.byaccount[accountId]
+                            });
                 }
                 new Chartist.Line(Charts.Balances.selector, {labels: Charts.Balances.labels, series: series}, Charts.Balances.options);
             });

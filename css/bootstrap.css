@@ -11,6 +11,9 @@ a.fas:hover, a.fas:focus {
 .fas.light {
     opacity: .5;
 }
+i.fas.pointer {
+    cursor: pointer;
+}
 
 div[id^="content-"] {
     display: none;

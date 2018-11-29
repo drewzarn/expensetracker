@@ -65,6 +65,17 @@ $(document).ready(function () {
             showErrors: Utils.ShowValidationErrors
         });
     });
+    $('body').on('click', 'i.fa-chevron-down, i.fa-chevron-up', function () {
+        var $this = $(this);
+        if ($this.hasClass('fa-chevron-down')) {
+            $this.nextAll('div').show();
+            $this.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        } else {
+            $this.nextAll('div').hide();
+            $this.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        }
+    });
+
     $('input[type=button][data-action=delete]').click(function () {
         var $this = $(this);
         $('input[name="__delete__"]').remove();
@@ -113,8 +124,19 @@ $(document).ready(function () {
         fetchCategoriesByMonth();
     });
 
-    $('#balancechart_accountlist').on('change', 'div.col input', Charts.Balances.Draw);
+    $('#balancechart_accountlist').on('change', 'input', Charts.Balances.Draw);
 });
+
+var DataReference = {
+    AccountNames: [],
+    AccountNamesById: {},
+    AccountTypeNames: [],
+    AccountTypeNamesById: {},
+    CategoryNames: [],
+    CategoryNamesById: {},
+    PayeeNames: [],
+    PayeeNamesById: {},
+}
 
 var ModalHandler = {
     Hidden: {
@@ -186,11 +208,15 @@ var DataHandler = {
             $('#card_datastats').find('li[data-ref=account] i').removeClass('fa-spin');
 
             var d = Utils.SortBeans(data.list);
+            DataReference.AccountNames = [];
+            DataReference.AccountNamesByID = {};
             $('#accountlist div ul').empty();
             $('#addbalance_accountlist div').empty();
             $('#balancetable tbody tr[data-accountid]').remove();
             $('#balancechart_accountlist div.col div label').remove();
             $.each(d, function (i, v) {
+                DataReference.AccountNames.push(v.name);
+                DataReference.AccountNamesByID[v.id] = v.name;
                 $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '" data-accountactive="' + v.active + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
                 if (v.active == '1') {
                     $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
@@ -207,19 +233,23 @@ var DataHandler = {
             $('#card_datastats').find('li[data-ref=accounttype] i').removeClass('fa-spin');
 
             var d = Utils.SortBeans(data.list);
+            DataReference.AccountTypeNames = [];
+            DataReference.AccountTypeNamesByID = {};
             $('#addaccount_type').empty();
             $('#accountlist div.row').empty();
             $('#addbalance_accountlist').empty();
             $('#balancetable tbody').remove();
             $('#balancechart_accountlist div.col').remove();
             $.each(d, function (i, v) {
+                DataReference.AccountTypeNames.push(v.name);
+                DataReference.AccountTypeNamesByID[v.id] = v.name;
                 $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
                 $('#accountlist div.row').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + ' Accounts</h5><ul></ul></div>');
                 $('#addbalance_accountlist').append('<h6>' + v.name + '</h6>');
                 $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
                 $('#balancetable tfoot').before('<tbody data-accounttypeid="' + v.id + '" data-accounttypeasset="' + v.asset + '"><tr class="table-secondary"><th>' + v.name + '</th></tr></tbody>');
                 $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
-                $('#balancechart_accountlist').append('<div class="col" data-accounttypeid="' + v.id + '"><h5><input type="checkbox" data-accounttypeid="' + v.id + '" id="bcat' + v.id + '" checked /> <label for="bcat' + v.id + '">' + v.name + '</label></h5><div></div></div>');
+                $('#balancechart_accountlist').append('<div class="col px-0" data-accounttypeid="' + v.id + '"><i class="fas fa-chevron-down float-right mt-2 pointer"></i><h5><input type="checkbox" data-accounttypeid="' + v.id + '" id="bcat' + v.id + '" checked /> <label for="bcat' + v.id + '">' + v.name + '</label></h5><div class="collapse"></div></div>');
 
             });
             AccountData.Refresh();
@@ -347,6 +377,7 @@ var DataHandler = {
                 }
                 $el.text(Utils.CurrencyFormatter.format($el.text()));
             });
+            Charts.Balances.Draw();
         },
         Category: function (e, data) {
             var date = new Date(data.timestamp * 1000);

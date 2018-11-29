@@ -13,7 +13,9 @@
 				<div class="col-10">
 					<div class="ct-chart ct-minor-sixth" id="balancechart"></div>
 				</div>
-				<div class="col-2" id="balancechart_accountlist"></div>
+				<div class="col-2" id="balancechart_accountlist">
+					<h5><input type="checkbox" id="bcnet" checked> <label for="bcnet">Net</label></h5>
+				</div>
 			</div>
 		</div>
 		<div class="tab-pane fade" id="balancesheet" role="tabpanel" aria-labelledby="balancesheet-tab">

@@ -15,8 +15,10 @@
 
 	<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous" />
 
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
-    <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+	<link rel="stylesheet" href="css/chartist.css">
+    <script src="js/chartist.js"></script>
+	<link rel="stylesheet" href="css/chartist-plugin-tooltip.css">
+    <script src="js/chartist-plugin-tooltip.js"></script>
 
 	<link rel="stylesheet" href="css/bootstrap-datepicker.min.css" />
 	<link rel="stylesheet" href="css/bootstrap.css" />

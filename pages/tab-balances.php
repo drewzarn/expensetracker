@@ -8,7 +8,16 @@
 		</li>
 	</ul>
 	<div class="tab-content" id="balanceTabContent">
-		<div class="tab-pane fade show active" id="balancedashboard" role="tabpanel" aria-labelledby="balancedashboard-tab">Dashboard</div>
+		<div class="tab-pane fade show active container-fluid" id="balancedashboard" role="tabpanel" aria-labelledby="balancedashboard-tab">
+			<div class="row">
+				<div class="col-10">
+					<div class="ct-chart ct-minor-sixth" id="balancechart"></div>
+				</div>
+				<div class="col-2" id="balancechart_accountlist">
+					<h5><input type="checkbox" id="bcnet" checked> <label for="bcnet">Net</label></h5>
+				</div>
+			</div>
+		</div>
 		<div class="tab-pane fade" id="balancesheet" role="tabpanel" aria-labelledby="balancesheet-tab">
 			<button class="btn btn-secondary m-3" data-toggle="modal" data-target="#modal_addbalance">Add Balance Entry</button>
 			<table id="balancetable" class="table table-striped table-bordered table-sm">

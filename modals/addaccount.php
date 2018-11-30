@@ -14,7 +14,7 @@
 					<div class="form-group"><input type="checkbox" id="addaccount_excludenetworth" name="addaccount_excludenetworth" /> <label for="addaccount_excludenetworth">Exclude from simple net worth?</label></div>
 				</div>
 				<div class="modal-footer">
-					<input type="submit" value="Add Account" id="addaccount_submit" class="btn btn-primary"/>
+					<div class="formmsg rounded border bg-light p-2 my-3 invisible"></div><input type="submit" value="Add Account" id="addaccount_submit" class="btn btn-primary"/>
 				</div>
 			</div>
 		</form>

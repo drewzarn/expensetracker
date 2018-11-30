@@ -13,7 +13,7 @@
 					<div id="addbalance_accountlist"></div>
 				</div>
 				<div class="modal-footer">
-					<input type="submit" value="Add Balances" id="addbalance_submit" class="btn btn-primary"/>
+					<div class="formmsg rounded border bg-light p-2 my-3 invisible"></div><input type="submit" value="Add Balances" id="addbalance_submit" class="btn btn-primary"/>
 				</div>
 			</div>
 		</form>

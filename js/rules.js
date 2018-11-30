@@ -1,7 +1,6 @@
 var CATEGORIES = [], IDIDS = {}, PAYEES = [], PAY_IDS = {};
 var NOW = new Date();
 var transactionlisttable;
-
 var AccountData = Object.create(DataObject);
 var AccountTypeData = Object.create(DataObject);
 var BalanceData = Object.create(DataObject);
@@ -36,7 +35,6 @@ $(document).ready(function () {
     $('#modal_editpayee').on('shown.bs.modal', ModalHandler.Shown.editpayee);
     $('#modal_addtransaction').on('shown.bs.modal', ModalHandler.Shown.addtransaction);
     $('#modal_edittransaction').on('shown.bs.modal', ModalHandler.Shown.edittransaction);
-
 
     $('#mainnav ul .nav-link').click(function () {
         var $this = $(this);
@@ -89,19 +87,17 @@ $(document).ready(function () {
         Utils.GetDataObject($(this).parent().data('ref')).Refresh();
     });
 
-    $('#transactionlistrange').datepicker({format: 'yyyy-mm-dd'});
-    $('#loadtransactionlist').click(fetchTransactionList);
     transactionlisttable = $('#transactionlisttable').DataTable({
         scrollY: '65vh',
         scrollCollapse: true,
         paging: false,
-        ajax: '',
+        data: {date:'', payee: {name:''}, category: {name:''}, description: '', amount: ''},
         columns: [
-            {data: 'shortdate', render: Utils.TransactionEditIcon},
+            {data: 'date', render: Utils.TransactionListRender.Date},
             {data: 'payee.name'},
             {data: 'category.name'},
-            {data: 'description'},
-            {data: 'amount'}
+            {data: 'description', render: Utils.TransactionListRender.Description},
+            {data: 'amount', render: Utils.TransactionListRender.Amount}
         ],
         order: [[0, "desc"]]
     });
@@ -117,7 +113,6 @@ $(document).ready(function () {
         $('#modal_editbalance').modal();
     });
 
-
     $('#catlist').on('click', 'button', function () {
         var $btn = $(this);
         $btn.toggleClass('btn-info');
@@ -126,7 +121,6 @@ $(document).ready(function () {
 
     $('#balancechart_accountlist').on('change', 'input', Charts.Balances.Draw);
 });
-
 var DataReference = {
     AccountNames: [],
     AccountNamesById: {},
@@ -206,7 +200,6 @@ var DataHandler = {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=account] span').html(Object.keys(data.list).length + ' accounts<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=account] i').removeClass('fa-spin');
-
             var d = Utils.SortBeans(data.list);
             DataReference.AccountNames = [];
             DataReference.AccountNamesByID = {};
@@ -231,7 +224,6 @@ var DataHandler = {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=accounttype] span').html(Object.keys(data.list).length + ' account types<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=accounttype] i').removeClass('fa-spin');
-
             var d = Utils.SortBeans(data.list);
             DataReference.AccountTypeNames = [];
             DataReference.AccountTypeNamesByID = {};
@@ -250,7 +242,6 @@ var DataHandler = {
                 $('#balancetable tfoot').before('<tbody data-accounttypeid="' + v.id + '" data-accounttypeasset="' + v.asset + '"><tr class="table-secondary"><th>' + v.name + '</th></tr></tbody>');
                 $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
                 $('#balancechart_accountlist').append('<div class="col px-0" data-accounttypeid="' + v.id + '"><i class="fas fa-chevron-down float-right mt-2 pointer"></i><h5><input type="checkbox" data-accounttypeid="' + v.id + '" id="bcat' + v.id + '" checked /> <label for="bcat' + v.id + '">' + v.name + '</label></h5><div class="collapse"></div></div>');
-
             });
             AccountData.Refresh();
         },
@@ -258,7 +249,6 @@ var DataHandler = {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=balance] span').html(Object.keys(data.list).length + ' balance entries<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=balance] i').removeClass('fa-spin');
-
             var d = data.list;
             $('#balancetable th.balancedate, #balancetable th[data-balancedate], #balancetable td.entry, #balancetable tr#netbalance').remove();
             $('#balancetable tfoot').append('<tr id="netbalance" class="table-secondary"><th>Net</th></tr>');
@@ -383,7 +373,6 @@ var DataHandler = {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=category] span').html(Object.keys(data.list).length + ' categories<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=category] i').removeClass('fa-spin');
-
             var d = Utils.SortBeans(data.list);
             $('#categorylist tbody').empty();
             DataReference.CategoryNames = [];
@@ -408,7 +397,6 @@ var DataHandler = {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=payee] span').html(Object.keys(data.list).length + ' payees<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=payee] i').removeClass('fa-spin');
-
             var d = Utils.SortBeans(data.list);
             $('#payeelist tbody').empty();
             DataReference.PayeeNames = [];
@@ -430,7 +418,7 @@ var DataHandler = {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=transaction] span').html(Object.keys(data.list).length + ' transactions<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=transaction] i').removeClass('fa-spin');
-
+            transactionlisttable.clear().rows.add(data.list).draw();
             var mtd = {income: 0, expense: 0};
             var ytd = {income: 0, expense: 0};
             $.each(data.list, function (i, v) {
@@ -453,7 +441,6 @@ var DataHandler = {
             $('#dash_mtd li:contains("Income") span').text(Utils.CurrencyFormatter.format(mtd.income));
             $('#dash_mtd li:contains("Expenses") span').text(Utils.CurrencyFormatter.format(mtd.expense));
             $('#dash_mtd li:contains("Net") span').text(Utils.CurrencyFormatter.format(mtd.income - mtd.expense));
-
             $('#dash_ytd li:contains("Income") span').text(Utils.CurrencyFormatter.format(ytd.income));
             $('#dash_ytd li:contains("Expenses") span').text(Utils.CurrencyFormatter.format(ytd.expense));
             $('#dash_ytd li:contains("Net") span').text(Utils.CurrencyFormatter.format(ytd.income - ytd.expense));
@@ -542,11 +529,28 @@ var Utils = {
         });
         return sorted;
     },
-    TransactionEditIcon: function (data, type, row) {
-        if (type === 'display') {
-            return '<a href="#" class="fas fa-edit text-dark mr-2 light" data-toggle="modal" data-target="#modal_edittransaction" data-transactionid="' + row.id + '"></a>' + data;
+    TransactionListRender: {
+        Amount: function (data, type, row) {
+            if (type === 'display') {
+                return Utils.CurrencyFormatter.format(data);
+            }
+            return data;
+        },
+        Date: function (data, type, row) {
+            if (type === 'display') {
+                var date = moment(data).format('M/D/YY');
+                return '<a href="#" class="fas fa-edit text-dark mr-2 light" data-toggle="modal" data-target="#modal_edittransaction" data-transactionid="' + row.id + '"></a>' + date;
+            }
+            return data;
+        },
+        Description: function (data, type, row) {
+            if (type === 'display') {
+                if (data != '' && data != null) {
+                    return data.length > 15 ? data.substring(0, 12) + '... <i class="fas fa-search-plus" title="' + data + '"></i>' : data;
+                }
+            }
+            return data;
         }
-        return data;
     }
 }
 
@@ -618,7 +622,6 @@ function formAjaxSubmit(form, event) {
                 Utils.ShowFormMessage($form.find('div.formmsg'), 'Transaction Updated');
                 $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
                 $form.find('input[type=checkbox]').prop('checked', false);
-                transactionlisttable.row($('#transactionlisttable a[data-transactionid=' + d.id + ']').parent().parent()[0]).data(d).draw();
                 $('#modal_edittransaction').modal('hide');
                 Utils.LoadInfrastructure($form.data('reload'));
             };
@@ -630,13 +633,6 @@ function formAjaxSubmit(form, event) {
             .fail(failHandler);
 }
 
-
-function fetchTransactionList() {
-    var start = $('#transactionlistrange input[name=start]').val();
-    var end = $('#transactionlistrange input[name=end]').val();
-    var url = "transaction/list/datefrom=" + start + "/dateto=" + end;
-    transactionlisttable.ajax.url(url).load();
-}
 
 function loadTransactionToEdit() {
     $('#addtransactionmodal').modal();

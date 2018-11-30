@@ -43,7 +43,7 @@ END, ' WHERE id=', b1.id, ';') AS cmd
 FROM balance b1
 JOIN account ON account.id=account_id
 JOIN accounttype ON accounttype.id=type_id
-WHERE parity IS NULL
+WHERE netgain IS NULL
 
 --Update transaction amount for income categories to be positive
 UPDATE `transaction`

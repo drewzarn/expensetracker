@@ -1,4 +1,4 @@
-var CATEGORIES = [], CAT_IDS = {}, PAYEES = [], PAY_IDS = {};
+var CATEGORIES = [], IDIDS = {}, PAYEES = [], PAY_IDS = {};
 var NOW = new Date();
 var transactionlisttable;
 
@@ -170,7 +170,7 @@ var ModalHandler = {
         edittransaction: function (e) {
             $('#edittransaction_id').val($(e.relatedTarget).data('transactionid'));
             var trnDetails = transactionlisttable.row($(e.relatedTarget).parent().parent()[0]).data();
-            fetchTransactionsByPayee(trnDetails.payee);
+            showTransactionsByPayee(trnDetails.payee);
             $.each(trnDetails, function (i, v) {
                 if (i == "date")
                     v = v.substring(0, 10); //Strip off time for setting input value
@@ -386,21 +386,21 @@ var DataHandler = {
 
             var d = Utils.SortBeans(data.list);
             $('#categorylist tbody').empty();
-            CATEGORIES = [];
-            CAT_IDS = {}
+            DataReference.CategoryNames = [];
+            DataReference.CategoryNamesByID = {}
             $.each(d, function (i, v) {
                 if (v.deleted != '1') {
-                    CATEGORIES.push(v.name);
-                    CAT_IDS[v.name] = v.id;
+                    DataReference.CategoryNames.push(v.name);
+                    DataReference.CategoryNamesByID[v.name] = v.id;
                 }
                 $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td>' + (v.income == '1' ? '<i class="fas fa-check-circle" />' : '') + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
                 $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
             });
-            CATEGORIES.sort();
-            $("#addtransaction_category").typeahead({source: CATEGORIES});
-            $("#edittransaction_category").typeahead({source: CATEGORIES});
+            DataReference.CategoryNames.sort();
+            $("#addtransaction_category").typeahead({source: DataReference.CategoryNames});
+            $("#edittransaction_category").typeahead({source: DataReference.CategoryNames});
             $('#catlist').empty();
-            $.each(CATEGORIES, function (i, v) {
+            $.each(DataReference.CategoryNames, function (i, v) {
                 $('#catlist').append('<button class="btn-sm">' + v + '</button>');
             });
         },
@@ -411,20 +411,20 @@ var DataHandler = {
 
             var d = Utils.SortBeans(data.list);
             $('#payeelist tbody').empty();
-            PAYEES = [];
-            PAY_IDS = {}
+            DataReference.PayeeNames = [];
+            DataReference.PayeeNamesByID = {}
             $.each(d, function (i, v) {
                 if (v.deleted != '1') {
-                    PAYEES.push(v.name);
-                    PAY_IDS[v.name] = v.id;
+                    DataReference.PayeeNames.push(v.name);
+                    DataReference.PayeeNamesByID[v.name] = v.id;
                 }
 
                 $('#payeelist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editpayee" data-payeeid="' + v.id + '" />' + v.name + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
                 $('#payeelist tbody').find('a[data-payeeid=' + v.id + ']').data('details', v);
             });
-            PAYEES.sort();
-            $("#addtransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
-            $("#edittransaction_payee").typeahead({source: PAYEES, afterSelect: fetchTransactionsByPayee});
+            DataReference.PayeeNames.sort();
+            $("#addtransaction_payee").typeahead({source: DataReference.PayeeNames, afterSelect: showTransactionsByPayee});
+            $("#edittransaction_payee").typeahead({source: DataReference.PayeeNames, afterSelect: showTransactionsByPayee});
         },
         Transaction: function (e, data) {
             var date = new Date(data.timestamp * 1000);
@@ -643,15 +643,15 @@ function loadTransactionToEdit() {
     $('#addtransactionmodal').attr('action', 'transaction/edit');
 }
 
-function fetchTransactionsByPayee(selected) {
-    var pay_id = PAY_IDS[selected];
-    $.get("/transaction/list/dateformat=short/limit=10/payee=" + pay_id)
-            .done(drawTransactionsByPayee);
-}
-
-function drawTransactionsByPayee(json) {
-    $('.payee_transactions tbody').empty();
-    $.each(json.data, function (i, v) {
-        $('.payee_transactions tbody').append('<tr><td>' + v.date + '</td><td>' + v.category.name + '</td><td>' + Utils.CurrencyFormatter.format(v.amount) + '</td></tr>');
+function showTransactionsByPayee(payeeName) {
+    TransactionData.GetData().then(function (data) {
+        var count = 0;
+        $('.payee_transactions tbody').empty();
+        data.list = data.list.reverse();
+        $.each(data.list, function (i, v) {
+            if (v.payee.name != payeeName || count++ > 9)
+                return;
+            $('.payee_transactions tbody').append('<tr><td>' + moment(v.date).format('M/D/YY') + '</td><td>' + v.category.name + '</td><td>' + Utils.CurrencyFormatter.format(v.amount) + '</td></tr>');
+        });
     });
 }

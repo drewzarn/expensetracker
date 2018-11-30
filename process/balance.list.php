@@ -24,7 +24,7 @@ ksort($allDates);
 foreach ($balances['byaccount'] as $accountId => $accountBalances) {
 	foreach ($allDates as $date) {
 		if (!array_key_exists($date, $accountBalances)) {
-			$accountBalances[$date] = 0;
+			$accountBalances[$date] = null;
 		}
 	}
 	ksort($accountBalances);
@@ -33,7 +33,7 @@ foreach ($balances['byaccount'] as $accountId => $accountBalances) {
 foreach ($balances['byaccounttype'] as $accountTypeId => $accountTypeBalances) {
 	foreach ($allDates as $date) {
 		if (!array_key_exists($date, $accountTypeBalances)) {
-			$accountTypeBalances[$date] = 0;
+			$accountTypeBalances[$date] = null;
 		}
 	}
 	ksort($accountTypeBalances);

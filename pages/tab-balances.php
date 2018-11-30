@@ -11,7 +11,7 @@
 		<div class="tab-pane fade show active container-fluid" id="balancedashboard" role="tabpanel" aria-labelledby="balancedashboard-tab">
 			<div class="row">
 				<div class="col-10">
-					<div class="ct-chart ct-minor-sixth" id="balancechart"></div>
+					<div class="ct-chart" id="balancechart"></div>
 				</div>
 				<div class="col-2" id="balancechart_accountlist">
 					<h5><input type="checkbox" id="bcnet" checked> <label for="bcnet">Net</label></h5>

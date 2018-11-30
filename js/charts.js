@@ -4,6 +4,9 @@ var Charts = {
         labels: [],
         allseries: {},
         options: {
+            lineSmooth: Chartist.Interpolation.monotoneCubic({
+                fillHoles: true,
+            }),
             plugins: [
                 Chartist.plugins.tooltip({anchorToPoint: true, currency: '$'})
             ]

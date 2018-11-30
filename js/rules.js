@@ -119,6 +119,8 @@ $(document).ready(function () {
         fetchCategoriesByMonth();
     });
 
+    Charts.Balances.options.height = ($( window ).height() - $('#balancechart').offset().top) + 'px';
+    Charts.Balances.options.width = ($( window ).width() / 6 * 5 - 40) + 'px';
     $('#balancechart_accountlist').on('change', 'input', Charts.Balances.Draw);
 });
 var DataReference = {

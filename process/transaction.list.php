@@ -9,7 +9,7 @@ foreach ($beans as $transaction) {
 	$transactions['list'][] = $transaction;
 }
 jsonheader();
-echo json_encode($transactions);
+echo json_encode($transactions, JSON_NUMERIC_CHECK);
 exit();
 
 $transactions = [];

@@ -40,4 +40,4 @@ foreach ($balances['byaccounttype'] as $accountTypeId => $accountTypeBalances) {
 	$balances['byaccounttype'][$accountTypeId] = array_values($accountTypeBalances);
 }
 jsonheader();
-echo json_encode($balances);
+echo json_encode($balances, JSON_NUMERIC_CHECK);

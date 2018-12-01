@@ -74,6 +74,21 @@ $(document).ready(function () {
         }
     });
 
+    $('#spendingbyperiod').on('click', 'th i', function () {
+        var $this = $(this);
+        var mDate = moment();
+        mDate.year($this.parent().data('year'));
+        mDate.month($this.parent().data('month'));
+        if ($this.hasClass('fa-chevron-left')) {
+            mDate.subtract(1, 'months');
+        } else {
+            mDate.add(1, 'months');
+        }
+        $this.parent().data('year', mDate.year());
+        $this.parent().data('month', mDate.month());
+        ShowSpendingByPeriod();
+    });
+
     $('input[type=button][data-action=delete]').click(function () {
         var $this = $(this);
         $('input[name="__delete__"]').remove();
@@ -91,7 +106,7 @@ $(document).ready(function () {
         scrollY: '65vh',
         scrollCollapse: true,
         paging: false,
-        data: {date:'', payee: {name:''}, category: {name:''}, description: '', amount: ''},
+        data: {date: '', payee: {name: ''}, category: {name: ''}, description: '', amount: ''},
         columns: [
             {data: 'date', render: Utils.TransactionListRender.Date},
             {data: 'payee.name'},
@@ -119,8 +134,8 @@ $(document).ready(function () {
         fetchCategoriesByMonth();
     });
 
-    Charts.Balances.options.height = ($( window ).height() - $('#balancechart').offset().top) + 'px';
-    Charts.Balances.options.width = ($( window ).width() / 6 * 5 - 40) + 'px';
+    Charts.Balances.options.height = ($(window).height() - $('#balancechart').offset().top) + 'px';
+    Charts.Balances.options.width = ($(window).width() / 6 * 5 - 40) + 'px';
     $('#balancechart_accountlist').on('change', 'input', Charts.Balances.Draw);
 });
 var DataReference = {
@@ -132,6 +147,10 @@ var DataReference = {
     CategoryNamesById: {},
     PayeeNames: [],
     PayeeNamesById: {},
+
+    SpendingByCategory: {},
+    SpendingByPayee: {},
+    NetByPeriod: {}
 }
 
 var ModalHandler = {
@@ -324,7 +343,7 @@ var DataHandler = {
                     $tbodyEl.find('td[data-entrydate=' + $thEl.text() + ']').each(function (di, tdEl) {
                         var $tdEl = $(tdEl);
                         if ($tdEl.parent().data('accountexcludenetworth') != "1") {
-                            sum += parseFloat($tdEl.data('amount'));
+                            sum += ($tdEl.data('amount'));
                         }
                     });
                     $tbodyEl.find('th[data-balancedate=' + $thEl.text() + ']').text(sum).data('amount', sum);
@@ -334,11 +353,11 @@ var DataHandler = {
             $('#balancetable th[data-balancedate]').each(function (i, el) {
                 var $el = $(el);
                 var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
-                if (parseFloat($el.data('amount')) == parseFloat($el.next().data('amount'))) {
+                if (($el.data('amount')) == ($el.next().data('amount'))) {
                     $el.addClass('text-warning');
-                } else if (parseFloat($el.data('amount')) > parseFloat($el.next().data('amount'))) {
+                } else if (($el.data('amount')) > ($el.next().data('amount'))) {
                     $el.addClass(isAsset ? 'text-success' : 'text-danger');
-                } else if (parseFloat($el.data('amount')) < parseFloat($el.next().data('amount'))) {
+                } else if (($el.data('amount')) < ($el.next().data('amount'))) {
                     $el.addClass(isAsset ? 'text-danger' : 'text-success');
                 }
                 $el.text(Utils.CurrencyFormatter.format($el.text()));
@@ -360,11 +379,11 @@ var DataHandler = {
             //Color-code net balance row
             $('#netbalance th[data-amount]').each(function (i, el) {
                 var $el = $(el);
-                if (parseFloat($el.data('amount')) == parseFloat($el.next().data('amount'))) {
+                if (($el.data('amount')) == ($el.next().data('amount'))) {
                     $el.addClass('text-warning');
-                } else if (parseFloat($el.data('amount')) > parseFloat($el.next().data('amount'))) {
+                } else if (($el.data('amount')) > ($el.next().data('amount'))) {
                     $el.addClass('text-success');
-                } else if (parseFloat($el.data('amount')) < parseFloat($el.next().data('amount'))) {
+                } else if (($el.data('amount')) < ($el.next().data('amount'))) {
                     $el.addClass('text-danger');
                 }
                 $el.text(Utils.CurrencyFormatter.format($el.text()));
@@ -420,32 +439,37 @@ var DataHandler = {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=transaction] span').html(Object.keys(data.list).length + ' transactions<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=transaction] i').removeClass('fa-spin');
+
             transactionlisttable.clear().rows.add(data.list).draw();
+
             var mtd = {income: 0, expense: 0};
             var ytd = {income: 0, expense: 0};
             $.each(data.list, function (i, v) {
                 var mDate = moment(v.date);
-                if (mDate.isSame(NOW, 'month')) {
-                    if (v.category.income == "1") {
-                        mtd.income += parseFloat(v.amount);
-                    } else {
-                        mtd.expense += parseFloat(v.amount);
-                    }
-                }
-                if (mDate.isSame(NOW, 'year')) {
-                    if (v.category.income == "1") {
-                        ytd.income += parseFloat(v.amount);
-                    } else {
-                        ytd.expense += parseFloat(v.amount);
-                    }
-                }
+                if (DataReference.NetByPeriod[mDate.year()] == null)
+                    DataReference.NetByPeriod[mDate.year()] = {income: 0, expense: 0};
+                if (DataReference.NetByPeriod[mDate.year()][mDate.month()] == null)
+                    DataReference.NetByPeriod[mDate.year()][mDate.month()] = {income: 0, expense: 0};
+                if (DataReference.SpendingByCategory[mDate.year()] == null)
+                    DataReference.SpendingByCategory[mDate.year()] = {};
+                if (DataReference.SpendingByCategory[mDate.year()][mDate.month()] == null)
+                    DataReference.SpendingByCategory[mDate.year()][mDate.month()] = {};
+                if (DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] == null)
+                    DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] = 0;
+                if (DataReference.SpendingByPayee[mDate.year()] == null)
+                    DataReference.SpendingByPayee[mDate.year()] = {};
+                if (DataReference.SpendingByPayee[mDate.year()][mDate.month()] == null)
+                    DataReference.SpendingByPayee[mDate.year()][mDate.month()] = {};
+                if (DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] == null)
+                    DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] = 0;
+
+                DataReference.NetByPeriod[mDate.year()][v.category.income == "1" ? 'income' : 'expense'] += (v.amount);
+                DataReference.NetByPeriod[mDate.year()][mDate.month()][v.category.income == "1" ? 'income' : 'expense'] += (v.amount);
+                DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] += (v.amount);
+                DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] += (v.amount);
             });
-            $('#dash_mtd li:contains("Income") span').text(Utils.CurrencyFormatter.format(mtd.income));
-            $('#dash_mtd li:contains("Expenses") span').text(Utils.CurrencyFormatter.format(mtd.expense));
-            $('#dash_mtd li:contains("Net") span').text(Utils.CurrencyFormatter.format(mtd.income - mtd.expense));
-            $('#dash_ytd li:contains("Income") span').text(Utils.CurrencyFormatter.format(ytd.income));
-            $('#dash_ytd li:contains("Expenses") span').text(Utils.CurrencyFormatter.format(ytd.expense));
-            $('#dash_ytd li:contains("Net") span').text(Utils.CurrencyFormatter.format(ytd.income - ytd.expense));
+
+            ShowSpendingByPeriod();
         }
     }
 }
@@ -652,4 +676,41 @@ function showTransactionsByPayee(payeeName) {
             $('.payee_transactions tbody').append('<tr><td>' + moment(v.date).format('M/D/YY') + '</td><td>' + v.category.name + '</td><td>' + Utils.CurrencyFormatter.format(v.amount) + '</td></tr>');
         });
     });
+}
+
+function ShowSpendingByPeriod() {
+    $table = $('#spendingbyperiod');
+    $tbody = $('#spendingbyperiod tbody');
+    $tbody.empty();
+
+    $tr = {
+        income: $('<tr><th>Income</th></tr>'),
+        expense: $('<tr><th>Expenses</th></tr>'),
+        net: $('<tr><th>Net</th></tr>')
+    }
+    $.each($table.find('th[data-year]'), function (i, el) {
+        var $el = $(el);
+        var mDate = moment();
+        mDate.year($el.data('year'));
+        $el.text(mDate.format('YYYY'));
+        try {
+            if ($el.data('month') != null) {
+                mDate.month($el.data('month') - 1);
+                $el.text(mDate.format('MMM YYYY'));
+                $tr.income.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()][mDate.month()].income) + '</td>');
+                $tr.expense.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()][mDate.month()].expense) + '</td>');
+                $tr.net.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()][mDate.month()].income - DataReference.NetByPeriod[mDate.year()][mDate.month()].expense) + '</td>');
+            } else {
+                $tr.income.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()].income) + '</td>');
+                $tr.expense.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()].expense) + '</td>');
+                $tr.net.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()].income - DataReference.NetByPeriod[mDate.year()].expense) + '</td>');
+            }
+        } catch (E) {
+        }
+    });
+    $tbody.append($tr.income);
+    $tbody.append($tr.expense);
+    $tbody.append($tr.net);
+
+    $table.find('thead th:last-of-type').append('<i class="fas fa-chevron-left mx-2 pointer"></i><i class="fas fa-chevron-right mx-2 pointer"></i>')
 }

@@ -1,28 +1,26 @@
 <div id="content-dashboard" class="container-fluid">
 	<div class="row">
-		<div class="col-sm-2">
-			<div id="dash_mtd" class="card my-3">
-				<h3 class="card-header"><?= date('F'); ?></h3>
-				<ul class="list-group list-group-flush">
-					<li class="list-group-item"><strong>Income: </strong> <span>$0</span></li>
-					<li class="list-group-item"><strong>Expenses: </strong> <span>$0</span></li>
-					<li class="list-group-item"><strong>Net: </strong> <span>$0</span></li>
-				</ul>
-			</div>
-		</div>
-		<div class="col-sm-2">
-			<div id="dash_ytd" class="card my-3">
-				<h3 class="card-header">All of <?= date('Y'); ?></h3>
-				<ul class="list-group list-group-flush">
-					<li class="list-group-item"><strong>Income: </strong> <span>$0</span></li>
-					<li class="list-group-item"><strong>Expenses: </strong> <span>$0</span></li>
-					<li class="list-group-item"><strong>Net: </strong> <span>$0</span></li>
-				</ul>
+		<div class="col-sm-4">
+			<div id="dash_spendingbyperiod" class="card my-3">
+				<h3 class="card-header">Spending by Period</h3>
+				<table class="table table-sm table-striped" id="spendingbyperiod">
+					<thead>
+						<tr><th></th><th data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n'); ?>" data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') == 1 ? 12 : date('n') - 1; ?>" data-year="<?= date('n') == 1 ? date('Y') - 1 : date('Y'); ?>"></th></tr>
+					</thead>
+					<tbody></tbody>
+				</table>
 			</div>
 		</div>
 		<div class="col-sm-2"></div>
 		<div class="col-sm-2"></div>
-		<div class="col-sm-2"></div>
+		<div class="col-sm-2">
+			<div class="card my-3">
+				<h3 class="card-header">Category $</h3>
+				<table class="table table-sm table-striped" id="card_spendbycategory">
+					<tr><th>Category</th><th>Amount</th></tr>
+				</table>
+			</div>
+		</div>
 		<div class="col-sm-2">
 			<div class="card my-3">
 				<h3 class="card-header">Data Stats</h3>

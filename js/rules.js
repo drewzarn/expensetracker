@@ -452,12 +452,16 @@ var DataHandler = {
                     DataReference.NetByPeriod[mDate.year()][mDate.month()] = {income: 0, expense: 0};
                 if (DataReference.SpendingByCategory[mDate.year()] == null)
                     DataReference.SpendingByCategory[mDate.year()] = {};
+                if (DataReference.SpendingByCategory[mDate.year()][v.category.name] == null)
+                    DataReference.SpendingByCategory[mDate.year()][v.category.name] = 0;
                 if (DataReference.SpendingByCategory[mDate.year()][mDate.month()] == null)
                     DataReference.SpendingByCategory[mDate.year()][mDate.month()] = {};
                 if (DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] == null)
                     DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] = 0;
                 if (DataReference.SpendingByPayee[mDate.year()] == null)
                     DataReference.SpendingByPayee[mDate.year()] = {};
+                if (DataReference.SpendingByPayee[mDate.year()][v.payee.name] == null)
+                    DataReference.SpendingByPayee[mDate.year()][v.payee.name] = 0;
                 if (DataReference.SpendingByPayee[mDate.year()][mDate.month()] == null)
                     DataReference.SpendingByPayee[mDate.year()][mDate.month()] = {};
                 if (DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] == null)
@@ -465,7 +469,11 @@ var DataHandler = {
 
                 DataReference.NetByPeriod[mDate.year()][v.category.income == "1" ? 'income' : 'expense'] += (v.amount);
                 DataReference.NetByPeriod[mDate.year()][mDate.month()][v.category.income == "1" ? 'income' : 'expense'] += (v.amount);
+                DataReference.NetByPeriod[mDate.year()].net = DataReference.NetByPeriod[mDate.year()].income - DataReference.NetByPeriod[mDate.year()].expense;
+                DataReference.NetByPeriod[mDate.year()][mDate.month()].net = DataReference.NetByPeriod[mDate.year()][mDate.month()].income - DataReference.NetByPeriod[mDate.year()][mDate.month()].expense;
+                DataReference.SpendingByCategory[mDate.year()][v.category.name] += (v.amount);
                 DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] += (v.amount);
+                DataReference.SpendingByPayee[mDate.year()][v.payee.name] += (v.amount);
                 DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] += (v.amount);
             });
 
@@ -683,34 +691,56 @@ function ShowSpendingByPeriod() {
     $tbody = $('#spendingbyperiod tbody');
     $tbody.empty();
 
-    $tr = {
-        income: $('<tr><th>Income</th></tr>'),
-        expense: $('<tr><th>Expenses</th></tr>'),
-        net: $('<tr><th>Net</th></tr>')
-    }
+    var periods = [];
     $.each($table.find('th[data-year]'), function (i, el) {
         var $el = $(el);
         var mDate = moment();
         mDate.year($el.data('year'));
-        $el.text(mDate.format('YYYY'));
-        try {
-            if ($el.data('month') != null) {
-                mDate.month($el.data('month') - 1);
-                $el.text(mDate.format('MMM YYYY'));
-                $tr.income.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()][mDate.month()].income) + '</td>');
-                $tr.expense.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()][mDate.month()].expense) + '</td>');
-                $tr.net.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()][mDate.month()].income - DataReference.NetByPeriod[mDate.year()][mDate.month()].expense) + '</td>');
-            } else {
-                $tr.income.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()].income) + '</td>');
-                $tr.expense.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()].expense) + '</td>');
-                $tr.net.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[mDate.year()].income - DataReference.NetByPeriod[mDate.year()].expense) + '</td>');
-            }
-        } catch (E) {
+        $el.html("<span>" + mDate.format('YYYY') + "</span>");
+        if ($el.data('month') != null) {
+            mDate.month($el.data('month') - 1);
+            $el.html("<span>" + mDate.format('MMM YYYY') + "</span>");
+            periods.push({year: mDate.year(), month: mDate.month()});
+        } else {
+            periods.push({year: mDate.year(), month: null});
         }
     });
-    $tbody.append($tr.income);
-    $tbody.append($tr.expense);
-    $tbody.append($tr.net);
 
-    $table.find('thead th:last-of-type').append('<i class="fas fa-chevron-left mx-2 pointer"></i><i class="fas fa-chevron-right mx-2 pointer"></i>')
+    rows = ['_income', '_expense', '_net'];
+    rows = rows.concat(DataReference.CategoryNames);
+
+    $.each(rows, function (ri, rv) {
+        $row = $('<tr><th>' + rv.replace('_', '').capitalize() + '</th></tr>');
+        $.each(periods, function (pi, pv) {
+            if (rv.startsWith('_')) {
+                if (pv.month == null) {
+                    if (DataReference.NetByPeriod[pv.year][rv.replace('_', '')] == null)
+                        DataReference.NetByPeriod[pv.year][rv.replace('_', '')] = 0;
+                    $row.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[pv.year][rv.replace('_', '')]) + '</td>');
+                } else {
+                    if (DataReference.NetByPeriod[pv.year][pv.month][rv.replace('_', '')] == null)
+                        DataReference.NetByPeriod[pv.year][pv.month][rv.replace('_', '')] = 0;
+                    $row.append('<td>' + Utils.CurrencyFormatter.format(DataReference.NetByPeriod[pv.year][pv.month][rv.replace('_', '')]) + '</td>');
+                }
+            } else {
+                if (pv.month == null) {
+                    if (DataReference.SpendingByCategory[pv.year][rv] == null)
+                        DataReference.SpendingByCategory[pv.year][rv] = 0;
+                    $row.append('<td>' + Utils.CurrencyFormatter.format(DataReference.SpendingByCategory[pv.year][rv]) + '</td>');
+                } else {
+                    if (DataReference.SpendingByCategory[pv.year][pv.month][rv] == null)
+                        DataReference.SpendingByCategory[pv.year][pv.month][rv] = 0;
+                    $row.append('<td>' + Utils.CurrencyFormatter.format(DataReference.SpendingByCategory[pv.year][pv.month][rv]) + '</td>');
+                }
+            }
+        });
+        $tbody.append($row);
+    });
+
+    $table.find('thead th i.fas').remove();
+    $table.find('thead th:not(:empty)').append('<i class="fas fa-chevron-left mr-2 pointer"></i><i class="fas fa-chevron-right ml-2 pointer"></i>');
+}
+
+String.prototype.capitalize = function () {
+    return this.charAt(0).toUpperCase() + this.slice(1);
 }

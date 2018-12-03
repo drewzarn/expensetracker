@@ -4,7 +4,7 @@
 			<div id="dash_spendingbyperiod" class="card my-3">
 				<h3 class="card-header">Spending by Period</h3>
 				<table class="table table-sm table-striped" id="spendingbyperiod">
-					<thead>
+					<thead class="steppable">
 						<tr><th></th><th data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n'); ?>" data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') == 1 ? 12 : date('n') - 1; ?>" data-year="<?= date('n') == 1 ? date('Y') - 1 : date('Y'); ?>"></th></tr>
 					</thead>
 					<tbody></tbody>
@@ -13,14 +13,7 @@
 		</div>
 		<div class="col-sm-2"></div>
 		<div class="col-sm-2"></div>
-		<div class="col-sm-2">
-			<div class="card my-3">
-				<h3 class="card-header">Category $</h3>
-				<table class="table table-sm table-striped" id="card_spendbycategory">
-					<tr><th>Category</th><th>Amount</th></tr>
-				</table>
-			</div>
-		</div>
+		<div class="col-sm-2"></div>
 		<div class="col-sm-2">
 			<div class="card my-3">
 				<h3 class="card-header">Data Stats</h3>

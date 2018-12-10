@@ -50,6 +50,7 @@ $(document).ready(function () {
         $('.nav-link[href="#dashboard"]').click();
     }
     Utils.SetDateInputs();
+    StepperTable.Init();
 
     $('a#logout:contains("Sandbox")').closest('body').addClass('sandbox');
 
@@ -588,6 +589,27 @@ var Utils = {
     }
 }
 
+var StepperTable = {
+    Init: function () {
+        $('table.stepper').each(function (i, table) {
+            var $table = $(table);
+            $.each($table.find('th[data-year]'), function (i, el) {
+                var $el = $(el);
+                var mDate = moment();
+                mDate.year($el.data('year'));
+                $el.html("<span>" + mDate.format('YYYY') + "</span>");
+                if ($el.data('month') != null) {
+                    mDate.month($el.data('month') - 1);
+                    $el.html("<span>" + mDate.format('MMM YYYY') + "</span>");
+                } else {
+                }
+            });
+            $table.find('thead th i.fas').remove();
+            $table.find('thead th:not(:empty)').append('<i class="fas fa-chevron-left mr-2 pointer"></i><i class="fas fa-chevron-right ml-2 pointer"></i>');
+        });
+    }
+}
+
 function formAjaxSubmit(form, event) {
     $form = $(form);
     Utils.HideFormMessage($form.find('div.formmsg'));
@@ -736,9 +758,6 @@ function ShowSpendingByPeriod() {
         });
         $tbody.append($row);
     });
-
-    $table.find('thead th i.fas').remove();
-    $table.find('thead th:not(:empty)').append('<i class="fas fa-chevron-left mr-2 pointer"></i><i class="fas fa-chevron-right ml-2 pointer"></i>');
 }
 
 String.prototype.capitalize = function () {

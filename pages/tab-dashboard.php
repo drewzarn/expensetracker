@@ -3,7 +3,7 @@
 		<div class="col-sm-4">
 			<div id="dash_spendingbyperiod" class="card my-3">
 				<h3 class="card-header">Spending by Period</h3>
-				<table class="table table-sm table-striped" id="spendingbyperiod">
+				<table class="table table-sm table-striped stepper" id="spendingbyperiod">
 					<thead class="steppable">
 						<tr><th></th><th data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n'); ?>" data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') == 1 ? 12 : date('n') - 1; ?>" data-year="<?= date('n') == 1 ? date('Y') - 1 : date('Y'); ?>"></th></tr>
 					</thead>

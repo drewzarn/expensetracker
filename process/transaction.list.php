@@ -2,11 +2,24 @@
 $beans = R::find('transaction', "site=:site", [':site' => SITE]);
 $transactions = ['timestamp' => time(), 'list' => []];
 
+$groupTotals = [];
+
 foreach ($beans as $transaction) {
 	$transaction->shortdate = substr($transaction->date, 0, 10);
 	$transaction->category = R::load('category', $transaction->category_id);
 	$transaction->payee = R::load('payee', $transaction->payee_id);
+
+	if($transaction->group != null) {
+		if(! isset($groupTotals[$transaction->group])) $groupTotals[$transaction->group] = 0;
+		$groupTotals[$transaction->group] += $transaction->amount;
+	}
+
 	$transactions['list'][] = $transaction;
+}
+foreach ($beans as &$transaction) {
+	if($transaction->group != null) {
+		$transaction->grouptotal = $groupTotals[$transaction->group];
+	}
 }
 jsonheader();
 echo json_encode($transactions, JSON_NUMERIC_CHECK);

@@ -2,27 +2,47 @@
 
 if ($POSTDATA['amount'] == '' || $POSTDATA['category'] == '' || $POSTDATA['payee'] == '' || $POSTDATA['date'] == '')
 	exit();
-$category = R::findOrCreate('category', ['name' => $POSTDATA['category'], 'site' => SITE, 'deleted' => 0]);
 $payee = R::findOrCreate('payee', ['name' => $POSTDATA['payee'], 'site' => SITE, 'deleted' => 0]);
 
-if (!isset($POSTDATA['allowdupe'])) {
-	$dupe = R::find('transaction', 'site=? AND category_id=? AND payee_id=? AND amount=? AND date BETWEEN DATE_ADD(?, INTERVAL ? DAY) AND DATE_ADD(?, INTERVAL ? DAY)', [SITE, $category->id, $payee->id, $POSTDATA['amount'], $POSTDATA['date'], $DUPECHECK['before'], $trnDate, $DUPECHECK['after']]);
-	if (count($dupe) > 0) {
-		$dupe = $dupe[array_keys($dupe)[0]];
-		header("HTTP/1.0 409 Conflict");
-		jsonheader();
-		echo json_encode(['dupe' => ['date' => $dupe->date, 'description' => $dupe->description]]);
-		exit();
-	}
+$baseTransaction = [
+	'payee' => $POSTDATA['payee'],
+	'date' => new DateTime($POSTDATA['date'])
+];
+$subTransactions[] = $baseTransaction + [
+	'category' => $POSTDATA['category'],
+	'amount' => $POSTDATA['amount'],
+	'description' => $POSTDATA['description'],
+];
+
+$s = 1;
+while ($POSTDATA["amount_{$s}"] != '') {
+	$subTransactions[] = $baseTransaction + [
+		'category' => $POSTDATA["category_{$s}"],
+		'amount' => $POSTDATA["amount_{$s}"],
+		'description' => $POSTDATA["description_{$s}"],
+	];
+	$s++;
+}
+if(count($subTransactions) > 1) {
+	$transactionGroup = SITE . rand(10000, 100000);
 }
 
-$transaction = R::dispense('transaction');
-$transaction->site = SITE;
-$transaction->category = $category;
-$transaction->payee = $payee;
-$transaction->amount = $POSTDATA['amount'];
-$transaction->description = $POSTDATA['description'];
-$transaction->date = $POSTDATA['date'];
-R::store($transaction);
+foreach($subTransactions as $tran) {
+	if($tran['amount'] == 0) continue;
+	$category = R::findOrCreate('category', ['name' => $tran['category'], 'site' => SITE, 'deleted' => 0]);
 
+	$transaction = R::dispense('transaction');
+	$transaction->site = SITE;
+	$transaction->category = $category;
+	$transaction->payee = $payee;
+	$transaction->amount = $tran['amount'];
+	$transaction->description = $tran['description'];
+	$transaction->date = $tran['date'];
+	if($transactionGroup != null) {
+		$transaction->group = $transactionGroup;
+	}
+	R::store($transaction);
+}
+
+echo json_encode('OK');
 exit();

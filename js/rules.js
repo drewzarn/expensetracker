@@ -49,7 +49,7 @@ $(document).ready(function () {
     } else {
         $('.nav-link[href="#dashboard"]').click();
     }
-    Utils.SetDateInputs();
+    Utils.InitDateInputs();
 
     $('a#logout:contains("Sandbox")').closest('body').addClass('sandbox');
 
@@ -73,6 +73,8 @@ $(document).ready(function () {
             $this.removeClass('fa-chevron-up').addClass('fa-chevron-down');
         }
     });
+
+    Utils.TransactionSplit.Init();
 
     $('#spendingbyperiod').on('click', 'th i', function () {
         var $this = $(this);
@@ -161,6 +163,9 @@ var ModalHandler = {
     },
     Shown: {
         addtransaction: function (e) {
+            $('#addtransaction_payee').focus();
+            $('#addtransaction_date').datepicker('update', new Date().toLocaleDateString());
+            Utils.TransactionSplit.Reset();
             $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
         },
         editaccount: function (e) {
@@ -475,16 +480,49 @@ var DataHandler = {
 }
 
 var Utils = {
+    TransactionSplit: {
+        Count: 0,
+        Init: function() {
+            $('#splittransaction').click(Utils.TransactionSplit.Add);
+            $('#frm_addtransaction').on('change', 'div.splitwrapper input[name^=addtransaction_amount]', Utils.TransactionSplit.Update);
+        },
+        Add: function () {
+            var splitNumber = ++Utils.TransactionSplit.Count;
+            var newSplit = $('#frm_addtransaction div.splitwrapper:first').clone();
+            newSplit.find('input').each(function (i, el) {
+                var $el = $(el);
+                $el.attr('id', $el.attr('id') + '_' + splitNumber);
+                $el.attr('name', $el.attr('name') + '_' + splitNumber);
+                $el.val('');
+            });
+            $('input[name^=addtransaction_category]').each(function(i, el) {$(el).typeahead({source: DataReference.CategoryNames});});
+            newSplit.insertAfter('#frm_addtransaction div.splitwrapper:last');
+            newSplit.find('input:first').focus();
+        },
+        Reset: function () {
+            Utils.TransactionSplit.Count = 0;
+            var newSplit = $('#frm_addtransaction div.splitwrapper:first').clone();
+            $('#frm_addtransaction div.splitwrapper').remove();
+            newSplit.find('input').val('');
+            newSplit.insertAfter('#frm_addtransaction div.form-group:first');
+            $('#splittotal').text('');
+            $('input[name^=addtransaction_category]').typeahead({source: DataReference.CategoryNames});
+        },
+        Update: function () {
+            var total = 0;
+            $('#frm_addtransaction div.splitwrapper input[name^=addtransaction_amount]').each(function (i, el) {
+                if($(el).val() == '') return;
+                total += parseFloat($(el).val());
+            });
+            $('#splittotal').text('Total: ' + Utils.CurrencyFormatter.format(total));
+        }
+    },
     CurrencyFormatter: new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}),
-    SetDateInputs: function (selectorOrElement) {
-        if (selectorOrElement == null) {
-            selectorOrElement = 'input[type=date]';
-        }
-        if (typeof selectorOrElement == 'string') {
-            $(selectorOrElement).val(new Date().toISOString().substring(0, 10));
-        } else {
-            selectorOrElement.val(new Date().toISOString().substring(0, 10));
-        }
+    InitDateInputs: function () {
+        $('input[data-type=date]').datepicker({
+            todayHighlight: true
+        });
+        $('input[data-type=date]').datepicker('update', new Date().toLocaleDateString());
     },
     GetDataObject: function (name) {
         switch (name) {
@@ -558,7 +596,11 @@ var Utils = {
     TransactionListRender: {
         Amount: function (data, type, row) {
             if (type === 'display') {
-                return Utils.CurrencyFormatter.format(data);
+                if(row.grouptotal == null) {
+                    return Utils.CurrencyFormatter.format(data);
+                } else {
+                    return Utils.CurrencyFormatter.format(data) + ' of ' + Utils.CurrencyFormatter.format(row.grouptotal) + '';
+                }
             }
             return data;
         },
@@ -627,10 +669,12 @@ function formAjaxSubmit(form, event) {
         case 'frm_addtransaction':
             doneHandler = function (d) {
                 Utils.ShowFormMessage($form.find('div.formmsg'), 'Transaction added');
-                $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset], :input[type=date]').val('');
+                $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
                 $form.find('input[type=checkbox]').prop('checked', false);
                 $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
+                $('#addtransaction_date').datepicker('update', new Date().toLocaleDateString());
                 $('#addtransaction_payee').focus();
+                Utils.TransactionSplit.Reset();
                 Utils.LoadInfrastructure($form.data('reload'));
             };
             failHandler = function (d) {

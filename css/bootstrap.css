@@ -31,7 +31,8 @@ div#transactionlistrange button {
     margin-left: .5em;
 }
 #transactionlisttable_wrapper {
-    margin-top: 1em;
+    margin-top: .5em;
+    margin-right: 1em;
 }
 #transactionlisttable tr td:first-of-type {
     min-width: 8em;
@@ -75,4 +76,14 @@ td.dupebalance::after {
 }
 thead.steppable th span {
     display: block;
+}
+
+table.stepper tbody {
+    display: block;
+    overflow: auto;
+}
+table.stepper thead, table.stepper tbody tr {
+    display:table;
+    width:100%;
+    table-layout:fixed;
 }

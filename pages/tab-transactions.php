@@ -5,26 +5,26 @@
 				<h3 class="card-header">Spending by Period</h3>
 				<ul class="nav nav-tabs nav-fill" role="tablist">
 					<li class="nav-item">
-						<a class="nav-link active" data-toggle="tab" href="#sbpcategories">Categories</a>
+						<a class="nav-link active" data-toggle="tab" href="#sbpcategories" id="tabsbpcategories">Categories (all)</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" data-toggle="tab" href="#sbppayees">Payees</a>
+						<a class="nav-link" data-toggle="tab" href="#sbppayees" id="tabsbppayees">Payees (all)</a>
 					</li>
 				</ul>
 
 				<div class="tab-content">
 					<div class="tab-pane fade show active" id="sbpcategories" role="tabpanel">
-						<table class="table table-sm table-striped stepper" data-source="SpendingByCategory" data-rows="CategoryNames">
+						<table class="table table-sm table-striped stepper" data-source="SpendingByCategory" data-rows="CategoryNames" data-rowselect="sbpcategory">
 							<thead class="steppable">
-								<tr><th></th><th data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') == 1 ? 12 : date('n') - 1; ?>" data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') ?>" data-year="<?= date('n') == 1 ? date('Y') - 1 : date('Y'); ?>"></th></tr>
+								<tr><th></th><th data-year=""></th><th data-month="" data-year=""></th><th data-month="" data-year=""></th></tr>
 							</thead>
 							<tbody></tbody>
 						</table>
 					</div>
-					<div class="tab-pane fade show active" id="sbppayees" role="tabpanel">
-						<table class="table table-sm table-striped stepper" data-source="SpendingByPayee" data-rows="PayeeNames">
+					<div class="tab-pane fade" id="sbppayees" role="tabpanel">
+						<table class="table table-sm table-striped stepper" data-source="SpendingByPayee" data-rows="PayeeNames" data-rowselect="sbppayee">
 							<thead class="steppable">
-								<tr><th></th><th data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') == 1 ? 12 : date('n') - 1; ?>" data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') ?>" data-year="<?= date('n') == 1 ? date('Y') - 1 : date('Y'); ?>"></th></tr>
+								<tr><th></th><th data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') == 1 ? 11 : date('n') - 1; ?>" data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') ?>" data-year="<?= date('n') == 1 ? date('Y') - 1 : date('Y'); ?>"></th></tr>
 							</thead>
 							<tbody></tbody>
 						</table>

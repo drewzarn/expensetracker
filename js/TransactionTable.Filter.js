@@ -8,7 +8,10 @@ $.fn.dataTableExt.afnFiltering.push(
         var trnDate = moment(aData[columns.date]);
         if(!trnDate.isBetween(startDate, endDate)) return false;
 
-        return true;
+        var categoryMatch = TransactionListTable.Filters.Category.length == 0 || TransactionListTable.Filters.Category.indexOf(aData[columns.category]) >= 0;
+        var payeeMatch = TransactionListTable.Filters.Payee.length == 0 || TransactionListTable.Filters.Payee.indexOf(aData[columns.payee]) >= 0;
+
+        return categoryMatch && payeeMatch;
     }
 );
 

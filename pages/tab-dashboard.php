@@ -5,7 +5,7 @@
 				<h3 class="card-header">Spending by Period</h3>
 				<table class="table table-sm table-striped stepper" data-source="NetByPeriod" data-rows="NetNames">
 					<thead class="steppable">
-						<tr><th></th><th data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') == 1 ? 12 : date('n') - 1; ?>" data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') ?>" data-year="<?= date('n') == 1 ? date('Y') - 1 : date('Y'); ?>"></th></tr>
+						<tr><th></th><th data-year=""></th><th data-month="" data-year=""></th><th data-month="" data-year=""></th></tr>
 					</thead>
 					<tbody></tbody>
 				</table>

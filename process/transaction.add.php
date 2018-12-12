@@ -24,7 +24,7 @@ while ($POSTDATA["amount_{$s}"] != '') {
 	$s++;
 }
 if(count($subTransactions) > 1) {
-	$transactionGroup = SITE . rand(10000, 100000);
+	$transactionGroup = SITE . $payee->id . time();
 }
 
 foreach($subTransactions as $tran) {

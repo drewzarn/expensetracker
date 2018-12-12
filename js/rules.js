@@ -104,9 +104,14 @@ $(document).ready(function () {
         ],
         order: [[0, "desc"]]
     });
+    $('#transactionlisttable_wrapper div.row:first div:first').append('<div class="input-daterange input-group"><input type="text" class="input-sm form-control" id="trnlistdatestart" /><span class="input-group-text">to</span><input type="text" class="form-control" id="trnlistdateend" /></div>');
+    $('#trnlistdatestart').datepicker({format: "m/d/yyyy"});
+    $('#trnlistdateend').datepicker({format: "m/d/yyyy"});
     $('#transactionlisttable').on('click', 'i.fa-edit', function () {
         loadTransactionToEdit($(this).data('transactionid'));
     });
+
+
     $('#balancetable').on('dblclick', 'td.entry', function () {
         var $td = $(this);
         $('#editbalance_id').val($td.data('balanceid'));
@@ -116,16 +121,11 @@ $(document).ready(function () {
         $('#modal_editbalance').modal();
     });
 
-    $('#catlist').on('click', 'button', function () {
-        var $btn = $(this);
-        $btn.toggleClass('btn-info');
-        fetchCategoriesByMonth();
-    });
-
     Charts.Balances.options.height = ($(window).height() - $('#balancechart').offset().top) + 'px';
     Charts.Balances.options.width = ($(window).width() / 6 * 5 - 40) + 'px';
     $('#balancechart_accountlist').on('change', 'input', Charts.Balances.Draw);
 });
+
 var DataReference = {
     AccountNames: [],
     AccountNamesById: {},
@@ -431,6 +431,8 @@ var DataHandler = {
             $('#card_datastats').find('li[data-ref=transaction] span').html(Object.keys(data.list).length + ' transactions<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=transaction] i').removeClass('fa-spin');
 
+            var dateLimits = {max: moment(), min: moment()};
+
             transactionlisttable.clear().rows.add(data.list).draw();
 
             DataReference.NetByPeriod = {};
@@ -438,6 +440,9 @@ var DataHandler = {
             DataReference.SpendingByPayee = {};
             $.each(data.list, function (i, v) {
                 var mDate = moment(v.date);
+                if(mDate < dateLimits.min) dateLimits.min = mDate;
+                if(mDate > dateLimits.max) dateLimits.max = mDate;
+
                 if (DataReference.NetByPeriod[mDate.year()] == null)
                     DataReference.NetByPeriod[mDate.year()] = {Income: 0, Expenses: 0};
                 if (DataReference.NetByPeriod[mDate.year()][mDate.month()] == null)
@@ -468,6 +473,9 @@ var DataHandler = {
                 DataReference.SpendingByPayee[mDate.year()][v.payee.name] += (v.amount);
                 DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] += (v.amount);
             });
+
+            $('#trnlistdatestart').datepicker('update', dateLimits.min.format('M/D/YYYY')).on('changeDate', transactionlisttable.draw);
+            $('#trnlistdateend').datepicker('update', dateLimits.max.format('M/D/YYYY')).on('changeDate', transactionlisttable.draw);
 
             StepperTable.RefreshAll();
         }
@@ -515,7 +523,8 @@ var Utils = {
     CurrencyFormatter: new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}),
     InitDateInputs: function () {
         $('input[data-type=date]').datepicker({
-            todayHighlight: true
+            todayHighlight: true,
+            format: "m/d/yyyy"
         });
         $('input[data-type=date]').datepicker('update', new Date().toLocaleDateString());
     },

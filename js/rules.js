@@ -135,10 +135,10 @@ var DataReference = {
     CategoryNamesById: {},
     PayeeNames: [],
     PayeeNamesById: {},
-
     SpendingByCategory: {},
     SpendingByPayee: {},
-    NetByPeriod: {}
+    NetByPeriod: {},
+    NetNames: ['Income', 'Expenses', 'Net']
 }
 
 var ModalHandler = {
@@ -439,9 +439,9 @@ var DataHandler = {
             $.each(data.list, function (i, v) {
                 var mDate = moment(v.date);
                 if (DataReference.NetByPeriod[mDate.year()] == null)
-                    DataReference.NetByPeriod[mDate.year()] = {Income: 0, Expense: 0};
+                    DataReference.NetByPeriod[mDate.year()] = {Income: 0, Expenses: 0};
                 if (DataReference.NetByPeriod[mDate.year()][mDate.month()] == null)
-                    DataReference.NetByPeriod[mDate.year()][mDate.month()] = {Income: 0, Expense: 0};
+                    DataReference.NetByPeriod[mDate.year()][mDate.month()] = {Income: 0, Expenses: 0};
                 if (DataReference.SpendingByCategory[mDate.year()] == null)
                     DataReference.SpendingByCategory[mDate.year()] = {};
                 if (DataReference.SpendingByCategory[mDate.year()][v.category.name] == null)
@@ -459,10 +459,10 @@ var DataHandler = {
                 if (DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] == null)
                     DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] = 0;
 
-                DataReference.NetByPeriod[mDate.year()][v.category.income == "1" ? 'Income' : 'Expense'] += (v.amount);
-                DataReference.NetByPeriod[mDate.year()][mDate.month()][v.category.income == "1" ? 'Income' : 'Expense'] += (v.amount);
-                DataReference.NetByPeriod[mDate.year()].Net = DataReference.NetByPeriod[mDate.year()].Income - DataReference.NetByPeriod[mDate.year()].Expense;
-                DataReference.NetByPeriod[mDate.year()][mDate.month()].Net = DataReference.NetByPeriod[mDate.year()][mDate.month()].Income - DataReference.NetByPeriod[mDate.year()][mDate.month()].Expense;
+                DataReference.NetByPeriod[mDate.year()][v.category.income == "1" ? 'Income' : 'Expenses'] += (v.amount);
+                DataReference.NetByPeriod[mDate.year()][mDate.month()][v.category.income == "1" ? 'Income' : 'Expenses'] += (v.amount);
+                DataReference.NetByPeriod[mDate.year()].Net = DataReference.NetByPeriod[mDate.year()].Income - DataReference.NetByPeriod[mDate.year()].Expenses;
+                DataReference.NetByPeriod[mDate.year()][mDate.month()].Net = DataReference.NetByPeriod[mDate.year()][mDate.month()].Income - DataReference.NetByPeriod[mDate.year()][mDate.month()].Expenses;
                 DataReference.SpendingByCategory[mDate.year()][v.category.name] += (v.amount);
                 DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] += (v.amount);
                 DataReference.SpendingByPayee[mDate.year()][v.payee.name] += (v.amount);
@@ -637,6 +637,7 @@ var StepperTable = {
                 if(monthStep) {
                     $this.parent().data('month', mDate.month());
                 }
+                StepperTable.Refresh($table);
             });
         });
     },
@@ -646,22 +647,49 @@ var StepperTable = {
         });
     },
     Refresh: function($table) {
+        var periods = [];
         $.each($table.find('th[data-year]'), function (i, el) {
             var $el = $(el);
             var mDate = moment();
             mDate.year($el.data('year'));
+            var period = {year: mDate.year()};
             $el.html("<span>" + mDate.format('YYYY') + "</span>");
             if ($el.data('month') != null) {
                 mDate.month($el.data('month') - 1);
+                period.month = mDate.month();
                 $el.html("<span>" + mDate.format('MMM YYYY') + "</span>");
-            } else {
             }
+            periods.push(period);
         });
         $table.find('thead th i.fas').remove();
         $table.find('thead th:not(:empty)').append('<i class="fas fa-chevron-left mr-2 pointer"></i><i class="fas fa-chevron-right ml-2 pointer"></i>');
 
         var dataSource = DataReference[$table.data('source')];
-        console.log(dataSource);
+        var rowSource = DataReference[$table.data('rows')];
+
+        var $tbody = $table.find('tbody');
+        $tbody.empty();
+        $.each(rowSource, function (ri, rv) {
+            $row = $('<tr><th>' + rv + '</th></tr>');
+            $.each(periods, function (pi, pv) {
+                if (pv.month == null) {
+                    if (dataSource[pv.year] == null)
+                        dataSource[pv.year] = {};
+                    if (dataSource[pv.year][rv] == null)
+                        dataSource[pv.year][rv] = 0;
+                    $row.append('<td>' + Utils.CurrencyFormatter.format(dataSource[pv.year][rv]) + '</td>');
+                } else {
+                    if (dataSource[pv.year] == null)
+                        dataSource[pv.year] = {};
+                    if (dataSource[pv.year][pv.month] == null)
+                        dataSource[pv.year][pv.month] = {};
+                    if (dataSource[pv.year][pv.month][rv] == null)
+                        dataSource[pv.year][pv.month][rv] = 0;
+                    $row.append('<td>' + Utils.CurrencyFormatter.format(dataSource[pv.year][pv.month][rv]) + '</td>');
+                }
+            });
+            $tbody.append($row);
+        });
 
 return;
         $.each(rows, function (ri, rv) {

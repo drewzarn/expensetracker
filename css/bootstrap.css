@@ -69,3 +69,10 @@ td.dupebalance::after {
     float: right;
     cursor: pointer;
 }
+
+#spendingbyperiod thead.steppable th, #spendingbyperiod td {
+    text-align: center;
+}
+thead.steppable th span {
+    display: block;
+}

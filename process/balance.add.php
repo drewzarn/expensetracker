@@ -9,7 +9,7 @@ foreach ($POSTDATA as $accountId => $amount) {
 	$accountId = str_replace('account', '', $accountId);
 	if (!isset($accounts[$accountId])) {
 		$accounts[$accountId] = r::load('account', $accountId);
-		$accounts[$accountId]->accounttype = r::load('accounttype', $accounts[$accountId]->id);
+		$accounts[$accountId]->accounttype = r::load('accounttype', $accounts[$accountId]->type_id);
 	}
 	$lastBalance = R::findOne('balance', 'account_id=? AND date<? ORDER BY date DESC LIMIT 1', [$accountId, $date]);
 
@@ -17,6 +17,7 @@ foreach ($POSTDATA as $accountId => $amount) {
 	$balance->date = $date;
 	$balance->amount = $amount;
 	$balance->account = $accounts[$accountId];
+	unset($balance->account->accounttype);
 	$balance->netgain = 0;
 	if ($lastBalance->amount != $amount) {
 		if ($accounts[$accountId]->accounttype->asset == "1") {

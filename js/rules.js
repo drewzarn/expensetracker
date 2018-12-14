@@ -634,7 +634,7 @@ var StepperTable = {
                 });
             }
         });
-        $('table.stepper').DataTable({ordering: false, paging: false, searching:false});
+        $('table.stepper').DataTable({ordering: false, paging: false, searching:false, info: false});
     },
     RefreshAll: function () {
         $('table.stepper').each(function (i, table) {
@@ -741,6 +741,7 @@ var TransactionListTable = {
             scrollY: '65vh',
             scrollCollapse: true,
             paging: false,
+            info: false,
             data: {date: '', payee: {name: ''}, category: {name: ''}, description: '', amount: ''},
             columns: [
                 {data: 'date', render: Utils.TransactionListRender.Date},

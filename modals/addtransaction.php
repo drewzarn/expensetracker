@@ -9,10 +9,9 @@
 					</button>
 				</div>
 				<div class="modal-body">
-					<input autocomplete="false" name="hidden" type="text" style="display:none;">
 					<div class="form-group clearfix">
 						<input type="text" class="form-control w-75 float-left typeahead" data-provide="typeahead" id="addtransaction_payee" name="addtransaction_payee" placeholder="Payee" required />
-						<input  data-type="date" class="form-control w-25 float-left" id="addtransaction_date" name="addtransaction_date" placeholder="Date" required />
+						<input data-type="date" class="form-control w-25 float-left" id="addtransaction_date" name="addtransaction_date" placeholder="Date" required />
 					</div>
 					<div class="splitwrapper">
 						<div class="form-group clearfix">

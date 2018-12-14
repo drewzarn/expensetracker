@@ -153,13 +153,13 @@ var ModalHandler = {
         },
         edittransaction: function (e) {
             $('#edittransaction_id').val($(e.relatedTarget).data('transactionid'));
-            var trnDetails = TransactionListTable.TabelRef.row($(e.relatedTarget).parent().parent()[0]).data();
-            showTransactionsByPayee(trnDetails.payee);
-            $.each(trnDetails, function (i, v) {
-                if (i == "date")
-                    v = v.substring(0, 10); //Strip off time for setting input value
-                $('#edittransaction_' + i).val(v.hasOwnProperty('name') ? v.name : v);
-            });
+            var trnDetails = TransactionListTable.TableRef.row($(e.relatedTarget).parent().parent()[0]).data();
+            $('#edittransaction_payee').val(DataReference.PayeeNamesByID[trnDetails.payee_id]);
+            $('#edittransaction_category').val(DataReference.CategoryNamesByID[trnDetails.category_id]);
+            $('#edittransaction_amount').val(trnDetails.amount);
+            $('#edittransaction_date').val(moment(trnDetails.date).format('M/D/YYYY'));
+            $('#edittransaction_description').val(trnDetails.description);
+            showTransactionsByPayee(DataReference.PayeeNamesByID[trnDetails.payee_id]);
         }
     }
 }
@@ -370,7 +370,7 @@ var DataHandler = {
             $.each(d, function (i, v) {
                 if (v.deleted != '1') {
                     DataReference.CategoryNames.push(v.name);
-                    DataReference.CategoryNamesByID[v.name] = v.id;
+                    DataReference.CategoryNamesByID[v.id] = v.name;
                 }
                 $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td>' + (v.income == '1' ? '<i class="fas fa-check-circle" />' : '') + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
                 $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
@@ -394,7 +394,7 @@ var DataHandler = {
             $.each(d, function (i, v) {
                 if (v.deleted != '1') {
                     DataReference.PayeeNames.push(v.name);
-                    DataReference.PayeeNamesByID[v.name] = v.id;
+                    DataReference.PayeeNamesByID[v.id] = v.name;
                 }
 
                 $('#payeelist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editpayee" data-payeeid="' + v.id + '" />' + v.name + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
@@ -634,6 +634,7 @@ var StepperTable = {
                 });
             }
         });
+        $('table.stepper').DataTable({ordering: false, paging: false, searching:false});
     },
     RefreshAll: function () {
         $('table.stepper').each(function (i, table) {
@@ -853,11 +854,11 @@ function showTransactionsByPayee(payeeName) {
     TransactionData.GetData().then(function (data) {
         var count = 0;
         $('.payee_transactions tbody').empty();
-        data.list = data.list.reverse();
-        $.each(data.list, function (i, v) {
+        var sortedTransactions = Utils.SortBeans(data.list, 'date').reverse();
+        $.each(sortedTransactions, function (i, v) {
             if (v.payee.name != payeeName || count++ > 9)
                 return;
-            $('.payee_transactions tbody').append('<tr><td>' + moment(v.date).format('M/D/YY') + '</td><td>' + v.category.name + '</td><td>' + Utils.CurrencyFormatter.format(v.amount) + '</td></tr>');
+            $('.payee_transactions tbody').append('<tr><td>' + moment(v.date).format('M/D/YY') + '</td><td>' + v.category.name + '</td><td>' + (v.grouptotal == null ? Utils.CurrencyFormatter.format(v.amount) : Utils.CurrencyFormatter.format(v.amount) + ' of ' + Utils.CurrencyFormatter.format(v.grouptotal)) + '</td></tr>');
         });
     });
 }

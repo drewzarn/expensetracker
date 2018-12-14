@@ -9,12 +9,15 @@
 					</button>
 				</div>
 				<div class="modal-body">
-					<input autocomplete="false" name="hidden" type="text" style="display:none;">
 					<input type="hidden" id="edittransaction_id" />
-					<div class="form-group"><input type="text" class="form-control typeahead" data-provide="typeahead" id="edittransaction_payee" name="edittransaction_payee" placeholder="Payee"/></div>
-					<div class="form-group"><input type="text" class="form-control typeahead" data-provide="typeahead" id="edittransaction_category" name="edittransaction_category" placeholder="Category" /></div>
-					<div class="form-group"><input type="number" class="form-control" id="edittransaction_amount" name="edittransaction_amount" step="0.01" placeholder="Amount" /></div>
-					<div class="form-group"><input type="date" class="form-control" id="edittransaction_date" name="edittransaction_date" placeholder="Date" /></div>
+					<div class="form-group clearfix">
+						<input type="text" class="form-control w-75 float-left typeahead" data-provide="typeahead" id="edittransaction_payee" name="edittransaction_payee" placeholder="Payee"/>
+						<input data-type="date" class="form-control w-25 float-left" id="edittransaction_date" name="edittransaction_date" placeholder="Date" />
+					</div>
+					<div class="form-group clearfix">
+						<input type="text" class="form-control w-75 float-left typeahead" data-provide="typeahead" id="edittransaction_category" name="edittransaction_category" placeholder="Category" />
+						<input type="number" class="form-control w-25 float-left" id="edittransaction_amount" name="edittransaction_amount" step="0.01" placeholder="Amount" />
+					</div>
 					<div class="form-group"><input type="text" class="form-control" id="edittransaction_description" name="edittransaction_description" placeholder="Description" /></div>
 				</div>
 				<div class="modal-footer">

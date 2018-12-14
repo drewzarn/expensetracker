@@ -854,11 +854,11 @@ function showTransactionsByPayee(payeeName) {
     TransactionData.GetData().then(function (data) {
         var count = 0;
         $('.payee_transactions tbody').empty();
-        data.list = data.list.reverse();
-        $.each(data.list, function (i, v) {
+        var sortedTransactions = Utils.SortBeans(data.list, 'date').reverse();
+        $.each(sortedTransactions, function (i, v) {
             if (v.payee.name != payeeName || count++ > 9)
                 return;
-            $('.payee_transactions tbody').append('<tr><td>' + moment(v.date).format('M/D/YY') + '</td><td>' + v.category.name + '</td><td>' + Utils.CurrencyFormatter.format(v.amount) + '</td></tr>');
+            $('.payee_transactions tbody').append('<tr><td>' + moment(v.date).format('M/D/YY') + '</td><td>' + v.category.name + '</td><td>' + (v.grouptotal == null ? Utils.CurrencyFormatter.format(v.amount) : Utils.CurrencyFormatter.format(v.amount) + ' of ' + Utils.CurrencyFormatter.format(v.grouptotal)) + '</td></tr>');
         });
     });
 }

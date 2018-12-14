@@ -1,4 +1,5 @@
 <?php
+
 $accountBeans = R::find('account', 'site=? ORDER BY name', [SITE]);
 $balances = ['timestamp' => time(), 'list' => [], 'byaccount' => [], 'byaccounttype' => [], 'net' => []];
 $allDates = [];
@@ -18,7 +19,7 @@ foreach ($accountBeans as $account) {
 	$balances['byaccount'][$account->id] = array_reverse($balances['byaccount'][$account->id]);
 	$balances['byaccounttype'][$account->type_id] = array_reverse($balances['byaccounttype'][$account->type_id]);
 }
-$balances['net'] = array_values(array_reverse($balances['net']));
+$balances['net'] = array_reverse($balances['net']);
 
 ksort($allDates);
 foreach ($balances['byaccount'] as $accountId => $accountBalances) {
@@ -39,5 +40,13 @@ foreach ($balances['byaccounttype'] as $accountTypeId => $accountTypeBalances) {
 	ksort($accountTypeBalances);
 	$balances['byaccounttype'][$accountTypeId] = array_values($accountTypeBalances);
 }
+
+foreach ($allDates as $date) {
+	if (!array_key_exists($date, $balances['net'])) {
+		$balances['net'][$date] = null;
+	}
+}
+ksort($balances['net']);
+$balances['net'] = array_values($balances['net']);
 jsonheader();
 echo json_encode($balances, JSON_NUMERIC_CHECK);

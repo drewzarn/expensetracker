@@ -9,7 +9,7 @@
 					</button>
 				</div>
 				<div class="modal-body">
-					<div class="form-group"><label>Balance Date</label><input type="date" name="addbalance_date" id="addbalance_date" class="form-control" /></div>
+					<div class="form-group"><label>Balance Date</label><input data-type="date" name="addbalance_date" id="addbalance_date" class="form-control" /></div>
 					<div id="addbalance_accountlist"></div>
 				</div>
 				<div class="modal-footer">

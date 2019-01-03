@@ -94,7 +94,7 @@ $(document).ready(function () {
         var $td = $(this);
         $('#editbalance_id').val($td.data('balanceid'));
         $('#editbalance_account').val($td.parent().data('accountid'));
-        $('#editbalance_date').val($td.data('entrydate'));
+        $('#editbalance_date').datepicker('update', moment($td.data('entrydate')).format('M/D/YYYY'));
         $('#editbalance_amount').val($td.data('amount'));
         $('#modal_editbalance').modal();
     });

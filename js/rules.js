@@ -625,6 +625,7 @@ var StepperTable = {
                 if ($el.data('month') != null) {
                     mDate.subtract(prevMonth ? 1 : 0, 'months');
                     $el.data('month', mDate.month());
+                    $el.data('year', mDate.year());
                     prevMonth = false;
                 }
             });

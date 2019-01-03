@@ -94,7 +94,7 @@ $(document).ready(function () {
         var $td = $(this);
         $('#editbalance_id').val($td.data('balanceid'));
         $('#editbalance_account').val($td.parent().data('accountid'));
-        $('#editbalance_date').val($td.data('entrydate'));
+        $('#editbalance_date').datepicker('update', moment($td.data('entrydate')).format('M/D/YYYY'));
         $('#editbalance_amount').val($td.data('amount'));
         $('#modal_editbalance').modal();
     });
@@ -116,7 +116,9 @@ var DataReference = {
     SpendingByCategory: {},
     SpendingByPayee: {},
     NetByPeriod: {},
-    NetNames: ['Income', 'Expenses', 'Net']
+    NetNames: ['Income', 'Expenses', 'Net'],
+    ParityIcons: {'1': 'plus', '0': 'exchange-alt', '-1': 'minus'},
+    ParityNames: {'1': 'Income', '0': 'Transfers', '-1': 'Expenses'}
 }
 
 var ModalHandler = {
@@ -142,7 +144,7 @@ var ModalHandler = {
             $('#editcategory_id').val($(e.relatedTarget).data('categoryid'));
             var details = $(e.relatedTarget).data('details');
             $('#editcategory_name').val(details.name);
-            $('#editcategory_income').prop('checked', details.income == "1");
+            $('#editcategory_parity').val(details.parity);
             $('#editcategory_deleted').prop('checked', details.deleted == "1");
         },
         editpayee: function (e) {
@@ -366,13 +368,13 @@ var DataHandler = {
             var d = Utils.SortBeans(data.list);
             $('#categorylist tbody').empty();
             DataReference.CategoryNames = [];
-            DataReference.CategoryNamesByID = {}
+            DataReference.CategoryNamesByID = {};
             $.each(d, function (i, v) {
                 if (v.deleted != '1') {
                     DataReference.CategoryNames.push(v.name);
                     DataReference.CategoryNamesByID[v.id] = v.name;
                 }
-                $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td>' + (v.income == '1' ? '<i class="fas fa-check-circle" />' : '') + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
+                $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td><i class="fas fa-' + DataReference.ParityIcons[v.parity] + '" /></td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
                 $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
             });
             DataReference.CategoryNames.sort();
@@ -442,8 +444,8 @@ var DataHandler = {
                 if (DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] == null)
                     DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] = 0;
 
-                DataReference.NetByPeriod[mDate.year()][v.category.income == "1" ? 'Income' : 'Expenses'] += (v.amount);
-                DataReference.NetByPeriod[mDate.year()][mDate.month()][v.category.income == "1" ? 'Income' : 'Expenses'] += (v.amount);
+                DataReference.NetByPeriod[mDate.year()][DataReference.ParityNames[v.category.parity]] += (v.amount);
+                DataReference.NetByPeriod[mDate.year()][mDate.month()][DataReference.ParityNames[v.category.parity]] += (v.amount);
                 DataReference.NetByPeriod[mDate.year()].Net = DataReference.NetByPeriod[mDate.year()].Income - DataReference.NetByPeriod[mDate.year()].Expenses;
                 DataReference.NetByPeriod[mDate.year()][mDate.month()].Net = DataReference.NetByPeriod[mDate.year()][mDate.month()].Income - DataReference.NetByPeriod[mDate.year()][mDate.month()].Expenses;
                 DataReference.SpendingByCategory[mDate.year()][v.category.name] += (v.amount);
@@ -583,10 +585,11 @@ var Utils = {
     TransactionListRender: {
         Amount: function (data, type, row) {
             if (type === 'display') {
+                var icon = '<i class="light float-right fas fa-' + DataReference.ParityIcons[row.category.parity] + '"></i> ';
                 if (row.grouptotal == null) {
-                    return Utils.CurrencyFormatter.format(data);
+                    return icon + Utils.CurrencyFormatter.format(data);
                 } else {
-                    return Utils.CurrencyFormatter.format(data) + ' of ' + Utils.CurrencyFormatter.format(row.grouptotal) + '';
+                    return icon + Utils.CurrencyFormatter.format(data) + ' of ' + Utils.CurrencyFormatter.format(row.grouptotal) + '';
                 }
             }
             return data;
@@ -622,6 +625,7 @@ var StepperTable = {
                 if ($el.data('month') != null) {
                     mDate.subtract(prevMonth ? 1 : 0, 'months');
                     $el.data('month', mDate.month());
+                    $el.data('year', mDate.year());
                     prevMonth = false;
                 }
             });

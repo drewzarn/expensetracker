@@ -11,7 +11,7 @@
 				<div class="modal-body">
 					<input type="hidden" id="editbalance_id" />
 					<div class="form-group"><select class="form-control" id="editbalance_account" name="editbalance_account"></select></div>
-					<div class="form-group"><input type="date" class="form-control" id="editbalance_date" name="editbalance_date" placeholder="Date" /></div>
+					<div class="form-group"><input data-type="date" class="form-control" id="editbalance_date" name="editbalance_date" placeholder="Date" /></div>
 					<div class="form-group"><input type="number" class="form-control" id="editbalance_amount" name="editbalance_amount" step="0.01" placeholder="Amount" /></div>
 				</div>
 				<div class="modal-footer d-flex justify-content-between">

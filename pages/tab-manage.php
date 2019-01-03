@@ -20,7 +20,7 @@
 						<h5>Categories</h5>
 						<table class="table table-sm table-striped table-bordered" id="categorylist">
 							<thead>
-								<tr><th>Name</th><th>Income</th><th>Inactive</th></tr>
+								<tr><th>Name</th><th>Parity</th><th>Inactive</th></tr>
 							</thead>
 							<tbody />
 						</table>

@@ -29,7 +29,7 @@ if(count($subTransactions) > 1) {
 
 foreach($subTransactions as $tran) {
 	if($tran['amount'] == 0) continue;
-	$category = R::findOrCreate('category', ['name' => $tran['category'], 'site' => SITE, 'deleted' => 0]);
+	$category = R::findOrCreate('category', ['name' => $tran['category'], 'site' => SITE, 'deleted' => 0, 'parity' => -1]);
 
 	$transaction = R::dispense('transaction');
 	$transaction->site = SITE;

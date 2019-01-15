@@ -3,7 +3,7 @@ $category = R::findOrCreate('category', ['name' => $POSTDATA['category'], 'site'
 $payee = R::findOrCreate('payee', ['name' => $POSTDATA['payee'], 'site' => SITE]);
 
 $amount = $POSTDATA['amount'];
-$trnDate = $POSTDATA['date'];
+$trnDate = new DateTime($POSTDATA['date']);
 
 $transaction = R::load('transaction', $POSTDATA['id']);
 $transaction->category = $category;

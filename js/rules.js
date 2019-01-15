@@ -159,7 +159,7 @@ var ModalHandler = {
             $('#edittransaction_payee').val(DataReference.PayeeNamesByID[trnDetails.payee_id]);
             $('#edittransaction_category').val(DataReference.CategoryNamesByID[trnDetails.category_id]);
             $('#edittransaction_amount').val(trnDetails.amount);
-            $('#edittransaction_date').val(moment(trnDetails.date).format('M/D/YYYY'));
+            $('#edittransaction_date').datepicker('update', moment(trnDetails.date).format('M/D/YYYY'));
             $('#edittransaction_description').val(trnDetails.description);
             showTransactionsByPayee(DataReference.PayeeNamesByID[trnDetails.payee_id]);
         }
@@ -458,6 +458,8 @@ var DataHandler = {
             $('#trnlistdateend').datepicker('update', dateLimits.max.format('M/D/YYYY')).on('changeDate', TransactionListTable.Draw);
 
             TransactionListTable.TableRef.clear().rows.add(data.list).draw();
+            TransactionListTable.Filters.Category = [];
+            TransactionListTable.Filters.Payee = [];
 
             StepperTable.RefreshAll();
         }
@@ -632,9 +634,10 @@ var StepperTable = {
 
             $table.on('click', 'th i.fas', StepperTable.Step);
 
-            if ($table.data('rowselect') != null) {
+            if ($table.data('filtertable') != null) {
                 $table.on('click', 'tbody tr', function () {
-                    StepperTable.SelectRow($(this), $(this).closest('table').data('rowselect'));
+                    var $parentTable = $(this).closest('table');
+                    StepperTable.SelectRow($(this), $parentTable.data('filtertable'), $parentTable.data('filterproperty'), $parentTable.data('filtercounter'));
                 });
             }
         });
@@ -690,30 +693,22 @@ var StepperTable = {
             $tbody.append($row);
         });
         $tbody.css('max-height', ($(window).height() - $tbody.offset().top - 30) + 'px');
-    },
-    SelectRow: function ($row, rowSelect) {
-        $row.toggleClass('table-success');
-        var add = $row.hasClass('table-success');
-        switch (rowSelect) {
-            case 'sbpcategory':
-                if (add) {
-                    TransactionListTable.Filters.Category.push($row.find('th:first').text());
-                } else {
-                    TransactionListTable.Filters.Category.splice(TransactionListTable.Filters.Category.indexOf($row.find('th:first').text()), 1);
-                }
-                $('#tabsbpcategories').text('Categories (' + (TransactionListTable.Filters.Category.length == 0 ? 'all' : TransactionListTable.Filters.Category.length) + ')');
-                TransactionListTable.Draw();
-                break;
-            case 'sbppayee':
-                if (add) {
-                    TransactionListTable.Filters.Payee.push($row.find('th:first').text());
-                } else {
-                    TransactionListTable.Filters.Payee.splice(TransactionListTable.Filters.Payee.indexOf($row.find('th:first').text()), 1);
-                }
-                $('#tabsbppayees').text('Payees (' + (TransactionListTable.Filters.Payee.length == 0 ? 'all' : TransactionListTable.Filters.Payee.length) + ')');
-                TransactionListTable.Draw();
-                break;
+        if($table.data('filtertable') != null) {
+            this.SelectRow(null, $table.data('filtertable'), $table.data('filterproperty'), $table.data('filtercounter'));
         }
+    },
+    SelectRow: function ($row, filterTable, filterProperty, filterCounter) {
+        if($row != null) {
+            $row.toggleClass('table-success');
+            var add = $row.hasClass('table-success');
+            if(add) {
+                window[filterTable].Filters[filterProperty].push($row.find('th:first').text());
+            } else {
+                window[filterTable].Filters[filterProperty].splice(TransactionListTable.Filters.Category.indexOf($row.find('th:first').text()), 1);
+            }
+        }
+        $(filterCounter).text(window[filterTable].Filters[filterProperty].length == 0 ? 'all' : window[filterTable].Filters[filterProperty].length);
+        window[filterTable].Draw();
     },
     Step: function () {
         var $this = $(this);

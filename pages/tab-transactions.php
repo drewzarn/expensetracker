@@ -5,16 +5,16 @@
 				<h3 class="card-header">Spending by Period</h3>
 				<ul class="nav nav-tabs nav-fill" role="tablist">
 					<li class="nav-item">
-						<a class="nav-link active" data-toggle="tab" href="#sbpcategories" id="tabsbpcategories">Categories (all)</a>
+						<a class="nav-link active" data-toggle="tab" href="#sbpcategories" id="tabsbpcategories">Categories (<span>all</span>)</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" data-toggle="tab" href="#sbppayees" id="tabsbppayees">Payees (all)</a>
+						<a class="nav-link" data-toggle="tab" href="#sbppayees" id="tabsbppayees">Payees (<span>all</span>)</a>
 					</li>
 				</ul>
 
 				<div class="tab-content">
 					<div class="tab-pane fade show active" id="sbpcategories" role="tabpanel">
-						<table class="table table-sm table-striped stepper" data-source="SpendingByCategory" data-rows="CategoryNames" data-rowselect="sbpcategory">
+						<table class="table table-sm table-striped stepper" data-source="SpendingByCategory" data-rows="CategoryNames" data-filtertable="TransactionListTable" data-filterproperty="Category" data-filtercounter="#tabsbpcategories span">
 							<thead class="steppable">
 								<tr><th></th><th data-year=""></th><th data-month="" data-year=""></th><th data-month="" data-year=""></th></tr>
 							</thead>
@@ -22,7 +22,7 @@
 						</table>
 					</div>
 					<div class="tab-pane fade" id="sbppayees" role="tabpanel">
-						<table class="table table-sm table-striped stepper" data-source="SpendingByPayee" data-rows="PayeeNames" data-rowselect="sbppayee">
+						<table class="table table-sm table-striped stepper" data-source="SpendingByPayee" data-rows="PayeeNames" data-filtertable="TransactionListTable" data-filterproperty="Payee" data-selectedcounter="#tabsbppayees span">
 							<thead class="steppable">
 								<tr><th></th><th data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') == 1 ? 11 : date('n') - 1; ?>" data-year="<?= date('Y'); ?>"></th><th data-month="<?= date('n') ?>" data-year="<?= date('n') == 1 ? date('Y') - 1 : date('Y'); ?>"></th></tr>
 							</thead>

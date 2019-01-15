@@ -42,3 +42,5 @@ if (!$_SESSION['user'] instanceof User && array_search($page, ['user', 'reset'])
 		$modalContent .= file_get_contents(getcwd() . '/modals/' . $file);
 	}
 }
+
+DEFINE('MYSQL_DATETIME', "Y-m-d H:i:s");

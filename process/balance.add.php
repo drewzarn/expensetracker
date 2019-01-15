@@ -1,6 +1,6 @@
 <?php
 
-$date = $POSTDATA['date'];
+$date = new DateTime($POSTDATA['date']);
 unset($POSTDATA['date']);
 $accounts = [];
 foreach ($POSTDATA as $accountId => $amount) {
@@ -11,7 +11,7 @@ foreach ($POSTDATA as $accountId => $amount) {
 		$accounts[$accountId] = r::load('account', $accountId);
 		$accounts[$accountId]->accounttype = r::load('accounttype', $accounts[$accountId]->type_id);
 	}
-	$lastBalance = R::findOne('balance', 'account_id=? AND date<? ORDER BY date DESC LIMIT 1', [$accountId, $date]);
+	$lastBalance = R::findOne('balance', 'account_id=? AND date<? ORDER BY date DESC LIMIT 1', [$accountId, $date->format(MYSQL_DATETIME)]);
 
 	$balance = R::dispense('balance');
 	$balance->date = $date;

@@ -6,7 +6,7 @@ if($POSTDATA['DELETE'] == 'true') {
 	R::trash($balance);
 	exit();
 }
-$balance->date = $POSTDATA['date'];
+$balance->date = new DateTime($POSTDATA['date']);
 $balance->amount = $POSTDATA['amount'];
 $balance->account = $account;
 R::store($balance);

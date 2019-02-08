@@ -1,6 +1,6 @@
 <div id="content-transactions" class="container-fluid">
 	<div class="row">
-		<div class="col-4">
+		<div class="col-sm-4">
 			<div class="card my-3">
 				<h3 class="card-header">Spending by Period</h3>
 				<ul class="nav nav-tabs nav-fill" role="tablist">
@@ -32,7 +32,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-8" id="transactionlist">
+		<div class="col-sm-8" id="transactionlist">
 			<div class="card my-3">
 				<h3 class="card-header">Transactions</h3>
 				<table id="transactionlisttable" class="display table table-sm table-striped" style="width:100%">

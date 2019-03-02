@@ -17,11 +17,11 @@
 						<div class="form-group clearfix">
 							<input type="text" class="form-control w-75 float-left typeahead" data-provide="typeahead" id="addtransaction_category" name="addtransaction_category" placeholder="Category" required />
 							<input type="number" class="form-control w-25 float-left" id="addtransaction_amount" name="addtransaction_amount" step="0.01" placeholder="Amount" required />
-						</div>
+						</div> 
 						<div class="form-group"><input type="text" class="form-control" id="addtransaction_description" name="addtransaction_description" placeholder="Description" /></div>
 					</div>
 					<div class="form-group d-none"><input type="checkbox" id="addtransaction_allowdupe" name="addtransaction_allowdupe" /> <label for="addtransaction_allowdupe">Allow dupe: </label></div>
-					<div class="form-group"><span id="splittotal" class="float-left"></span><a class="float-right btn btn-info btn-sm text-light" id="splittransaction">Add Split</a></div>
+					<div class="form-group"><span id="splittotal" class="float-left"></span><a class="btn btn-info btn-sm text-light" id="splittransaction">Add Split</a></div>
 				</div>
 				<div class="modal-footer">
 					<div class="formmsg rounded border bg-light p-2 my-3 invisible"></div><input type="submit" class="btn btn-primary" value="Add Transaction" />

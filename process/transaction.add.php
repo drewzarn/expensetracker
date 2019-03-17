@@ -6,7 +6,8 @@ $payee = R::findOrCreate('payee', ['name' => $POSTDATA['payee'], 'site' => SITE,
 
 $baseTransaction = [
 	'payee' => $POSTDATA['payee'],
-	'date' => new DateTime($POSTDATA['date'])
+	'date' => new DateTime($POSTDATA['date']),
+    'change_date' => new DateTime()
 ];
 $subTransactions[] = $baseTransaction + [
 	'category' => $POSTDATA['category'],

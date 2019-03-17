@@ -11,4 +11,5 @@ $transaction->payee = $payee;
 $transaction->amount = $amount;
 $transaction->description = $POSTDATA['description'];
 $transaction->date = $trnDate;
+$transaction->change_date = new DateTime();
 R::store($transaction);

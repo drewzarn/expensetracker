@@ -1,5 +1,6 @@
 <nav id="mainnav" class="navbar navbar-expand-lg navbar-light bg-light">
 	<span class="navbar-brand">Expenses</span>
+    <span class="navbar-text"><i id="status_location" class="text-light fas fa-crosshairs"></i></span>
 	<a class="nav-link text-muted" href="#" data-toggle="modal" data-target="#modal_addtransaction">Add Transaction</a>
 	<div class="collapse navbar-collapse" id="navbarSupportedContent">
 		<ul class="navbar-nav mr-auto">

@@ -55,6 +55,7 @@ class User {
 		}
 		$user->password = password_hash($password, PASSWORD_DEFAULT);
 		$user->reset = null;
+        $user->change_date = new DateTime();
 		R::store($user);
 
 		$headers = "From: Expenses <expenses@amovita.net>\r\n";

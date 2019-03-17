@@ -6,7 +6,10 @@ $payee = R::findOrCreate('payee', ['name' => $POSTDATA['payee'], 'site' => SITE,
 
 $baseTransaction = [
 	'payee' => $POSTDATA['payee'],
-	'date' => new DateTime($POSTDATA['date'])
+	'date' => new DateTime($POSTDATA['date']),
+    'change_date' => new DateTime(),
+    'latitude' => $POSTDATA['latitude'],
+    'longitude' => $POSTDATA['longitude']
 ];
 $subTransactions[] = $baseTransaction + [
 	'category' => $POSTDATA['category'],
@@ -41,6 +44,9 @@ foreach($subTransactions as $tran) {
 	if($transactionGroup != null) {
 		$transaction->group = $transactionGroup;
 	}
+    $transaction->change_date = $tran['change_date'];
+    $transaction->latitude = $tran['latitude'];
+    $transaction->longitude = $tran['longitude'];
 	R::store($transaction);
 }
 

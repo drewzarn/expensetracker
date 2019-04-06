@@ -6,7 +6,9 @@ var BalanceData = Object.create(DataObject);
 var CategoryData = Object.create(DataObject);
 var PayeeData = Object.create(DataObject);
 var TransactionData = Object.create(DataObject);
-$(document).ready(function () {
+$(document).ready(async function () {
+    await IDBInterface.Init();
+    
     $(document).on('account:dataloading', DataHandler.Loading.Account);
     $(document).on('accounttype:dataloading', DataHandler.Loading.AccountType);
     $(document).on('balance:dataloading', DataHandler.Loading.Balance);
@@ -370,6 +372,7 @@ var DataHandler = {
             DataReference.CategoryNames = [];
             DataReference.CategoryNamesByID = {};
             $.each(d, function (i, v) {
+                IDBInterface.AddRecord('category', v);
                 if (v.deleted != '1') {
                     DataReference.CategoryNames.push(v.name);
                     DataReference.CategoryNamesByID[v.id] = v.name;
@@ -394,6 +397,7 @@ var DataHandler = {
             DataReference.PayeeNames = [];
             DataReference.PayeeNamesByID = {}
             $.each(d, function (i, v) {
+                IDBInterface.AddRecord('payee', v);
                 if (v.deleted != '1') {
                     DataReference.PayeeNames.push(v.name);
                     DataReference.PayeeNamesByID[v.id] = v.name;
@@ -416,12 +420,19 @@ var DataHandler = {
             DataReference.NetByPeriod = {};
             DataReference.SpendingByCategory = {};
             DataReference.SpendingByPayee = {};
-            $.each(data.list, function (i, v) {
+            $.each(data.list, function (i, v) {                
                 var mDate = moment(v.date);
                 if (mDate < dateLimits.min)
                     dateLimits.min = mDate;
                 if (mDate > dateLimits.max)
                     dateLimits.max = mDate;
+                
+                v.date = mDate.format('YYYYMMDD');
+                v.year = mDate.year();
+                v.month = mDate.month() + 1;
+                v.day = mDate.date();
+                v.weekday = mDate.format('dddd');
+                IDBInterface.AddRecord('transaction', v);
 
                 if (DataReference.NetByPeriod[mDate.year()] == null)
                     DataReference.NetByPeriod[mDate.year()] = {Income: 0, Expenses: 0};

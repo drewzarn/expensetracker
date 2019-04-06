@@ -3,7 +3,7 @@
 // Licensed under a CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
 // http://creativecommons.org/publicdomain/zero/1.0/
 
-(function() {
+(function () {
     if (typeof idb === "undefined") {
         self.importScripts('js/idb.js');
     }
@@ -27,20 +27,20 @@
                 return cache.addAll([]);
             })
             );
-        expensedb = idb.openDb('expensedb', 2, function (upgradeDb) {
-            console.log('making a new object store');
-            if (!upgradeDb.objectStoreNames.contains('category')) {
-                upgradeDb.createObjectStore('category', {keyPath: 'id', autoIncrement: true});
-            }
-        });
+        /*expensedb = idb.openDB('expensedb', 2, function (upgradeDb) {
+         console.log('making a new object store');
+         if (!upgradeDb.objectStoreNames.contains('category')) {
+         upgradeDb.createObjectStore('category', {keyPath: 'id', autoIncrement: true});
+         }
+         });*/
     });
 
     self.addEventListener('fetch', function (event) {
-        console.log(event.request.url);
-        if(event.request.url.endsWith('/list')) {
+        console.log('Fetch: ' + event.request.url);
+        if (event.request.url.endsWith('/list')) {
             var urlChunks = event.request.url.split('/');
             var dataObject = urlChunks[urlChunks.length - 2];
-            console.log(dataObject);
+            console.log('DataObject: ' + dataObject);
         }
         event.respondWith(
             caches.match(event.request)

@@ -190,7 +190,7 @@ var DataHandler = {
         }
     },
     Loaded: {
-        Account: function (e, data) {
+        Account: async function (e, data) {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=account] span').html(Object.keys(data.list).length + ' accounts<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=account] i').removeClass('fa-spin');
@@ -202,6 +202,7 @@ var DataHandler = {
             $('#balancetable tbody tr[data-accountid]').remove();
             $('#balancechart_accountlist div.col div label').remove();
             $.each(d, function (i, v) {
+                IDBInterface.QueueRecord('account', v);
                 DataReference.AccountNames.push(v.name);
                 DataReference.AccountNamesByID[v.id] = v.name;
                 $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '" data-accountactive="' + v.active + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
@@ -212,6 +213,7 @@ var DataHandler = {
                 $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
                 $('#balancechart_accountlist div.col[data-accounttypeid=' + v.type_id + '] div').append('<label class="d-block" for="bca' + v.id + '"><input type="checkbox" data-accountid="' + v.id + '" id="bca' + v.id + '"> ' + v.name + '</label></div>');
             });
+            IDBInterface.CommitQueuedRecords('account');
             BalanceData.Refresh();
         },
         AccountType: function (e, data) {
@@ -227,6 +229,7 @@ var DataHandler = {
             $('#balancetable tbody').remove();
             $('#balancechart_accountlist div.col').remove();
             $.each(d, function (i, v) {
+                IDBInterface.QueueRecord('accounttype', v);
                 DataReference.AccountTypeNames.push(v.name);
                 DataReference.AccountTypeNamesByID[v.id] = v.name;
                 $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
@@ -237,6 +240,7 @@ var DataHandler = {
                 $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
                 $('#balancechart_accountlist').append('<div class="col px-0" data-accounttypeid="' + v.id + '"><i class="fas fa-chevron-down float-right mt-2 pointer"></i><h5><input type="checkbox" data-accounttypeid="' + v.id + '" id="bcat' + v.id + '" checked /> <label for="bcat' + v.id + '">' + v.name + '</label></h5><div class="collapse"></div></div>');
             });
+            IDBInterface.CommitQueuedRecords('accounttype');
             AccountData.Refresh();
         },
         Balance: function (e, data) {
@@ -248,12 +252,14 @@ var DataHandler = {
             $('#balancetable tfoot').append('<tr id="netbalance" class="table-secondary"><th>Net</th></tr>');
             var entriesByDate = {};
             $.each(d, function (i, v) {
+                IDBInterface.QueueRecord('balance', v);
                 v.date = v.date.substring(0, 10);
                 if (entriesByDate[v.date] == null) {
                     entriesByDate[v.date] = new Array();
                 }
                 entriesByDate[v.date].push(v);
             });
+            IDBInterface.CommitQueuedRecords('balance');
             Charts.Balances.labels = Object.keys(entriesByDate).sort();
             Charts.Balances.allseries = {};
             var dates = Object.keys(entriesByDate).sort().reverse();
@@ -363,7 +369,7 @@ var DataHandler = {
             });
             Charts.Balances.Draw();
         },
-        Category: function (e, data) {
+        Category: async function (e, data) {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=category] span').html(Object.keys(data.list).length + ' categories<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=category] i').removeClass('fa-spin');
@@ -372,7 +378,7 @@ var DataHandler = {
             DataReference.CategoryNames = [];
             DataReference.CategoryNamesByID = {};
             $.each(d, function (i, v) {
-                IDBInterface.AddRecord('category', v);
+                IDBInterface.QueueRecord('category', v);
                 if (v.deleted != '1') {
                     DataReference.CategoryNames.push(v.name);
                     DataReference.CategoryNamesByID[v.id] = v.name;
@@ -380,6 +386,7 @@ var DataHandler = {
                 $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td><i class="fas fa-' + DataReference.ParityIcons[v.parity] + '" /></td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
                 $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
             });
+            await IDBInterface.CommitQueuedRecords('category');
             DataReference.CategoryNames.sort();
             $("#addtransaction_category").typeahead({source: DataReference.CategoryNames});
             $("#edittransaction_category").typeahead({source: DataReference.CategoryNames});
@@ -388,7 +395,7 @@ var DataHandler = {
                 $('#catlist').append('<button class="btn-sm">' + v + '</button>');
             });
         },
-        Payee: function (e, data) {
+        Payee: async function (e, data) {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=payee] span').html(Object.keys(data.list).length + ' payees<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=payee] i').removeClass('fa-spin');
@@ -397,7 +404,7 @@ var DataHandler = {
             DataReference.PayeeNames = [];
             DataReference.PayeeNamesByID = {}
             $.each(d, function (i, v) {
-                IDBInterface.AddRecord('payee', v);
+                IDBInterface.QueueRecord('payee', v);
                 if (v.deleted != '1') {
                     DataReference.PayeeNames.push(v.name);
                     DataReference.PayeeNamesByID[v.id] = v.name;
@@ -406,11 +413,12 @@ var DataHandler = {
                 $('#payeelist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editpayee" data-payeeid="' + v.id + '" />' + v.name + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
                 $('#payeelist tbody').find('a[data-payeeid=' + v.id + ']').data('details', v);
             });
+            await IDBInterface.CommitQueuedRecords('payee');
             DataReference.PayeeNames.sort();
             $("#addtransaction_payee").typeahead({source: DataReference.PayeeNames, afterSelect: showTransactionsByPayee});
             $("#edittransaction_payee").typeahead({source: DataReference.PayeeNames, afterSelect: showTransactionsByPayee});
         },
-        Transaction: function (e, data) {
+        Transaction: async function (e, data) {
             var date = new Date(data.timestamp * 1000);
             $('#card_datastats').find('li[data-ref=transaction] span').html(Object.keys(data.list).length + ' transactions<br />' + moment(date).calendar());
             $('#card_datastats').find('li[data-ref=transaction] i').removeClass('fa-spin');
@@ -432,7 +440,8 @@ var DataHandler = {
                 v.month = mDate.month() + 1;
                 v.day = mDate.date();
                 v.weekday = mDate.format('dddd');
-                IDBInterface.AddRecord('transaction', v);
+                v.monthyear = v.month.toString() + v.year.toString();
+                IDBInterface.QueueRecord('transaction', v);
 
                 if (DataReference.NetByPeriod[mDate.year()] == null)
                     DataReference.NetByPeriod[mDate.year()] = {Income: 0, Expenses: 0};
@@ -464,6 +473,7 @@ var DataHandler = {
                 DataReference.SpendingByPayee[mDate.year()][v.payee.name] += (v.amount);
                 DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] += (v.amount);
             });
+            await IDBInterface.CommitQueuedRecords('transaction');
 
             $('#trnlistdatestart').datepicker('update', dateLimits.min.format('M/D/YYYY')).on('changeDate', TransactionListTable.Draw);
             $('#trnlistdateend').datepicker('update', dateLimits.max.format('M/D/YYYY')).on('changeDate', TransactionListTable.Draw);
@@ -861,16 +871,16 @@ function loadTransactionToEdit() {
     $('#addtransactionmodal').attr('action', 'transaction/edit');
 }
 
-function showTransactionsByPayee(payeeName) {
-    TransactionData.GetData().then(function (data) {
-        var count = 0;
-        $('.payee_transactions tbody').empty();
-        var sortedTransactions = Utils.SortBeans(data.list, 'date').reverse();
-        $.each(sortedTransactions, function (i, v) {
-            if (v.payee.name != payeeName || count++ > 9)
-                return;
-            $('.payee_transactions tbody').append('<tr><td>' + moment(v.date).format('M/D/YY') + '</td><td>' + v.category.name + '</td><td>' + (v.grouptotal == null ? Utils.CurrencyFormatter.format(v.amount) : Utils.CurrencyFormatter.format(v.amount) + ' of ' + Utils.CurrencyFormatter.format(v.grouptotal)) + '</td></tr>');
-        });
+async function showTransactionsByPayee(payeeName) {
+    var payeeId = (await IDBInterface.GetRecordsByIndex('payee', 'name', payeeName))[0].id;
+    var records = await IDBInterface.GetRecordsByIndex('transaction', 'payee', payeeId);
+    var sortedTransactions = Utils.SortBeans(records, 'date').reverse();
+    var count = 0;
+    $('.payee_transactions tbody').empty();
+    $.each(sortedTransactions, function (i, v) {
+        if (count++ > 9)
+            return;
+        $('.payee_transactions tbody').append('<tr><td>' + moment(v.date).format('M/D/YY') + '</td><td>' + v.category.name + '</td><td>' + (v.grouptotal == null ? Utils.CurrencyFormatter.format(v.amount) : Utils.CurrencyFormatter.format(v.amount) + ' of ' + Utils.CurrencyFormatter.format(v.grouptotal)) + '</td></tr>');
     });
 }
 

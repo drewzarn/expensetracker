@@ -27,13 +27,11 @@
 	<script type="text/javascript" src="js/bootstrap-datepicker.min.js"></script>
 	<script type="text/javascript" src="js/typeahead.js"></script>
 	<script type="text/javascript" src="js/moment.js"></script>
-
-	<script src="js/idb.js"></script>
 	<!-- script src="worker.js"></script -->
 	<script src="js/localforage.js"></script>
 	<script src="js/dataObject.js"></script>
 	<script src="js/idbinterface.js"></script>
-	<script src="js/rules.js"></script>
+	<script type="module" src="js/main.js"></script>
 	<script src="js/charts.js"></script>
 </head>
 <body <?= $DEVELOPMENT ? 'class="dev"' : '' ?>>

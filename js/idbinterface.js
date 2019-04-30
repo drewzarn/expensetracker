@@ -49,7 +49,7 @@ var IDBInterface = {
     },
     AddRecord: async function (store, record) {
         console.log('Adding record to ' + store);
-        //await IDBInterface.DB.put(store, record, record.id);
+        await IDBInterface.DB.put(store, record);
     },
     QueuedRecords: {},
     QueueRecord: async function (store, record) {
@@ -61,14 +61,21 @@ var IDBInterface = {
     CommitQueuedRecords: async function(store) {
         var tx = IDBInterface.DB.transaction(store, 'readwrite');
         console.log('Committing ' + IDBInterface.QueuedRecords[store].length + ' records to ' + store);
-        IDBInterface.QueuedRecords[store].forEach(function(item, i){
-            tx.store.add(item);
-        });
+        /*IDBInterface.QueuedRecords[store].forEach(function(item, i){
+            if(item.hasOwnProperty('id')) {
+                tx.store.add(item);
+            } else {
+                tx.store.add(item, 33);
+            }
+        });*/
         IDBInterface.QueuedRecords[store] = [];
         await tx.done;
     },
     GetAllKeys: async function(store) {
         return await IDBInterface.DB.getAllKeys(store);
+    },
+    GetAll: async function(store) {
+        return await IDBInterface.DB.getAll(store);
     },
     GetRecordByID: async function (store, id) {
         console.log('Getting record ' + id + ' from ' + store);

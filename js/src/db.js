@@ -22,6 +22,7 @@ const DBWrapper = {
                 DB.metadata.put({table: table, lastBulk: new Date()});
             } else {
                 console.log("Skipping bulk add for " + table + " due to freshness");
+                DataUI[table]();
             }
         })
         .catch(function(){

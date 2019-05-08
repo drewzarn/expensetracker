@@ -32,6 +32,9 @@ $(document).ready(async function () {
           */
         });
         console.log(changedObjects);
+        changedObjects.forEach(function(changeObject){
+            DataUI[changeObject]();
+        });
     });
     DBClass.DB.open().catch(function (e) {
         console.error("Open failed: " + e.stack);
@@ -134,6 +137,24 @@ $(document).ready(async function () {
     $('#balancechart_accountlist').on('change', 'input', Charts.Balances.Draw);
 });
 
+var DataUI = {
+    accounts: function() {
+        $('#accountlist div ul').empty();
+        $('#addbalance_accountlist div').empty();
+        $('#balancetable tbody tr[data-accountid]').remove();
+        $('#balancechart_accountlist div.col div label').remove();
+        DBClass.DB.accounts.orderBy('name')
+        .then(function(data){
+            console.log(data);
+        });
+    },
+    accounttypes: function(){},
+    balances: function(){},
+    categories: function(){},
+    payees: function(){},
+    transactions: function(){}
+};
+
 var DataReference = {
     AccountNames: [],
     AccountNamesById: {},
@@ -225,10 +246,6 @@ var DataHandler = {
             var d = Utils.SortBeans(data.list);
             DataReference.AccountNames = [];
             DataReference.AccountNamesByID = {};
-            $('#accountlist div ul').empty();
-            $('#addbalance_accountlist div').empty();
-            $('#balancetable tbody tr[data-accountid]').remove();
-            $('#balancechart_accountlist div.col div label').remove();
             var bulkObjects = [];
             $.each(d, function (i, v) {
                 bulkObjects.push(v);

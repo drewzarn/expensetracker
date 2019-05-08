@@ -13,7 +13,7 @@ module.exports = {
     // the target directory for all output files
     // must be an absolute path (use the Node.js path module)
     filename: "main.js", // string
-    // the filename template for entry chunks
-    
-  }
+    // the filename template for entry chunks 
+  },
+  devtool
 }

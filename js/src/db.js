@@ -4,12 +4,12 @@ import 'dexie-syncable';
 
 const DB = new Dexie('expensedata');
 DB.version(1).stores({
-    payees: 'id,name',
-    accounts: 'id,accounttype',
-    accounttypes: 'id',
-    balances: 'id,account',
-    categories: 'id,parity,name',
-    transactions: 'id,payee,category,date,year,month,day,monthyear,weekday',
+    payee: 'id,name',
+    account: 'id,accounttype,name',
+    accounttype: 'id',
+    balance: 'id,account',
+    category: 'id,parity,name',
+    transaction: 'id,payee,category,date,year,month,day,monthyear,weekday',
     metadata: 'table'
 });
 

@@ -1,5 +1,20 @@
 import DBClass from './db.js';
 
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function(event) {
+        console.log("Got message from service worker: " + event.data);
+    });
+    if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage("newclient");
+    } else {
+        navigator.serviceWorker.register('/worker.js').then(function(registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+        });
+    }
+}
+
 var CATEGORIES = [], IDIDS = {}, PAYEES = [], PAY_IDS = {};
 var NOW = new Date();
 var AccountData = Object.create(DataObject);
@@ -138,21 +153,26 @@ $(document).ready(async function () {
 });
 
 var DataUI = {
-    accounts: function() {
+    account: function() {
         $('#accountlist div ul').empty();
         $('#addbalance_accountlist div').empty();
         $('#balancetable tbody tr[data-accountid]').remove();
         $('#balancechart_accountlist div.col div label').remove();
-        DBClass.DB.accounts.orderBy('name')
-        .then(function(data){
-            console.log(data);
+        DBClass.DB.accounts.orderBy('name').each(function(v){
+            $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '" data-accountactive="' + v.active + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
+                if (v.active == '1') {
+                    $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
+                }
+                $('#balancetable tbody[data-accounttypeid=' + v.type_id + ']').append('<tr data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '"><td>' + v.name + '</td></tr>');
+                $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
+                $('#balancechart_accountlist div.col[data-accounttypeid=' + v.type_id + '] div').append('<label class="d-block" for="bca' + v.id + '"><input type="checkbox" data-accountid="' + v.id + '" id="bca' + v.id + '"> ' + v.name + '</label></div>');
         });
     },
-    accounttypes: function(){},
-    balances: function(){},
-    categories: function(){},
-    payees: function(){},
-    transactions: function(){}
+    accounttype: function(){},
+    balance: function(){},
+    category: function(){},
+    payee: function(){},
+    transaction: function(){}
 };
 
 var DataReference = {
@@ -259,7 +279,7 @@ var DataHandler = {
                 $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
                 $('#balancechart_accountlist div.col[data-accounttypeid=' + v.type_id + '] div').append('<label class="d-block" for="bca' + v.id + '"><input type="checkbox" data-accountid="' + v.id + '" id="bca' + v.id + '"> ' + v.name + '</label></div>');
             });
-            DBClass.DBWrapper.bulkAdd('accounts', bulkObjects);
+            DBClass.DBWrapper.bulkAdd('account', bulkObjects);
             BalanceData.Refresh();
         },
         AccountType: function (e, data) {
@@ -287,7 +307,7 @@ var DataHandler = {
                 $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
                 $('#balancechart_accountlist').append('<div class="col px-0" data-accounttypeid="' + v.id + '"><i class="fas fa-chevron-down float-right mt-2 pointer"></i><h5><input type="checkbox" data-accounttypeid="' + v.id + '" id="bcat' + v.id + '" checked /> <label for="bcat' + v.id + '">' + v.name + '</label></h5><div class="collapse"></div></div>');
             });
-            DBClass.DBWrapper.bulkAdd('accounttypes', bulkObjects);
+            DBClass.DBWrapper.bulkAdd('accounttype', bulkObjects);
             AccountData.Refresh();
         },
         Balance: function (e, data) {
@@ -307,7 +327,7 @@ var DataHandler = {
                 }
                 entriesByDate[v.date].push(v);
             });
-            DBClass.DBWrapper.bulkAdd('balances', bulkObjects);
+            DBClass.DBWrapper.bulkAdd('balance', bulkObjects);
 
             Charts.Balances.labels = Object.keys(entriesByDate).sort();
             Charts.Balances.allseries = {};
@@ -436,7 +456,7 @@ var DataHandler = {
                 $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td><i class="fas fa-' + DataReference.ParityIcons[v.parity] + '" /></td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
                 $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
             });
-            DBClass.DBWrapper.bulkAdd('categories', bulkObjects);
+            DBClass.DBWrapper.bulkAdd('category', bulkObjects);
 
             DataReference.CategoryNames.sort();
             $("#addtransaction_category").typeahead({source: DataReference.CategoryNames});
@@ -465,7 +485,7 @@ var DataHandler = {
                 $('#payeelist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editpayee" data-payeeid="' + v.id + '" />' + v.name + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
                 $('#payeelist tbody').find('a[data-payeeid=' + v.id + ']').data('details', v);
             });
-            DBClass.DBWrapper.bulkAdd('payees', bulkObjects);
+            DBClass.DBWrapper.bulkAdd('payee', bulkObjects);
 
             DataReference.PayeeNames.sort();
             $("#addtransaction_payee").typeahead({source: DataReference.PayeeNames, afterSelect: showTransactionsByPayee});
@@ -527,7 +547,7 @@ var DataHandler = {
                 DataReference.SpendingByPayee[mDate.year()][v.payee.name] += (v.amount);
                 DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] += (v.amount);
             });
-            DBClass.DBWrapper.bulkAdd('transactions', bulkObjects);
+            DBClass.DBWrapper.bulkAdd('transaction', bulkObjects);
             
             $('#trnlistdatestart').datepicker('update', dateLimits.min.format('M/D/YYYY')).on('changeDate', TransactionListTable.Draw);
             $('#trnlistdateend').datepicker('update', dateLimits.max.format('M/D/YYYY')).on('changeDate', TransactionListTable.Draw);

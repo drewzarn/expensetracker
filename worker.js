@@ -1,57 +1,30 @@
 'use strict';
 
-// Licensed under a CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
-// http://creativecommons.org/publicdomain/zero/1.0/
+self.importScripts('https://unpkg.com/dexie@2.0.4/dist/dexie.js');
+const DB = new Dexie('expensedata');
+self.importScripts('js/db-init.js');
+console.log('SW started', self);
 
-(function () {
-    if (typeof idb === "undefined") {
-        self.importScripts('js/idb.js');
-    }
-    var CACHE_NAME = 'expenses-cache-1';
+self.addEventListener('install', function (event) {
+    console.log('SW Installed', event);
+    event.waitUntil(self.skipWaiting()); // Activate worker immediately
+});
 
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-            navigator.serviceWorker.register('/worker.js').then(function (registration) {
-                console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            }, function (err) {
-                console.log('ServiceWorker registration failed: ', err);
-            });
+self.addEventListener('activate', function (event) {
+    console.log('SW Activated', event);
+    event.waitUntil(self.clients.claim()); // Become available to all pages
+});
+
+self.addEventListener('message', function (event) {
+    console.log("SW received message: ", event.data);
+
+    if(event.data.load) {
+        fetch('/' + event.data.load + '/list', {credentials: 'include'})
+        .then(response => response.json())
+        .then(data => {
+            DB[event.data.load].clear();
+            DB[event.data.load].bulkAdd(data.list);
+            DB.metadata.put({table: event.data.load, lastBulk: new Date()});
         });
     }
-
-    self.addEventListener('install', function (event) {
-        event.waitUntil(
-            caches.open(CACHE_NAME)
-            .then(function (cache) {
-                console.log('Opened cache');
-                return cache.addAll([]);
-            })
-            );
-        /*expensedb = idb.openDB('expensedb', 2, function (upgradeDb) {
-         console.log('making a new object store');
-         if (!upgradeDb.objectStoreNames.contains('category')) {
-         upgradeDb.createObjectStore('category', {keyPath: 'id', autoIncrement: true});
-         }
-         });*/
-    });
-
-    self.addEventListener('fetch', function (event) {
-        console.log('Fetch: ' + event.request.url);
-        if (event.request.url.endsWith('/list')) {
-            var urlChunks = event.request.url.split('/');
-            var dataObject = urlChunks[urlChunks.length - 2];
-            console.log('DataObject: ' + dataObject);
-        }
-        event.respondWith(
-            caches.match(event.request)
-            .then(function (response) {
-                // Cache hit - return response
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
-            }
-            )
-            );
-    });
-})();
+});

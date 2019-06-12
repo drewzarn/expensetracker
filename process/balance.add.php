@@ -7,7 +7,7 @@ foreach ($POSTDATA as $accountId => $amount) {
 	if ($amount == '')
 		continue;
 	$accountId = str_replace('account', '', $accountId);
-	if (!isset($accounts[$accountId])) {
+	if (!isset($accounts[$accountId]) || !isset($accounts[$accountId]->accounttype)) {
 		$accounts[$accountId] = r::load('account', $accountId);
 		$accounts[$accountId]->accounttype = r::load('accounttype', $accounts[$accountId]->type_id);
 	}
@@ -17,10 +17,11 @@ foreach ($POSTDATA as $accountId => $amount) {
 	$balance->date = $date;
 	$balance->amount = $amount;
 	$balance->account = $accounts[$accountId];
+	$balanceAccountAsset = $balance->account->accounttype->asset == "1";
 	unset($balance->account->accounttype);
 	$balance->netgain = 0;
 	if ($lastBalance->amount != $amount) {
-		if ($accounts[$accountId]->accounttype->asset == "1") {
+		if ($balanceAccountAsset) {
 			$balance->netgain = ($lastBalance->amount > $amount) ? -1 : 1;
 		} else {
 			$balance->netgain = ($lastBalance->amount > $amount) ? 1 : -1;

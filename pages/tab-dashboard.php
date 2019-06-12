@@ -18,12 +18,12 @@
 			<div class="card my-3">
 				<h3 class="card-header">Data Stats</h3>
 				<ul class="list-group list-group-flush" id="card_datastats">
-					<li class="list-group-item" data-ref="accounttype"><span>Account Types<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
-					<li class="list-group-item" data-ref="account"><span>Accounts<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
-					<li class="list-group-item" data-ref="balance"><span>Balances<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
-					<li class="list-group-item" data-ref="transaction"><span>Transactions<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
-					<li class="list-group-item" data-ref="category"><span>Categories<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
-					<li class="list-group-item" data-ref="payee"><span>Payees<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
+					<li class="list-group-item" data-ref="accounttypes"><span>Account Types<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
+					<li class="list-group-item" data-ref="accounts"><span>Accounts<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
+					<li class="list-group-item" data-ref="balances"><span>Balances<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
+					<li class="list-group-item" data-ref="transactions"><span>Transactions<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
+					<li class="list-group-item" data-ref="categories"><span>Categories<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
+					<li class="list-group-item" data-ref="payees"><span>Payees<br />Pending</span><i class="text-muted fas fa-sync-alt"></i></li>
 				</ul>
 			</div>
 		</div>

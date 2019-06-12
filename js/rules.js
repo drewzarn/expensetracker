@@ -1,21 +1,42 @@
-import DBClass from './db.js';
-
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', function(event) {
-        console.log("Got message from service worker: " + event.data);
-    });
-    if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage("newclient");
-    } else {
-        navigator.serviceWorker.register('/worker.js').then(function(registration) {
+    if (!navigator.serviceWorker.controller) {
+        navigator.serviceWorker.register('/worker.js').then(function (registration) {
             console.log('ServiceWorker registration successful with scope: ', registration.scope);
-        }, function(err) {
+        }, function (err) {
             console.log('ServiceWorker registration failed: ', err);
         });
     }
+} 
+
+const channel = new BroadcastChannel('sw-messages');
+channel.addEventListener('message', event => {
+    console.log('BC received in client', event.data);
+
+    if (event.data.loaded) {
+        console.log("SW loaded " + event.data.loaded);
+        DB[event.data.loaded].count().then(c => {
+            updateCardStats(event.data.loaded, c);
+        });
+        DataUI[event.data.loaded]();
+    }
+});
+
+function updateCardStats(item, count) {
+    var itemName = item == 'accounttypes' ? 'Account Types' : item[0].toUpperCase() + item.substring(1);
+    $('#card_datastats').find('li[data-ref=' + item + '] span').html(count + ' ' + itemName + '<br />' + moment().calendar());
+    $('#card_datastats').find('li[data-ref=' + item + '] i').removeClass('fa-spin');
 }
 
-var CATEGORIES = [], IDIDS = {}, PAYEES = [], PAY_IDS = {};
+function LoadData(item) {
+    $('#card_datastats li[data-ref=' + item + '] i').addClass('fa-spin');
+    fetch(item + '/list');
+}
+
+
+var CATEGORIES = [],
+    IDIDS = {},
+    PAYEES = [],
+    PAY_IDS = {};
 var NOW = new Date();
 var AccountData = Object.create(DataObject);
 var AccountTypeData = Object.create(DataObject);
@@ -25,26 +46,25 @@ var PayeeData = Object.create(DataObject);
 var TransactionData = Object.create(DataObject);
 
 $(document).ready(async function () {
-    DBClass.DB.on('changes', function (changes) {
+    DB.metadata.each(meta => {
+            updateCardStats(meta.table, meta.count);
+        })
+        .then(() => {
+            Object.keys(DataUI).forEach(item => {
+                DataUI[item]();
+            });
+        });
+    LoadData("categories");
+    LoadData("payees");
+    LoadData("transactions");
+    LoadData("accounttypes");
+    /*DBClass.DB.on('changes', function (changes) {
         var changedObjects = [];
         console.log('Changes fired for ' + changes.length + ' items');
         changes.forEach(function (change) {
             if(changedObjects.indexOf(change.table) < 0) {
                 changedObjects.push(change.table);
             }
-            /*
-          switch (change.type) {
-            case 1: // CREATED
-              console.log('An object was created: ' + JSON.stringify(change.obj));
-              break;
-            case 2: // UPDATED
-              console.log('An object with key ' + change.key + ' was updated with modifications: ' + JSON.stringify(change.mods));
-              break;
-            case 3: // DELETED
-              console.log('An object was deleted: ' + JSON.stringify(change.oldObj));
-              break;
-          }
-          */
         });
         console.log(changedObjects);
         changedObjects.forEach(function(changeObject){
@@ -53,8 +73,8 @@ $(document).ready(async function () {
     });
     DBClass.DB.open().catch(function (e) {
         console.error("Open failed: " + e.stack);
-    });
-    
+    });*/
+
     $(document).on('account:dataloading', DataHandler.Loading.Account);
     $(document).on('accounttype:dataloading', DataHandler.Loading.AccountType);
     $(document).on('balance:dataloading', DataHandler.Loading.Balance);
@@ -135,7 +155,7 @@ $(document).ready(async function () {
     });
 
     $('#card_datastats i').click(function () {
-        Utils.GetDataObject($(this).parent().data('ref')).Refresh();
+        LoadData($(this).parent().data('ref'));
     });
 
     $('#balancetable').on('dblclick', 'td.entry', function () {
@@ -153,26 +173,288 @@ $(document).ready(async function () {
 });
 
 var DataUI = {
-    account: function() {
+    accounts: function () {
         $('#accountlist div ul').empty();
         $('#addbalance_accountlist div').empty();
         $('#balancetable tbody tr[data-accountid]').remove();
         $('#balancechart_accountlist div.col div label').remove();
-        DBClass.DB.accounts.orderBy('name').each(function(v){
+        DB.accounts.orderBy('name').each(function (v) {
             $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '" data-accountactive="' + v.active + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
-                if (v.active == '1') {
-                    $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
+            if (v.active == '1') {
+                $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
+            }
+            $('#balancetable tbody[data-accounttypeid=' + v.type_id + ']').append('<tr data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '"><td>' + v.name + '</td></tr>');
+            $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
+            $('#balancechart_accountlist div.col[data-accounttypeid=' + v.type_id + '] div').append('<label class="d-block" for="bca' + v.id + '"><input type="checkbox" data-accountid="' + v.id + '" id="bca' + v.id + '"> ' + v.name + '</label></div>');
+        });
+        LoadData('balances');
+    },
+    accounttypes: function () {
+        DataReference.AccountTypeNames = [];
+        DataReference.AccountTypeNamesById = {};
+        $('#addaccount_type').empty();
+        $('#accountlist div.row').empty();
+        $('#addbalance_accountlist').empty();
+        $('#balancetable tbody').remove();
+        $('#balancechart_accountlist div.col').remove();
+        DB.accounttypes.orderBy('name').each(function (v) {
+            DataReference.AccountTypeNames.push(v.name);
+            DataReference.AccountTypeNamesById[v.id] = v.name;
+            $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
+            $('#accountlist div.row').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + ' Accounts</h5><ul></ul></div>');
+            $('#addbalance_accountlist').append('<h6>' + v.name + '</h6>');
+            $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
+            $('#balancetable tfoot').before('<tbody data-accounttypeid="' + v.id + '" data-accounttypeasset="' + v.asset + '"><tr class="table-secondary"><th>' + v.name + '</th></tr></tbody>');
+            $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
+            $('#balancechart_accountlist').append('<div class="col px-0" data-accounttypeid="' + v.id + '"><i class="fas fa-chevron-down float-right mt-2 pointer"></i><h5><input type="checkbox" data-accounttypeid="' + v.id + '" id="bcat' + v.id + '" checked /> <label for="bcat' + v.id + '">' + v.name + '</label></h5><div class="collapse"></div></div>');
+        });
+        LoadData('accounts');
+    },
+    balances: function () {
+        $('#balancetable th.balancedate, #balancetable th[data-balancedate], #balancetable td.entry, #balancetable tr#netbalance').remove();
+        $('#balancetable tfoot').append('<tr id="netbalance" class="table-secondary"><th>Net</th></tr>');
+        var entriesByDate = {};
+        DB.balances.each(function (v) {
+                v.date = v.date.substring(0, 10);
+                if (entriesByDate[v.date] == null) {
+                    entriesByDate[v.date] = new Array();
                 }
-                $('#balancetable tbody[data-accounttypeid=' + v.type_id + ']').append('<tr data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '"><td>' + v.name + '</td></tr>');
-                $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
-                $('#balancechart_accountlist div.col[data-accounttypeid=' + v.type_id + '] div').append('<label class="d-block" for="bca' + v.id + '"><input type="checkbox" data-accountid="' + v.id + '" id="bca' + v.id + '"> ' + v.name + '</label></div>');
+                entriesByDate[v.date].push(v);
+            })
+            .then(() => {
+                Charts.Balances.labels = Object.keys(entriesByDate).sort();
+                Charts.Balances.allseries = {};
+                var dates = Object.keys(entriesByDate).sort().reverse();
+                for (var date in dates) {
+                    var entryDate = dates[date];
+                    $('#balancetable thead tr').append('<th class="balancedate">' + entryDate + '</th>');
+                    $('#balancetable tbody tr:first-of-type').append('<th data-balancedate="' + entryDate + '"></th>');
+                    for (var key in entriesByDate[entryDate]) {
+                        var entry = entriesByDate[entryDate][key];
+                        if ($('#balancetable tr[data-accountid=' + entry.account_id + '] td.entry[data-entrydate=' + entryDate + ']').addClass('bg-dark').addClass('text-white').addClass('dupebalance').length > 0) {
+                            continue;
+                        }
+                        if (Charts.Balances.allseries[entry.account_id] == null)
+                            Charts.Balances.allseries[entry.account_id] = new Array();
+                        Charts.Balances.allseries[entry.account_id].push(entry.amount);
+                        var td = $('<td class="entry" data-entrydate="' + entryDate + '" data-balanceid="' + entry.id + '" data-netgain="' + entry.netgain + '">' + entry.amount + '</td>');
+                        td.data('amount', entry.amount);
+                        $('#balancetable tr[data-accountid=' + entry.account_id + ']').append(td);
+                    }
+
+                    $('#balancetable tr[data-accountid').each(function (i, tr) {
+                        var $tr = $(tr);
+                        if ($tr.find('td.entry[data-entrydate=' + entryDate + ']').length == 0) {
+                            var td = $('<td class="entry empty" data-entrydate="' + entryDate + '">-</td>');
+                            td.data('amount', 0);
+                            $tr.append(td);
+                        }
+                    });
+                }
+
+                for (var i in Object.keys(Charts.Balances.allseries)) {
+                    var accountId = Object.keys(Charts.Balances.allseries)[i];
+                    Charts.Balances.allseries[accountId].reverse();
+                }
+
+                //Add color-coding to entry cells
+                $('#balancetable td.entry').each(function (i, el) {
+                    var $el = $(el);
+                    if ($el.text() != '-') {
+                        if ($el.data('netgain') == '0') {
+                            $el.addClass('table-warning');
+                        } else if ($el.data('netgain') == '1') {
+                            $el.addClass('table-success');
+                        } else if ($el.data('netgain') == '-1') {
+                            $el.addClass('table-danger');
+                        }
+
+                        $el.text(Utils.CurrencyFormatter.format($el.text()));
+                    }
+                });
+                $('#balancetable tr[data-accountid] td:last-of-type').removeClass('table-danger').removeClass('table-warning').removeClass('table-success');
+                //Calculate account type sums
+                $('#balancetable tbody').each(function (bi, tbodyEl) {
+                    var $tbodyEl = $(tbodyEl);
+                    $('#balancetable thead th').each(function (hi, thEl) {
+                        var $thEl = $(thEl);
+                        if ($thEl.text().trim() == '')
+                            return;
+                        var sum = 0;
+                        $tbodyEl.find('td[data-entrydate=' + $thEl.text() + ']').each(function (di, tdEl) {
+                            var $tdEl = $(tdEl);
+                            if ($tdEl.parent().data('accountexcludenetworth') != "1") {
+                                sum += ($tdEl.data('amount'));
+                            }
+                        });
+                        $tbodyEl.find('th[data-balancedate=' + $thEl.text() + ']').text(sum).data('amount', sum);
+                    });
+                });
+                //Add color-coding to sum cells
+                $('#balancetable th[data-balancedate]').each(function (i, el) {
+                    var $el = $(el);
+                    var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
+                    if (($el.data('amount')) == ($el.next().data('amount'))) {
+                        $el.addClass('text-warning');
+                    } else if (($el.data('amount')) > ($el.next().data('amount'))) {
+                        $el.addClass(isAsset ? 'text-success' : 'text-danger');
+                    } else if (($el.data('amount')) < ($el.next().data('amount'))) {
+                        $el.addClass(isAsset ? 'text-danger' : 'text-success');
+                    }
+                    $el.text(Utils.CurrencyFormatter.format($el.text()));
+                });
+                //Set net sum text
+                $('#balancetable thead th.balancedate').each(function (i, el) {
+                    var $el = $(el);
+                    var netSum = 0;
+                    $('#balancetable').find('th[data-balancedate=' + $el.text() + ']').each(function (typeI, typeEl) {
+                        var $typeEl = $(typeEl);
+                        if ($typeEl.parent().parent().data('accounttypeasset') == '1') {
+                            netSum += $typeEl.data('amount');
+                        } else {
+                            netSum -= $typeEl.data('amount');
+                        }
+                    });
+                    $('#netbalance').append('<th data-amount="' + netSum + '">' + netSum + '</th>');
+                });
+                //Color-code net balance row
+                $('#netbalance th[data-amount]').each(function (i, el) {
+                    var $el = $(el);
+                    if (($el.data('amount')) == ($el.next().data('amount'))) {
+                        $el.addClass('text-warning');
+                    } else if (($el.data('amount')) > ($el.next().data('amount'))) {
+                        $el.addClass('text-success');
+                    } else if (($el.data('amount')) < ($el.next().data('amount'))) {
+                        $el.addClass('text-danger');
+                    }
+                    $el.text(Utils.CurrencyFormatter.format($el.text()));
+                });
+                Charts.Balances.Draw();
+            });
+    },
+    categories: function () {
+        var date = new Date();
+
+        $('#categorylist tbody').empty();
+        DB.categories.orderBy('name').each(function (v) {
+            if (v.deleted != '1') {
+                DataReference.CategoryNames.push(v.name);
+                DataReference.CategoryNamesById[v.id] = v.name;
+            }
+            $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td><i class="fas fa-' + DataReference.ParityIcons[v.parity] + '" /></td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
+            $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
+        });
+        DataReference.CategoryNames.sort();
+        $("#addtransaction_category").typeahead({
+            source: DataReference.CategoryNames
+        });
+        $("#edittransaction_category").typeahead({
+            source: DataReference.CategoryNames
+        });
+        $('#catlist').empty();
+        $.each(DataReference.CategoryNames, function (i, v) {
+            $('#catlist').append('<button class="btn-sm">' + v + '</button>');
         });
     },
-    accounttype: function(){},
-    balance: function(){},
-    category: function(){},
-    payee: function(){},
-    transaction: function(){}
+    payees: function () {
+        var date = new Date();
+
+        $('#payeelist tbody').empty();
+        DataReference.PayeeNames = [];
+        DataReference.PayeeNamesById = {}
+        DB.payees.orderBy('name').each(function (v) {
+            if (v.deleted != '1') {
+                DataReference.PayeeNames.push(v.name);
+                DataReference.PayeeNamesById[v.id] = v.name;
+            }
+
+            $('#payeelist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editpayee" data-payeeid="' + v.id + '" />' + v.name + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
+            $('#payeelist tbody').find('a[data-payeeid=' + v.id + ']').data('details', v);
+        });
+
+        DataReference.PayeeNames.sort();
+        $("#addtransaction_payee").typeahead({
+            source: DataReference.PayeeNames,
+            afterSelect: showTransactionsByPayee
+        });
+        $("#edittransaction_payee").typeahead({
+            source: DataReference.PayeeNames,
+            afterSelect: showTransactionsByPayee
+        });
+    },
+    transactions: function () {
+        var dateLimits = {
+            max: moment(),
+            min: moment()
+        };
+
+        DataReference.NetByPeriod = {};
+        DataReference.SpendingByCategory = {};
+        DataReference.SpendingByPayee = {};
+        let transactionListForTable = [];
+        DB.transactions.orderBy('date').each(function (v) {
+                var mDate = moment(v.date);
+                if (mDate < dateLimits.min)
+                    dateLimits.min = mDate;
+                if (mDate > dateLimits.max)
+                    dateLimits.max = mDate;
+
+                v.date = mDate.format('YYYYMMDD');
+                v.year = mDate.year();
+                v.month = mDate.month() + 1;
+                v.day = mDate.date();
+                v.weekday = mDate.format('dddd');
+                v.monthyear = v.month.toString() + v.year.toString();
+
+                transactionListForTable.push(v);
+
+                if (DataReference.NetByPeriod[mDate.year()] == null)
+                    DataReference.NetByPeriod[mDate.year()] = {
+                        Income: 0,
+                        Expenses: 0
+                    };
+                if (DataReference.NetByPeriod[mDate.year()][mDate.month()] == null)
+                    DataReference.NetByPeriod[mDate.year()][mDate.month()] = {
+                        Income: 0,
+                        Expenses: 0
+                    };
+                if (DataReference.SpendingByCategory[mDate.year()] == null)
+                    DataReference.SpendingByCategory[mDate.year()] = {};
+                if (DataReference.SpendingByCategory[mDate.year()][v.category.name] == null)
+                    DataReference.SpendingByCategory[mDate.year()][v.category.name] = 0;
+                if (DataReference.SpendingByCategory[mDate.year()][mDate.month()] == null)
+                    DataReference.SpendingByCategory[mDate.year()][mDate.month()] = {};
+                if (DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] == null)
+                    DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] = 0;
+                if (DataReference.SpendingByPayee[mDate.year()] == null)
+                    DataReference.SpendingByPayee[mDate.year()] = {};
+                if (DataReference.SpendingByPayee[mDate.year()][v.payee.name] == null)
+                    DataReference.SpendingByPayee[mDate.year()][v.payee.name] = 0;
+                if (DataReference.SpendingByPayee[mDate.year()][mDate.month()] == null)
+                    DataReference.SpendingByPayee[mDate.year()][mDate.month()] = {};
+                if (DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] == null)
+                    DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] = 0;
+
+                DataReference.NetByPeriod[mDate.year()][DataReference.ParityNames[v.category.parity]] += (v.amount);
+                DataReference.NetByPeriod[mDate.year()][mDate.month()][DataReference.ParityNames[v.category.parity]] += (v.amount);
+                DataReference.NetByPeriod[mDate.year()].Net = DataReference.NetByPeriod[mDate.year()].Income - DataReference.NetByPeriod[mDate.year()].Expenses;
+                DataReference.NetByPeriod[mDate.year()][mDate.month()].Net = DataReference.NetByPeriod[mDate.year()][mDate.month()].Income - DataReference.NetByPeriod[mDate.year()][mDate.month()].Expenses;
+                DataReference.SpendingByCategory[mDate.year()][v.category.name] += (v.amount);
+                DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] += (v.amount);
+                DataReference.SpendingByPayee[mDate.year()][v.payee.name] += (v.amount);
+                DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] += (v.amount);
+            })
+            .then(() => {
+                $('#trnlistdatestart').datepicker('update', moment().startOf('month').format('M/D/YYYY')).on('changeDate', TransactionListTable.Draw);
+                $('#trnlistdateend').datepicker('update', dateLimits.max.format('M/D/YYYY')).on('changeDate', TransactionListTable.Draw);
+
+                TransactionListTable.TableRef.clear().rows.add(transactionListForTable).draw();
+                TransactionListTable.Filters.Category = [];
+                TransactionListTable.Filters.Payee = [];
+
+                StepperTable.RefreshAll();
+            });
+    }
 };
 
 var DataReference = {
@@ -188,8 +470,16 @@ var DataReference = {
     SpendingByPayee: {},
     NetByPeriod: {},
     NetNames: ['Income', 'Expenses', 'Net'],
-    ParityIcons: {'1': 'plus', '0': 'exchange-alt', '-1': 'minus'},
-    ParityNames: {'1': 'Income', '0': 'Transfers', '-1': 'Expenses'}
+    ParityIcons: {
+        '1': 'plus',
+        '0': 'exchange-alt',
+        '-1': 'minus'
+    },
+    ParityNames: {
+        '1': 'Income',
+        '0': 'Transfers',
+        '-1': 'Expenses'
+    }
 }
 
 var ModalHandler = {
@@ -227,12 +517,12 @@ var ModalHandler = {
         edittransaction: function (e) {
             $('#edittransaction_id').val($(e.relatedTarget).data('transactionid'));
             var trnDetails = TransactionListTable.TableRef.row($(e.relatedTarget).parent().parent()[0]).data();
-            $('#edittransaction_payee').val(DataReference.PayeeNamesByID[trnDetails.payee_id]);
-            $('#edittransaction_category').val(DataReference.CategoryNamesByID[trnDetails.category_id]);
+            $('#edittransaction_payee').val(DataReference.PayeeNamesById[trnDetails.payee_id]);
+            $('#edittransaction_category').val(DataReference.CategoryNamesById[trnDetails.category_id]);
             $('#edittransaction_amount').val(trnDetails.amount);
             $('#edittransaction_date').datepicker('update', moment(trnDetails.date).format('M/D/YYYY'));
             $('#edittransaction_description').val(trnDetails.description);
-            showTransactionsByPayee(DataReference.PayeeNamesByID[trnDetails.payee_id]);
+            showTransactionsByPayee(DataReference.PayeeNamesById[trnDetails.payee_id]);
         }
     }
 }
@@ -259,304 +549,17 @@ var DataHandler = {
         }
     },
     Loaded: {
-        Account: async function (e, data) {
-            var date = new Date(data.timestamp * 1000);
-            $('#card_datastats').find('li[data-ref=account] span').html(Object.keys(data.list).length + ' accounts<br />' + moment(date).calendar());
-            $('#card_datastats').find('li[data-ref=account] i').removeClass('fa-spin');
-            var d = Utils.SortBeans(data.list);
-            DataReference.AccountNames = [];
-            DataReference.AccountNamesByID = {};
-            var bulkObjects = [];
-            $.each(d, function (i, v) {
-                bulkObjects.push(v);
-                DataReference.AccountNames.push(v.name);
-                DataReference.AccountNamesByID[v.id] = v.name;
-                $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '" data-accountactive="' + v.active + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
-                if (v.active == '1') {
-                    $('#addbalance_accountlist_' + v.type_id).append('<div class="form-group"><input class="form-control" type="number" step="0.01" name="addbalance_account' + v.id + '" id="addbalance_account' + v.id + '" placeholder="' + v.name + '" /></div>')
-                }
-                $('#balancetable tbody[data-accounttypeid=' + v.type_id + ']').append('<tr data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '"><td>' + v.name + '</td></tr>');
-                $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
-                $('#balancechart_accountlist div.col[data-accounttypeid=' + v.type_id + '] div').append('<label class="d-block" for="bca' + v.id + '"><input type="checkbox" data-accountid="' + v.id + '" id="bca' + v.id + '"> ' + v.name + '</label></div>');
-            });
-            DBClass.DBWrapper.bulkAdd('account', bulkObjects);
-            BalanceData.Refresh();
-        },
+        Account: async function (e, data) {},
         AccountType: function (e, data) {
-            var date = new Date(data.timestamp * 1000);
-            $('#card_datastats').find('li[data-ref=accounttype] span').html(Object.keys(data.list).length + ' account types<br />' + moment(date).calendar());
-            $('#card_datastats').find('li[data-ref=accounttype] i').removeClass('fa-spin');
-            var d = Utils.SortBeans(data.list);
-            DataReference.AccountTypeNames = [];
-            DataReference.AccountTypeNamesByID = {};
-            $('#addaccount_type').empty();
-            $('#accountlist div.row').empty();
-            $('#addbalance_accountlist').empty();
-            $('#balancetable tbody').remove();
-            $('#balancechart_accountlist div.col').remove();
-            var bulkObjects = [];
-            $.each(d, function (i, v) {
-                bulkObjects.push(v);
-                DataReference.AccountTypeNames.push(v.name);
-                DataReference.AccountTypeNamesByID[v.id] = v.name;
-                $('#addaccount_type').append('<option value="' + v.id + '">' + v.name + '</option>')
-                $('#accountlist div.row').append('<div class="col" data-accounttypeid="' + v.id + '"><h5>' + v.name + ' Accounts</h5><ul></ul></div>');
-                $('#addbalance_accountlist').append('<h6>' + v.name + '</h6>');
-                $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
-                $('#balancetable tfoot').before('<tbody data-accounttypeid="' + v.id + '" data-accounttypeasset="' + v.asset + '"><tr class="table-secondary"><th>' + v.name + '</th></tr></tbody>');
-                $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
-                $('#balancechart_accountlist').append('<div class="col px-0" data-accounttypeid="' + v.id + '"><i class="fas fa-chevron-down float-right mt-2 pointer"></i><h5><input type="checkbox" data-accounttypeid="' + v.id + '" id="bcat' + v.id + '" checked /> <label for="bcat' + v.id + '">' + v.name + '</label></h5><div class="collapse"></div></div>');
-            });
-            DBClass.DBWrapper.bulkAdd('accounttype', bulkObjects);
-            AccountData.Refresh();
+
         },
         Balance: function (e, data) {
-            var date = new Date(data.timestamp * 1000);
-            $('#card_datastats').find('li[data-ref=balance] span').html(Object.keys(data.list).length + ' balance entries<br />' + moment(date).calendar());
-            $('#card_datastats').find('li[data-ref=balance] i').removeClass('fa-spin');
-            var d = data.list;
-            $('#balancetable th.balancedate, #balancetable th[data-balancedate], #balancetable td.entry, #balancetable tr#netbalance').remove();
-            $('#balancetable tfoot').append('<tr id="netbalance" class="table-secondary"><th>Net</th></tr>');
-            var entriesByDate = {};
-            var bulkObjects = [];
-            $.each(d, function (i, v) {
-                bulkObjects.push(v);
-                v.date = v.date.substring(0, 10);
-                if (entriesByDate[v.date] == null) {
-                    entriesByDate[v.date] = new Array();
-                }
-                entriesByDate[v.date].push(v);
-            });
-            DBClass.DBWrapper.bulkAdd('balance', bulkObjects);
 
-            Charts.Balances.labels = Object.keys(entriesByDate).sort();
-            Charts.Balances.allseries = {};
-            var dates = Object.keys(entriesByDate).sort().reverse();
-            for (var date in dates) {
-                var entryDate = dates[date];
-                $('#balancetable thead tr').append('<th class="balancedate">' + entryDate + '</th>');
-                $('#balancetable tbody tr:first-of-type').append('<th data-balancedate="' + entryDate + '"></th>');
-                for (var key in entriesByDate[entryDate]) {
-                    var entry = entriesByDate[entryDate][key];
-                    if ($('#balancetable tr[data-accountid=' + entry.account_id + '] td.entry[data-entrydate=' + entryDate + ']').addClass('bg-dark').addClass('text-white').addClass('dupebalance').length > 0) {
-                        continue;
-                    }
-                    if (Charts.Balances.allseries[entry.account_id] == null)
-                        Charts.Balances.allseries[entry.account_id] = new Array();
-                    Charts.Balances.allseries[entry.account_id].push(entry.amount);
-                    var td = $('<td class="entry" data-entrydate="' + entryDate + '" data-balanceid="' + entry.id + '" data-netgain="' + entry.netgain + '">' + entry.amount + '</td>');
-                    td.data('amount', entry.amount);
-                    $('#balancetable tr[data-accountid=' + entry.account_id + ']').append(td);
-                }
-
-                $('#balancetable tr[data-accountid').each(function (i, tr) {
-                    var $tr = $(tr);
-                    if ($tr.find('td.entry[data-entrydate=' + entryDate + ']').length == 0) {
-                        var td = $('<td class="entry empty" data-entrydate="' + entryDate + '">-</td>');
-                        td.data('amount', 0);
-                        $tr.append(td);
-                    }
-                });
-            }
-
-            for (var i in Object.keys(Charts.Balances.allseries)) {
-                var accountId = Object.keys(Charts.Balances.allseries)[i];
-                Charts.Balances.allseries[accountId].reverse();
-            }
-
-            //Add color-coding to entry cells
-            $('#balancetable td.entry').each(function (i, el) {
-                var $el = $(el);
-                if ($el.text() != '-') {
-                    if ($el.data('netgain') == '0') {
-                        $el.addClass('table-warning');
-                    } else if ($el.data('netgain') == '1') {
-                        $el.addClass('table-success');
-                    } else if ($el.data('netgain') == '-1') {
-                        $el.addClass('table-danger');
-                    }
-
-                    $el.text(Utils.CurrencyFormatter.format($el.text()));
-                }
-            });
-            $('#balancetable tr[data-accountid] td:last-of-type').removeClass('table-danger').removeClass('table-warning').removeClass('table-success');
-            //Calculate account type sums
-            $('#balancetable tbody').each(function (bi, tbodyEl) {
-                var $tbodyEl = $(tbodyEl);
-                $('#balancetable thead th').each(function (hi, thEl) {
-                    var $thEl = $(thEl);
-                    if ($thEl.text().trim() == '')
-                        return;
-                    var sum = 0;
-                    $tbodyEl.find('td[data-entrydate=' + $thEl.text() + ']').each(function (di, tdEl) {
-                        var $tdEl = $(tdEl);
-                        if ($tdEl.parent().data('accountexcludenetworth') != "1") {
-                            sum += ($tdEl.data('amount'));
-                        }
-                    });
-                    $tbodyEl.find('th[data-balancedate=' + $thEl.text() + ']').text(sum).data('amount', sum);
-                });
-            });
-            //Add color-coding to sum cells
-            $('#balancetable th[data-balancedate]').each(function (i, el) {
-                var $el = $(el);
-                var isAsset = $el.closest('tbody').data('accounttypeasset') == "1";
-                if (($el.data('amount')) == ($el.next().data('amount'))) {
-                    $el.addClass('text-warning');
-                } else if (($el.data('amount')) > ($el.next().data('amount'))) {
-                    $el.addClass(isAsset ? 'text-success' : 'text-danger');
-                } else if (($el.data('amount')) < ($el.next().data('amount'))) {
-                    $el.addClass(isAsset ? 'text-danger' : 'text-success');
-                }
-                $el.text(Utils.CurrencyFormatter.format($el.text()));
-            });
-            //Set net sum text
-            $('#balancetable thead th.balancedate').each(function (i, el) {
-                var $el = $(el);
-                var netSum = 0;
-                $('#balancetable').find('th[data-balancedate=' + $el.text() + ']').each(function (typeI, typeEl) {
-                    var $typeEl = $(typeEl);
-                    if ($typeEl.parent().parent().data('accounttypeasset') == '1') {
-                        netSum += $typeEl.data('amount');
-                    } else {
-                        netSum -= $typeEl.data('amount');
-                    }
-                });
-                $('#netbalance').append('<th data-amount="' + netSum + '">' + netSum + '</th>');
-            });
-            //Color-code net balance row
-            $('#netbalance th[data-amount]').each(function (i, el) {
-                var $el = $(el);
-                if (($el.data('amount')) == ($el.next().data('amount'))) {
-                    $el.addClass('text-warning');
-                } else if (($el.data('amount')) > ($el.next().data('amount'))) {
-                    $el.addClass('text-success');
-                } else if (($el.data('amount')) < ($el.next().data('amount'))) {
-                    $el.addClass('text-danger');
-                }
-                $el.text(Utils.CurrencyFormatter.format($el.text()));
-            });
-            Charts.Balances.Draw();
         },
-        Category: async function (e, data) {
-            var date = new Date(data.timestamp * 1000);
-            $('#card_datastats').find('li[data-ref=category] span').html(Object.keys(data.list).length + ' categories<br />' + moment(date).calendar());
-            $('#card_datastats').find('li[data-ref=category] i').removeClass('fa-spin');
-            var d = Utils.SortBeans(data.list);
-            $('#categorylist tbody').empty();
-            DataReference.CategoryNames = [];
-            DataReference.CategoryNamesByID = {};
-            var bulkObjects = [];
-            $.each(d, function (i, v) {
-                bulkObjects.push(v);
-                if (v.deleted != '1') {
-                    DataReference.CategoryNames.push(v.name);
-                    DataReference.CategoryNamesByID[v.id] = v.name;
-                }
-                $('#categorylist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editcategory" data-categoryid="' + v.id + '" />' + v.name + '</td><td><i class="fas fa-' + DataReference.ParityIcons[v.parity] + '" /></td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
-                $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
-            });
-            DBClass.DBWrapper.bulkAdd('category', bulkObjects);
-
-            DataReference.CategoryNames.sort();
-            $("#addtransaction_category").typeahead({source: DataReference.CategoryNames});
-            $("#edittransaction_category").typeahead({source: DataReference.CategoryNames});
-            $('#catlist').empty();
-            $.each(DataReference.CategoryNames, function (i, v) {
-                $('#catlist').append('<button class="btn-sm">' + v + '</button>');
-            });
-        },
-        Payee: async function (e, data) {
-            var date = new Date(data.timestamp * 1000);
-            $('#card_datastats').find('li[data-ref=payee] span').html(Object.keys(data.list).length + ' payees<br />' + moment(date).calendar());
-            $('#card_datastats').find('li[data-ref=payee] i').removeClass('fa-spin');
-            var d = Utils.SortBeans(data.list);
-            $('#payeelist tbody').empty();
-            DataReference.PayeeNames = [];
-            DataReference.PayeeNamesByID = {}
-            var bulkObjects = [];
-            $.each(d, function (i, v) {
-                bulkObjects.push(v);
-                if (v.deleted != '1') {
-                    DataReference.PayeeNames.push(v.name);
-                    DataReference.PayeeNamesByID[v.id] = v.name;
-                }
-
-                $('#payeelist tbody').append('<tr><td><a href="#" class="fas fa-edit text-dark light mr-2" data-toggle="modal" data-target="#modal_editpayee" data-payeeid="' + v.id + '" />' + v.name + '</td><td>' + (v.deleted == '1' ? '<i class="fas fa-ban" />' : '') + '</td></tr>');
-                $('#payeelist tbody').find('a[data-payeeid=' + v.id + ']').data('details', v);
-            });
-            DBClass.DBWrapper.bulkAdd('payee', bulkObjects);
-
-            DataReference.PayeeNames.sort();
-            $("#addtransaction_payee").typeahead({source: DataReference.PayeeNames, afterSelect: showTransactionsByPayee});
-            $("#edittransaction_payee").typeahead({source: DataReference.PayeeNames, afterSelect: showTransactionsByPayee});
-        },
+        Category: async function (e, data) {},
+        Payee: async function (e, data) {},
         Transaction: async function (e, data) {
-            var date = new Date(data.timestamp * 1000);
-            $('#card_datastats').find('li[data-ref=transaction] span').html(Object.keys(data.list).length + ' transactions<br />' + moment(date).calendar());
-            $('#card_datastats').find('li[data-ref=transaction] i').removeClass('fa-spin');
 
-            var dateLimits = {max: moment(), min: moment()};
-
-            DataReference.NetByPeriod = {};
-            DataReference.SpendingByCategory = {};
-            DataReference.SpendingByPayee = {};
-            var bulkObjects = [];
-            $.each(data.list, function (i, v) {                
-                var mDate = moment(v.date);
-                if (mDate < dateLimits.min)
-                    dateLimits.min = mDate;
-                if (mDate > dateLimits.max)
-                    dateLimits.max = mDate;
-                
-                v.date = mDate.format('YYYYMMDD');
-                v.year = mDate.year();
-                v.month = mDate.month() + 1;
-                v.day = mDate.date();
-                v.weekday = mDate.format('dddd');
-                v.monthyear = v.month.toString() + v.year.toString();
-                bulkObjects.push(v);
-
-                if (DataReference.NetByPeriod[mDate.year()] == null)
-                    DataReference.NetByPeriod[mDate.year()] = {Income: 0, Expenses: 0};
-                if (DataReference.NetByPeriod[mDate.year()][mDate.month()] == null)
-                    DataReference.NetByPeriod[mDate.year()][mDate.month()] = {Income: 0, Expenses: 0};
-                if (DataReference.SpendingByCategory[mDate.year()] == null)
-                    DataReference.SpendingByCategory[mDate.year()] = {};
-                if (DataReference.SpendingByCategory[mDate.year()][v.category.name] == null)
-                    DataReference.SpendingByCategory[mDate.year()][v.category.name] = 0;
-                if (DataReference.SpendingByCategory[mDate.year()][mDate.month()] == null)
-                    DataReference.SpendingByCategory[mDate.year()][mDate.month()] = {};
-                if (DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] == null)
-                    DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] = 0;
-                if (DataReference.SpendingByPayee[mDate.year()] == null)
-                    DataReference.SpendingByPayee[mDate.year()] = {};
-                if (DataReference.SpendingByPayee[mDate.year()][v.payee.name] == null)
-                    DataReference.SpendingByPayee[mDate.year()][v.payee.name] = 0;
-                if (DataReference.SpendingByPayee[mDate.year()][mDate.month()] == null)
-                    DataReference.SpendingByPayee[mDate.year()][mDate.month()] = {};
-                if (DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] == null)
-                    DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] = 0;
-
-                DataReference.NetByPeriod[mDate.year()][DataReference.ParityNames[v.category.parity]] += (v.amount);
-                DataReference.NetByPeriod[mDate.year()][mDate.month()][DataReference.ParityNames[v.category.parity]] += (v.amount);
-                DataReference.NetByPeriod[mDate.year()].Net = DataReference.NetByPeriod[mDate.year()].Income - DataReference.NetByPeriod[mDate.year()].Expenses;
-                DataReference.NetByPeriod[mDate.year()][mDate.month()].Net = DataReference.NetByPeriod[mDate.year()][mDate.month()].Income - DataReference.NetByPeriod[mDate.year()][mDate.month()].Expenses;
-                DataReference.SpendingByCategory[mDate.year()][v.category.name] += (v.amount);
-                DataReference.SpendingByCategory[mDate.year()][mDate.month()][v.category.name] += (v.amount);
-                DataReference.SpendingByPayee[mDate.year()][v.payee.name] += (v.amount);
-                DataReference.SpendingByPayee[mDate.year()][mDate.month()][v.payee.name] += (v.amount);
-            });
-            DBClass.DBWrapper.bulkAdd('transaction', bulkObjects);
-            
-            $('#trnlistdatestart').datepicker('update', dateLimits.min.format('M/D/YYYY')).on('changeDate', TransactionListTable.Draw);
-            $('#trnlistdateend').datepicker('update', dateLimits.max.format('M/D/YYYY')).on('changeDate', TransactionListTable.Draw);
-
-            TransactionListTable.TableRef.clear().rows.add(data.list).draw();
-            TransactionListTable.Filters.Category = [];
-            TransactionListTable.Filters.Payee = [];
-
-            StepperTable.RefreshAll();
         }
     }
 }
@@ -578,7 +581,9 @@ var Utils = {
                 $el.val('');
             });
             $('input[name^=addtransaction_category]').each(function (i, el) {
-                $(el).typeahead({source: DataReference.CategoryNames});
+                $(el).typeahead({
+                    source: DataReference.CategoryNames
+                });
             });
             newSplit.insertAfter('#frm_addtransaction div.splitwrapper:last');
             newSplit.find('input:first').focus();
@@ -590,7 +595,9 @@ var Utils = {
             newSplit.find('input').val('');
             newSplit.insertAfter('#frm_addtransaction div.form-group:first');
             $('#splittotal').text('');
-            $('input[name^=addtransaction_category]').typeahead({source: DataReference.CategoryNames});
+            $('input[name^=addtransaction_category]').typeahead({
+                source: DataReference.CategoryNames
+            });
         },
         Update: function () {
             var total = 0;
@@ -602,7 +609,10 @@ var Utils = {
             $('#splittotal').text('Total: ' + Utils.CurrencyFormatter.format(total));
         }
     },
-    CurrencyFormatter: new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}),
+    CurrencyFormatter: new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }),
     InitDateInputs: function () {
         $('input[data-type=date]').datepicker({
             todayHighlight: true,
@@ -736,7 +746,12 @@ var StepperTable = {
                 });
             }
         });
-        $('table.stepper').DataTable({ordering: false, paging: false, searching:false, info: false});
+        $('table.stepper').DataTable({
+            ordering: false,
+            paging: false,
+            searching: false,
+            info: false
+        });
     },
     RefreshAll: function () {
         $('table.stepper').each(function (i, table) {
@@ -749,7 +764,9 @@ var StepperTable = {
             var $el = $(el);
             var mDate = moment();
             mDate.year($el.data('year'));
-            var period = {year: mDate.year()};
+            var period = {
+                year: mDate.year()
+            };
             $el.html("<span>" + mDate.format('YYYY') + "</span>");
             if ($el.data('month') != null) {
                 mDate.month($el.data('month'));
@@ -788,15 +805,15 @@ var StepperTable = {
             $tbody.append($row);
         });
         $tbody.css('max-height', ($(window).height() - $tbody.offset().top - 30) + 'px');
-        if($table.data('filtertable') != null) {
+        if ($table.data('filtertable') != null) {
             this.SelectRow(null, $table.data('filtertable'), $table.data('filterproperty'), $table.data('filtercounter'));
         }
     },
     SelectRow: function ($row, filterTable, filterProperty, filterCounter) {
-        if($row != null) {
+        if ($row != null) {
             $row.toggleClass('table-success');
             var add = $row.hasClass('table-success');
-            if(add) {
+            if (add) {
                 window[filterTable].Filters[filterProperty].push($row.find('th:first').text());
             } else {
                 window[filterTable].Filters[filterProperty].splice(TransactionListTable.Filters.Category.indexOf($row.find('th:first').text()), 1);
@@ -836,19 +853,47 @@ var TransactionListTable = {
             scrollCollapse: true,
             paging: false,
             info: false,
-            data: {date: '', payee: {name: ''}, category: {name: ''}, description: '', amount: ''},
-            columns: [
-                {data: 'date', render: Utils.TransactionListRender.Date},
-                {data: 'payee.name'},
-                {data: 'category.name'},
-                {data: 'description', render: Utils.TransactionListRender.Description},
-                {data: 'amount', render: Utils.TransactionListRender.Amount}
+            data: {
+                date: '',
+                payee: {
+                    name: ''
+                },
+                category: {
+                    name: ''
+                },
+                description: '',
+                amount: ''
+            },
+            columns: [{
+                    data: 'date',
+                    render: Utils.TransactionListRender.Date
+                },
+                {
+                    data: 'payee.name'
+                },
+                {
+                    data: 'category.name'
+                },
+                {
+                    data: 'description',
+                    render: Utils.TransactionListRender.Description
+                },
+                {
+                    data: 'amount',
+                    render: Utils.TransactionListRender.Amount
+                }
             ],
-            order: [[0, "desc"]]
+            order: [
+                [0, "desc"]
+            ]
         });
         $('#transactionlisttable_wrapper div.row:first div:first').append('<div class="input-daterange input-group ml-3"><input type="text" class="input-sm form-control" id="trnlistdatestart" /><span class="input-group-text">to</span><input type="text" class="form-control" id="trnlistdateend" /></div>');
-        $('#trnlistdatestart').datepicker({format: "m/d/yyyy"});
-        $('#trnlistdateend').datepicker({format: "m/d/yyyy"});
+        $('#trnlistdatestart').datepicker({
+            format: "m/d/yyyy"
+        });
+        $('#trnlistdateend').datepicker({
+            format: "m/d/yyyy"
+        });
         $('#transactionlisttable').on('click', 'i.fa-edit', function () {
             loadTransactionToEdit($(this).data('transactionid'));
         });
@@ -934,9 +979,14 @@ function formAjaxSubmit(form, event) {
             break;
     }
 
-    $.ajax(form.action, {method: "POST", data: {data: data}})
-            .done(doneHandler)
-            .fail(failHandler);
+    $.ajax(form.action, {
+            method: "POST",
+            data: {
+                data: data
+            }
+        })
+        .done(doneHandler)
+        .fail(failHandler);
 }
 
 
@@ -946,8 +996,8 @@ function loadTransactionToEdit() {
 }
 
 async function showTransactionsByPayee(payeeName) {
-    var payeeId = 7;//(await IDBInterface.GetRecordsByIndex('payee', 'name', payeeName))[0].id;
-    var records = [];//await IDBInterface.GetRecordsByIndex('transaction', 'payee', payeeId);
+    var payeeId = 7; //(await IDBInterface.GetRecordsByIndex('payee', 'name', payeeName))[0].id;
+    var records = []; //await IDBInterface.GetRecordsByIndex('transaction', 'payee', payeeId);
     var sortedTransactions = Utils.SortBeans(records, 'date').reverse();
     var count = 0;
     $('.payee_transactions tbody').empty();

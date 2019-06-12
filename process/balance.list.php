@@ -1,7 +1,7 @@
 <?php
 
 $accountBeans = R::find('account', 'site=? ORDER BY name', [SITE]);
-$balances = ['timestamp' => time(), 'list' => [], 'byaccount' => [], 'byaccounttype' => [], 'net' => []];
+$balances = ['timestamp' => time(), 'object' => 'balances', 'list' => [], 'byaccount' => [], 'byaccounttype' => [], 'net' => []];
 $allDates = [];
 foreach ($accountBeans as $account) {
 	$accountType = R::findOne('accounttype', 'id=?', [$account->type_id]);

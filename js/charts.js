@@ -26,7 +26,7 @@ var Charts = {
                         continue;
                     series.push(
                             {
-                                name: DataReference.AccountTypeNamesByID[accountTypeId],
+                                name: DataReference.AccountTypeNamesById[accountTypeId],
                                 data: balances.byaccounttype[accountTypeId]
                             });
                 }
@@ -36,7 +36,7 @@ var Charts = {
                         continue;
                     series.push(
                             {
-                                name: DataReference.AccountNamesByID[accountId],
+                                name: DataReference.AccountNamesById[accountId],
                                 data: balances.byaccount[accountId]
                             });
                 }

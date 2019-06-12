@@ -31,8 +31,9 @@
 	<script src="js/localforage.js"></script>
 	<script src="js/dataObject.js"></script>
 	<script src="js/idbinterface.js"></script>
-	<script type="module" src="js/bundle.rules.js"></script>
-	<script type="module" src="js/bundle.db.js"></script>
+	<script src="js/dexie.js"></script>
+	<script src="js/db.js"></script>
+	<script src="js/rules.js"></script>
 	<script src="js/charts.js"></script>
 </head>
 

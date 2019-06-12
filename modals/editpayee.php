@@ -14,7 +14,7 @@
 					<div class="form-group"><input type="checkbox" id="editpayee_deleted" name="editpayee_deleted" /> <label for="editpayee_deleted">Inactive</label></div>
 				</div>
 				<div class="modal-footer">
-					<input type="submit" class="btn btn-primary" value="Update Balance Entry" />
+					<input type="submit" class="btn btn-primary" value="Update Payee" />
 				</div>
 			</div>
 		</form>

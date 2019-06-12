@@ -1,6 +1,6 @@
 <div class="modal" tabindex="-1" role="dialog" id="modal_editcategory">
 	<div class="modal-dialog" role="document">
-		<form id="frm_editcategory" action="category/edit" method="POST" autocomplete="off" data-reload="category">
+		<form id="frm_editcategory" action="category/edit" method="POST" autocomplete="off" data-reload="categories">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Edit Category</h5>

@@ -46,12 +46,15 @@ var PayeeData = Object.create(DataObject);
 var TransactionData = Object.create(DataObject);
 
 $(document).ready(async function () {
+    if(navigator.serviceWorker.controller == null) {
+        location.reload();
+    }
     DB.metadata.each(meta => {
             updateCardStats(meta.table, meta.count);
         })
         .then(() => {
             Object.keys(DataUI).forEach(item => {
-                DataUI[item]();
+                //DataUI[item]();
             });
         });
     LoadData("categories");
@@ -74,27 +77,6 @@ $(document).ready(async function () {
     DBClass.DB.open().catch(function (e) {
         console.error("Open failed: " + e.stack);
     });*/
-
-    $(document).on('account:dataloading', DataHandler.Loading.Account);
-    $(document).on('accounttype:dataloading', DataHandler.Loading.AccountType);
-    $(document).on('balance:dataloading', DataHandler.Loading.Balance);
-    $(document).on('category:dataloading', DataHandler.Loading.Category);
-    $(document).on('payee:dataloading', DataHandler.Loading.Payee);
-    $(document).on('transaction:dataloading', DataHandler.Loading.Transaction);
-
-    $(document).on('account:dataloaded', DataHandler.Loaded.Account);
-    $(document).on('accounttype:dataloaded', DataHandler.Loaded.AccountType);
-    $(document).on('balance:dataloaded', DataHandler.Loaded.Balance);
-    $(document).on('category:dataloaded', DataHandler.Loaded.Category);
-    $(document).on('payee:dataloaded', DataHandler.Loaded.Payee);
-    $(document).on('transaction:dataloaded', DataHandler.Loaded.Transaction);
-
-    AccountData.Init('Account');
-    AccountTypeData.Init('AccountType');
-    BalanceData.Init('Balance');
-    CategoryData.Init('Category');
-    PayeeData.Init('Payee');
-    TransactionData.Init('Transaction');
 
     $('div.modal').on('hidden.bs.modal', ModalHandler.Hidden.default);
     $('#modal_editaccount').on('shown.bs.modal', ModalHandler.Shown.editaccount);
@@ -174,8 +156,10 @@ $(document).ready(async function () {
 
 var DataUI = {
     accounts: function () {
+        console.log("DataUI.accounts loading");
         $('#accountlist div ul').empty();
         $('#addbalance_accountlist div').empty();
+        $('#editbalance_account optgroup').empty();
         $('#balancetable tbody tr[data-accountid]').remove();
         $('#balancechart_accountlist div.col div label').remove();
         DB.accounts.orderBy('name').each(function (v) {
@@ -190,11 +174,13 @@ var DataUI = {
         LoadData('balances');
     },
     accounttypes: function () {
+        console.log("DataUI.accounttypes loading");
         DataReference.AccountTypeNames = [];
         DataReference.AccountTypeNamesById = {};
         $('#addaccount_type').empty();
         $('#accountlist div.row').empty();
         $('#addbalance_accountlist').empty();
+        $('#editbalance_account').empty();
         $('#balancetable tbody').remove();
         $('#balancechart_accountlist div.col').remove();
         DB.accounttypes.orderBy('name').each(function (v) {
@@ -211,6 +197,7 @@ var DataUI = {
         LoadData('accounts');
     },
     balances: function () {
+        console.log("DataUI.balances loading");
         $('#balancetable th.balancedate, #balancetable th[data-balancedate], #balancetable td.entry, #balancetable tr#netbalance').remove();
         $('#balancetable tfoot').append('<tr id="netbalance" class="table-secondary"><th>Net</th></tr>');
         var entriesByDate = {};
@@ -333,6 +320,7 @@ var DataUI = {
             });
     },
     categories: function () {
+        console.log("DataUI.categories loading");
         var date = new Date();
 
         $('#categorylist tbody').empty();
@@ -357,6 +345,7 @@ var DataUI = {
         });
     },
     payees: function () {
+        console.log("DataUI.payees loading");
         var date = new Date();
 
         $('#payeelist tbody').empty();
@@ -383,6 +372,7 @@ var DataUI = {
         });
     },
     transactions: function () {
+        console.log("DataUI.transactions loading");
         var dateLimits = {
             max: moment(),
             min: moment()
@@ -569,6 +559,7 @@ var Utils = {
         Count: 0,
         Init: function () {
             $('#splittransaction').click(Utils.TransactionSplit.Add);
+            $('#unsplittransaction').click(Utils.TransactionSplit.Remove);
             $('#frm_addtransaction').on('change', 'div.splitwrapper input[name^=addtransaction_amount]', Utils.TransactionSplit.Update);
         },
         Add: function () {
@@ -588,13 +579,17 @@ var Utils = {
             newSplit.insertAfter('#frm_addtransaction div.splitwrapper:last');
             newSplit.find('input:first').focus();
         },
+        Remove: function () {
+            $('div.splitwrapper:last').remove();
+            Utils.TransactionSplit.Update();
+        },
         Reset: function () {
             Utils.TransactionSplit.Count = 0;
             var newSplit = $('#frm_addtransaction div.splitwrapper:first').clone();
             $('#frm_addtransaction div.splitwrapper').remove();
             newSplit.find('input').val('');
             newSplit.insertAfter('#frm_addtransaction div.form-group:first');
-            $('#splittotal').text('');
+            $('#splittotal').text('Total: $0.00');
             $('input[name^=addtransaction_category]').typeahead({
                 source: DataReference.CategoryNames
             });
@@ -607,6 +602,10 @@ var Utils = {
                 total += parseFloat($(el).val());
             });
             $('#splittotal').text('Total: ' + Utils.CurrencyFormatter.format(total));
+            $('#unsplittransaction').addClass('d-none');
+            if($('div.splitwrapper').length > 1) {
+                $('#unsplittransaction').removeClass('d-none');
+            }
         }
     },
     CurrencyFormatter: new Intl.NumberFormat('en-US', {
@@ -620,53 +619,8 @@ var Utils = {
         });
         $('input[data-type=date]').datepicker('update', new Date().toLocaleDateString());
     },
-    GetDataObject: function (name) {
-        switch (name) {
-            case 'account':
-                return AccountData;
-                break;
-            case 'accounttype':
-                return AccountTypeData;
-                break;
-            case 'balance':
-                return BalanceData;
-                break;
-            case 'category':
-                return CategoryData;
-                break;
-            case 'payee':
-                return PayeeData;
-                break;
-            case 'transaction':
-                return TransactionData;
-                break;
-        }
-    },
     HideFormMessage: function ($el) {
         $el.addClass('invisible').removeClass('border-danger text-danger border-success text-success');
-    },
-    LoadInfrastructure: function (load) {
-        if (load == null)
-            return;
-        load = load.split(',');
-        if (load.includes('account')) {
-            AccountData.Refresh();
-        }
-        if (load.includes('accounttype')) {
-            AccountTypeData.Refresh();
-        }
-        if (load.includes('balance')) {
-            BalanceData.Refresh();
-        }
-        if (load.includes('category')) {
-            CategoryData.Refresh();
-        }
-        if (load.includes('payee')) {
-            PayeeData.Refresh();
-        }
-        if (load.includes('transaction')) {
-            TransactionData.Refresh();
-        }
     },
     ShowFormError: function ($el, text) {
         $el.addClass('border-danger text-danger').removeClass('border-success text-success invisible').text(text);
@@ -937,7 +891,7 @@ function formAjaxSubmit(form, event) {
         $form.find('input[type=checkbox]').prop('checked', false);
         $form.find('input[type=radio]').prop('checked', false);
         $form.find('select').val('');
-        Utils.LoadInfrastructure($form.data('reload'));
+        LoadData($form.data('reload'));
         $form.find('input:first').focus();
         if (form.action.indexOf('/edit') >= 0) {
             $form.closest('div.modal').modal('hide');
@@ -956,7 +910,7 @@ function formAjaxSubmit(form, event) {
                 $('#addtransaction_date').datepicker('update', new Date().toLocaleDateString());
                 $('#addtransaction_payee').focus();
                 Utils.TransactionSplit.Reset();
-                Utils.LoadInfrastructure($form.data('reload'));
+                LoadData($form.data('reload'));
             };
             failHandler = function (d) {
                 d = JSON.parse(d.responseText);
@@ -974,7 +928,7 @@ function formAjaxSubmit(form, event) {
                 $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
                 $form.find('input[type=checkbox]').prop('checked', false);
                 $('#modal_edittransaction').modal('hide');
-                Utils.LoadInfrastructure($form.data('reload'));
+                LoadData($form.data('reload'));
             };
             break;
     }

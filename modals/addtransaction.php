@@ -1,6 +1,6 @@
 <div class="modal" tabindex="-1" role="dialog" id="modal_addtransaction">
 	<div class="modal-dialog" role="document">
-		<form id="frm_addtransaction" action="transaction/add" method="POST" autocomplete="off" data-reload="transaction">
+		<form id="frm_addtransaction" action="transaction/add" method="POST" autocomplete="off" data-reload="transactions">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Add Transaction</h5>
@@ -21,7 +21,11 @@
 						<div class="form-group"><input type="text" class="form-control" id="addtransaction_description" name="addtransaction_description" placeholder="Description" /></div>
 					</div>
 					<div class="form-group d-none"><input type="checkbox" id="addtransaction_allowdupe" name="addtransaction_allowdupe" /> <label for="addtransaction_allowdupe">Allow dupe: </label></div>
-					<div class="form-group"><span id="splittotal" class="float-left"></span><a class="btn btn-info btn-sm text-light" id="splittransaction">Add Split</a></div>
+					<div class="form-group"><span id="splittotal" class="float-left"></span>
+						<br />
+						<a class="btn btn-info btn-sm text-light" id="splittransaction">Add Split</a>
+						<a class="btn btn-info btn-sm text-light d-none" id="unsplittransaction">Remove Split</a>
+					</div>
 				</div>
 				<div class="modal-footer">
 					<div class="formmsg rounded border bg-light p-2 my-3 invisible"></div><input type="submit" class="btn btn-primary" value="Add Transaction" />

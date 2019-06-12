@@ -1,6 +1,6 @@
 <div class="modal" tabindex="-1" role="dialog" id="modal_edittransaction">
 	<div class="modal-dialog" role="document">
-		<form id="frm_edittransaction" action="transaction/edit" method="POST" autocomplete="off" data-reload="transaction">
+		<form id="frm_edittransaction" action="transaction/edit" method="POST" autocomplete="off" data-reload="transactions">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Edit Transaction</h5>

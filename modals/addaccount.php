@@ -1,6 +1,6 @@
 <div class="modal" tabindex="-1" role="dialog" id="modal_addaccount">
 	<div class="modal-dialog" role="document">
-		<form id="frm_addaccount" method="POST" action="account/add" data-reload="account" >
+		<form id="frm_addaccount" method="POST" action="account/add" data-reload="accounts" >
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Add Account</h5>

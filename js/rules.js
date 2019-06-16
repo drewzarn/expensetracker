@@ -6,7 +6,7 @@ if ('serviceWorker' in navigator) {
             console.log('ServiceWorker registration failed: ', err);
         });
     }
-} 
+}
 
 const channel = new BroadcastChannel('sw-messages');
 channel.addEventListener('message', event => {
@@ -15,16 +15,21 @@ channel.addEventListener('message', event => {
     if (event.data.loaded) {
         console.log("SW loaded " + event.data.loaded);
         DB[event.data.loaded].count().then(c => {
-            updateCardStats(event.data.loaded, c);
+            updateCardStats(event.data.loaded, c, event.data.fetch != null);
         });
         DataUI[event.data.loaded]();
     }
+    if (event.data.fetch) {
+        fetch(event.data.fetch);
+    }
 });
 
-function updateCardStats(item, count) {
+function updateCardStats(item, count, stillLoading) {
     var itemName = item == 'accounttypes' ? 'Account Types' : item[0].toUpperCase() + item.substring(1);
     $('#card_datastats').find('li[data-ref=' + item + '] span').html(count + ' ' + itemName + '<br />' + moment().calendar());
-    $('#card_datastats').find('li[data-ref=' + item + '] i').removeClass('fa-spin');
+    if (!stillLoading) {
+        $('#card_datastats').find('li[data-ref=' + item + '] i').removeClass('fa-spin');
+    }
 }
 
 function LoadData(item) {
@@ -46,21 +51,19 @@ var PayeeData = Object.create(DataObject);
 var TransactionData = Object.create(DataObject);
 
 $(document).ready(async function () {
-    if(navigator.serviceWorker.controller == null) {
+    if (navigator.serviceWorker.controller == null) {
         location.reload();
     }
     DB.metadata.each(meta => {
             updateCardStats(meta.table, meta.count);
         })
         .then(() => {
-            Object.keys(DataUI).forEach(item => {
-                //DataUI[item]();
-            });
+            LoadData("categories");
+            LoadData("payees");
+            LoadData("transactions");
+            LoadData("accounttypes");
         });
-    LoadData("categories");
-    LoadData("payees");
-    LoadData("transactions");
-    LoadData("accounttypes");
+
     /*DBClass.DB.on('changes', function (changes) {
         var changedObjects = [];
         console.log('Changes fired for ' + changes.length + ' items');
@@ -603,7 +606,7 @@ var Utils = {
             });
             $('#splittotal').text('Total: ' + Utils.CurrencyFormatter.format(total));
             $('#unsplittransaction').addClass('d-none');
-            if($('div.splitwrapper').length > 1) {
+            if ($('div.splitwrapper').length > 1) {
                 $('#unsplittransaction').removeClass('d-none');
             }
         }

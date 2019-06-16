@@ -12,7 +12,7 @@ var Charts = {
             ]
         },
         Draw: function () {
-            BalanceData.GetData().then(function (balances) {
+            DB.balances.toArray().then(function (balances) {
                 var series = [];
                 if ($('#balancechart_accountlist input#bcnet').prop('checked')) {
                     series.push({

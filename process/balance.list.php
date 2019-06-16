@@ -1,14 +1,22 @@
 <?php
-
 $accountBeans = R::find('account', 'site=? ORDER BY name', [SITE]);
 $balances = ['timestamp' => time(), 'object' => 'balances', 'list' => [], 'byaccount' => [], 'byaccounttype' => [], 'net' => []];
 $allDates = [];
 foreach ($accountBeans as $account) {
 	$accountType = R::findOne('accounttype', 'id=?', [$account->type_id]);
-	$balanceBeans = R::find('balance', 'account_id=?', [$account->id]);
+	$balanceBeans = R::find('balance', 'account_id=? ORDER BY date', [$account->id]);
 	$balances['list'] = array_merge($balances['list'], $balanceBeans);
 
+	$lastBean = null;
 	foreach ($balanceBeans as $bean) {
+		$bean->netgain = 0;
+		if($bean->amount != $lastBean->amount)
+		if($accountType->asset) {
+			$bean->netgain = $bean->amount > $lastBean->amount ? 1 : -1;
+		} else {
+			$bean->netgain = $bean->amount < $lastBean->amount ? -1 : 1;
+		}
+		$lastBean = $bean;
 		$allDates[$bean->date] = $bean->date;
 		$balances['byaccount'][$account->id][$bean->date] = $bean->amount;
 		if ($account->excludenetworth == 0) {

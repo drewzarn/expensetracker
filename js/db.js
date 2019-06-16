@@ -3,7 +3,7 @@ DB.version(1).stores({
     payees: 'id,name',
     accounts: 'id,accounttype,name',
     accounttypes: 'id,name',
-    balances: 'id,account',
+    balances: 'id,account_id,date',
     categories: 'id,parity,name',
     transactions: 'id,payee,category,date,year,month,day,monthyear,weekday',
     metadata: 'table'

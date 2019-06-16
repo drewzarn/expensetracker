@@ -47,13 +47,21 @@ self.addEventListener('activate', function (event) {
 self.addEventListener('fetch', event => {
     console.log("Fetching (" + event.request.method + ") " + event.request.url)
     if (event.request.method != 'GET') return;
+    if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') {
+        return;
+    }
 
-    if (event.request.url.endsWith('/list')) {
+    if (event.request.url.indexOf('/list') >= 0) {
         event.respondWith(
             fetch(event.request)
             .then(response => {
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
                 response.clone().json()
-                .then(data => {ProcessDataList(data);});
+                    .then(data => {
+                        ProcessDataList(data);
+                    });
                 return response;
             })
         );
@@ -63,24 +71,29 @@ self.addEventListener('fetch', event => {
 });
 
 async function ProcessDataList(data) {
-    if(DB[data.object] == null) {
+    if (DB[data.object] == null) {
         console.error("No table found for " + data.object);
         console.trace();
         return;
     }
-    DB[data.object].clear()
-        .then(async () => {
-            for (const i in data.list) {
-                await DB[data.object].put(data.list[i]);
-            }
-            DB.metadata.put({
-                table: data.object,
-                count: 0,
-                lastBulk: new Date(),
-                lastUpdate: new Date()
-            });
-            channel.postMessage({
-                loaded: data.object
-            });
-        })
+    
+    (data.paged ? Promise.resolve(100) : DB[data.object].clear())
+    .then(async () => {
+        for (const i in data.list) {
+            await DB[data.object].put(data.list[i]);
+        }
+        DB.metadata.put({
+            table: data.object,
+            count: 0,
+            lastBulk: new Date(),
+            lastUpdate: new Date()
+        });
+        let msgData = {
+            loaded: data.object
+        };
+        if (data.nextpage != null) {
+            msgData.fetch = data.nextpage;
+        }
+        channel.postMessage(msgData);
+    });
 }

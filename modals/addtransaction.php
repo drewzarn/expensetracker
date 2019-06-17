@@ -20,7 +20,6 @@
 						</div> 
 						<div class="form-group"><input type="text" class="form-control" id="addtransaction_description" name="addtransaction_description" placeholder="Description" /></div>
 					</div>
-					<div class="form-group d-none"><input type="checkbox" id="addtransaction_allowdupe" name="addtransaction_allowdupe" /> <label for="addtransaction_allowdupe">Allow dupe: </label></div>
 					<div class="form-group"><span id="splittotal" class="float-left"></span>
 						<br />
 						<a class="btn btn-info btn-sm text-light" id="splittransaction">Add Split</a>

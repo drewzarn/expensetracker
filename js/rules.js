@@ -58,6 +58,8 @@ $(document).ready(async function () {
             DataUI.accounttypes();
         });
 
+        Utils.GeoLocation.Init();
+
     /*DBClass.DB.on('changes', function (changes) {
         var changedObjects = [];
         console.log('Changes fired for ' + changes.length + ' items');
@@ -578,6 +580,22 @@ var DataHandler = {
 }
 
 var Utils = {
+    GeoLocation: {
+        Coordinates: {
+            latitude: null,
+            longitude: null
+        },
+        Init: function () {
+            navigator.geolocation.getCurrentPosition(Utils.GeoLocation.Received);
+            navigator.geolocation.watchPosition(Utils.GeoLocation.Received);
+        },
+        Received: function (position) {
+            Utils.GeoLocation.Coordinates.latitude = position.coords.latitude;
+            Utils.GeoLocation.Coordinates.longitude = position.coords.longitude;
+
+            $('#status_location').removeClass('text-light');
+        }
+    },
     TransactionSplit: {
         Count: 0,
         Init: function () {
@@ -885,6 +903,12 @@ function formAjaxSubmit(form, event) {
     Utils.HideFormMessage($form.find('div.formmsg'));
     var replacePrefix = form.id.replace('frm_', '') + '_';
     var data = {};
+
+    if (form.id == "frm_addtransaction") {
+        data.latitude = Utils.GeoLocation.Coordinates.latitude;
+        data.longitude = Utils.GeoLocation.Coordinates.longitude;
+    }
+
     $form.find('input').each(function (i, el) {
         if (el.type == 'submit' || el.type == 'button' || (el.name == '' && el.id == ''))
             return;

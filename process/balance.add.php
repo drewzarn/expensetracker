@@ -27,6 +27,7 @@ foreach ($POSTDATA as $accountId => $amount) {
 			$balance->netgain = ($lastBalance->amount > $amount) ? 1 : -1;
 		}
 	}
+    $balance->change_date = new DateTime();
 	R::store($balance);
 }
 

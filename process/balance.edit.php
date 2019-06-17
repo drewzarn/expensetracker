@@ -9,6 +9,7 @@ if($POSTDATA['DELETE'] == 'true') {
 $balance->date = new DateTime($POSTDATA['date']);
 $balance->amount = $POSTDATA['amount'];
 $balance->account = $account;
+$balance->change_date = new DateTime();
 R::store($balance);
 
 exit();

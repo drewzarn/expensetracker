@@ -3,6 +3,14 @@ $page = $_REQUEST['page'];
 if($page == '') $page = 'index';
 if(isset($_REQUEST['cmd'])) $command = $_REQUEST['cmd'];
 
+$paging = (object)[
+	'page' => isset($_REQUEST['pagenum']) ? $_REQUEST['pagenum'] : 0,
+	'size' => 500
+];
+$paging->next = isset($_REQUEST['pagenum']) ? (int)$_REQUEST['pagenum'] + 1 : 1;
+$paging->start = isset($_REQUEST['pagenum']) ? $paging->size * (int)$_REQUEST['pagenum'] : 0;
+$paging->last = $paging->start + $paging->size;
+
 $args = [];
 if(isset($_REQUEST['extra'])) {
 	$_args = explode('/', $_REQUEST['extra']);

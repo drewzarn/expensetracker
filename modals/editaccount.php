@@ -1,6 +1,6 @@
 <div class="modal" tabindex="-1" role="dialog" id="modal_editaccount">
 	<div class="modal-dialog" role="document">
-		<form id="frm_editaccount" method="POST" action="account/edit" data-reload="account" autocomplete="off">
+		<form id="frm_editaccount" method="POST" action="account/edit" data-reload="accounts" autocomplete="off">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title">Edit Account</h5>

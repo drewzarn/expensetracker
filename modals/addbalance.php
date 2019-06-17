@@ -1,6 +1,6 @@
 <div class="modal" tabindex="-1" role="dialog" id="modal_addbalance">
 	<div class="modal-dialog" role="document">
-		<form id="frm_addbalance" method="POST" action="balance/add" data-reload="balance" >
+		<form id="frm_addbalance" method="POST" action="balance/add" data-reload="balances" >
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Add Balance Entry</h5>

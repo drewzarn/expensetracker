@@ -1,0 +1,21 @@
+{
+  "name": "js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "TransactionTable.Filter.js",
+  "dependencies": {
+    "dexie": "^2.0.4",
+    "dexie-observable": "^1.0.0-beta.5",
+    "dexie-syncable": "^1.0.0-beta.4"
+  },
+  "devDependencies": {
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

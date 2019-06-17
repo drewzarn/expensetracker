@@ -43,12 +43,6 @@ var CATEGORIES = [],
     PAYEES = [],
     PAY_IDS = {};
 var NOW = new Date();
-var AccountData = Object.create(DataObject);
-var AccountTypeData = Object.create(DataObject);
-var BalanceData = Object.create(DataObject);
-var CategoryData = Object.create(DataObject);
-var PayeeData = Object.create(DataObject);
-var TransactionData = Object.create(DataObject);
 
 $(document).ready(async function () {
     if (navigator.serviceWorker.controller == null) {
@@ -58,6 +52,11 @@ $(document).ready(async function () {
             updateCardStats(meta.table, meta.count);
         })
         .then(() => {
+            DataUI.categories();
+            DataUI.payees();
+            DataUI.transactions();
+            DataUI.accounttypes();
+            return;
             LoadData("categories");
             LoadData("payees");
             LoadData("transactions");
@@ -174,7 +173,11 @@ var DataUI = {
             $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
             $('#balancechart_accountlist div.col[data-accounttypeid=' + v.type_id + '] div').append('<label class="d-block" for="bca' + v.id + '"><input type="checkbox" data-accountid="' + v.id + '" id="bca' + v.id + '"> ' + v.name + '</label></div>');
         });
-        LoadData('balances');
+        DB.accounts.count().then(c => {
+            updateCardStats('accounts', c);
+        });
+        DataUI.balances();
+        //LoadData('balances');
     },
     accounttypes: function () {
         console.log("DataUI.accounttypes loading");
@@ -197,7 +200,11 @@ var DataUI = {
             $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
             $('#balancechart_accountlist').append('<div class="col px-0" data-accounttypeid="' + v.id + '"><i class="fas fa-chevron-down float-right mt-2 pointer"></i><h5><input type="checkbox" data-accounttypeid="' + v.id + '" id="bcat' + v.id + '" checked /> <label for="bcat' + v.id + '">' + v.name + '</label></h5><div class="collapse"></div></div>');
         });
-        LoadData('accounts');
+        DB.accounttypes.count().then(c => {
+            updateCardStats('accounttypes', c);
+        });
+        DataUI.accounts();
+        //        LoadData('accounts');
     },
     balances: function () {
         console.log("DataUI.balances loading");
@@ -321,6 +328,9 @@ var DataUI = {
                 });
                 Charts.Balances.Draw();
             });
+            DB.balances.count().then(c => {
+                updateCardStats('balances', c);
+            });
     },
     categories: function () {
         console.log("DataUI.categories loading");
@@ -345,6 +355,9 @@ var DataUI = {
         $('#catlist').empty();
         $.each(DataReference.CategoryNames, function (i, v) {
             $('#catlist').append('<button class="btn-sm">' + v + '</button>');
+        });
+        DB.categories.count().then(c => {
+            updateCardStats('categories', c);
         });
     },
     payees: function () {
@@ -372,6 +385,9 @@ var DataUI = {
         $("#edittransaction_payee").typeahead({
             source: DataReference.PayeeNames,
             afterSelect: showTransactionsByPayee
+        });
+        DB.payees.count().then(c => {
+            updateCardStats('payees', c);
         });
     },
     transactions: function () {
@@ -447,6 +463,10 @@ var DataUI = {
 
                 StepperTable.RefreshAll();
             });
+            
+        DB.transactions.count().then(c => {
+            updateCardStats('transactions', c);
+        });
     }
 };
 

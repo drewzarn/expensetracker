@@ -36,6 +36,9 @@ channel.addEventListener('message', event => {
 
 self.addEventListener('install', function (event) {
     console.log('SW Installed', event);
+    event.waitUntil(
+        caches.open('expensesinfra')
+    );
     event.waitUntil(self.skipWaiting()); // Activate worker immediately
 });
 
@@ -45,7 +48,6 @@ self.addEventListener('activate', function (event) {
 });
 
 self.addEventListener('fetch', event => {
-    console.log("Fetching (" + event.request.method + ") " + event.request.url)
     if (event.request.method != 'GET') return;
     if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') {
         return;
@@ -66,7 +68,16 @@ self.addEventListener('fetch', event => {
             })
         );
     } else {
-        return fetch(event.request);
+        event.respondWith(
+            caches.open('expensesinfra').then(function (cache) {
+                return cache.match(event.request).then(function (response) {
+                    return response || fetch(event.request).then(function (response) {
+                        cache.put(event.request, response.clone());
+                        return response;
+                    });
+                });
+            })
+        );
     }
 });
 
@@ -76,7 +87,7 @@ async function ProcessDataList(data) {
         console.trace();
         return;
     }
-    
+
     (data.paged ? Promise.resolve(100) : DB[data.object].clear())
     .then(async () => {
         for (const i in data.list) {

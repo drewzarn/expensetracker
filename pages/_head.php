@@ -28,9 +28,6 @@
 	<script type="text/javascript" src="js/bootstrap-datepicker.min.js"></script>
 	<script type="text/javascript" src="js/typeahead.js"></script>
 	<script type="text/javascript" src="js/moment.js"></script>
-	<script src="js/localforage.js"></script>
-	<script src="js/dataObject.js"></script>
-	<script src="js/idbinterface.js"></script>
 	<script src="js/dexie.js"></script>
 	<script src="js/db.js"></script>
 	<script src="js/rules.js"></script>

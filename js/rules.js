@@ -56,11 +56,6 @@ $(document).ready(async function () {
             DataUI.payees();
             DataUI.transactions();
             DataUI.accounttypes();
-            return;
-            LoadData("categories");
-            LoadData("payees");
-            LoadData("transactions");
-            LoadData("accounttypes");
         });
 
     /*DBClass.DB.on('changes', function (changes) {
@@ -154,6 +149,11 @@ $(document).ready(async function () {
     Charts.Balances.options.height = ($(window).height() - $('#balancechart').offset().top) + 'px';
     Charts.Balances.options.width = ($(window).width() / 6 * 5 - 40) + 'px';
     $('#balancechart_accountlist').on('change', 'input', Charts.Balances.Draw);
+
+    LoadData("categories");
+    LoadData("payees");
+    LoadData("transactions");
+    LoadData("accounttypes");
 });
 
 var DataUI = {
@@ -328,9 +328,9 @@ var DataUI = {
                 });
                 Charts.Balances.Draw();
             });
-            DB.balances.count().then(c => {
-                updateCardStats('balances', c);
-            });
+        DB.balances.count().then(c => {
+            updateCardStats('balances', c);
+        });
     },
     categories: function () {
         console.log("DataUI.categories loading");
@@ -463,7 +463,7 @@ var DataUI = {
 
                 StepperTable.RefreshAll();
             });
-            
+
         DB.transactions.count().then(c => {
             updateCardStats('transactions', c);
         });

@@ -28,7 +28,6 @@ $PWRESETLIMIT = 60 * 15;
 $DUPECHECK = ['before' => -8, 'after' => 6];
 $modalContent = '';
 
-
 if (!$_SESSION['user'] instanceof User && array_search($page, ['user', 'reset']) === false) {
 	unset($_SESSION['user']);
 	$page = 'login';

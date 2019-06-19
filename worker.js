@@ -2,6 +2,7 @@
 
 self.importScripts('js/dexie.js');
 self.importScripts('js/db.js');
+self.importScripts('js/moment.js');
 
 console.log('SW started', self);
 
@@ -81,6 +82,8 @@ self.addEventListener('fetch', event => {
             })
         );
     } else {
+        return fetch(event.request);
+        /*
         event.respondWith(
             caches.open('expensesinfra').then(function (cache) {
                 return cache.match(event.request).then(function (response) {
@@ -90,7 +93,7 @@ self.addEventListener('fetch', event => {
                     });
                 });
             })
-        );
+        );*/
     }
 });
 
@@ -104,7 +107,16 @@ async function ProcessDataList(data) {
     (data.paged ? Promise.resolve(100) : DB[data.object].clear())
     .then(async () => {
         for (const i in data.list) {
-            await DB[data.object].put(data.list[i]);
+            let obj = data.list[i];
+            switch(data.object) {
+                case 'transactions':
+                    let trnDate = new moment(obj.date);
+                    obj.monthyear = trnDate.format("MMYYYY");
+                    obj.month = trnDate.format("MM");
+                    obj.year = trnDate.format("YYYY");
+                    break;
+            }
+            await DB[data.object].put(obj);
         }
         DB.metadata.put({
             table: data.object,

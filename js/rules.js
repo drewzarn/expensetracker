@@ -48,15 +48,17 @@ $(document).ready(async function () {
     if (navigator.serviceWorker.controller == null) {
         location.reload();
     }
-    DB.metadata.each(meta => {
-            updateCardStats(meta.table, meta.count);
-        })
-        .then(() => {
-            DataUI.categories();
-            DataUI.payees();
-            DataUI.transactions();
-            DataUI.accounttypes();
-        });
+    if(!$('body').hasClass('login')) {
+        DB.metadata.each(meta => {
+                updateCardStats(meta.table, meta.count);
+            })
+            .then(() => {
+                DataUI.categories();
+                DataUI.payees();
+                DataUI.transactions();
+                DataUI.accounttypes();
+            });
+    }
 
         Utils.GeoLocation.Init();
 
@@ -105,7 +107,6 @@ $(document).ready(async function () {
 
     $('form').each(function () {
         if (this.id == "frm_login") {
-            DataObject.Nuke();
             return;
         }
         $(this).validate({
@@ -152,10 +153,12 @@ $(document).ready(async function () {
     Charts.Balances.options.width = ($(window).width() / 6 * 5 - 40) + 'px';
     $('#balancechart_accountlist').on('change', 'input', Charts.Balances.Draw);
 
-    LoadData("categories");
-    LoadData("payees");
-    LoadData("transactions");
-    LoadData("accounttypes");
+    if(!$('body').hasClass('login')) {
+        LoadData("categories");
+        LoadData("payees");
+        LoadData("transactions");
+        LoadData("accounttypes");
+    }
 });
 
 var DataUI = {

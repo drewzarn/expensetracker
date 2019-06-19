@@ -35,5 +35,5 @@
 	<script src="js/charts.js"></script>
 </head>
 
-<body <?= $DEVELOPMENT ? 'class="dev"' : '' ?>>
+<body class="<?= $DEVELOPMENT ? 'dev' : '' ?> <?= $page=='login' ? 'login' : '' ?>">
 	<?= $modalContent ?>

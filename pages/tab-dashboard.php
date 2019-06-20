@@ -3,7 +3,7 @@
 		<div class="col-sm-4">
 			<div id="dash_spendingbyperiod" class="card my-3">
 				<h3 class="card-header">Spending by Period</h3>
-				<table class="table table-sm table-striped stepper" data-source="NetByPeriod" data-rows="NetNames">
+				<table class="table table-sm table-striped stepper" data-function="sum += i.amount * i.category.parity;" data-source="NetByPeriod" data-rows="NetNames">
 					<thead class="steppable">
 						<tr><th></th><th data-year=""></th><th data-month="" data-year=""></th><th data-month="" data-year=""></th></tr>
 					</thead>

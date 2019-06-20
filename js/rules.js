@@ -162,9 +162,7 @@ $(document).ready(async function () {
         $('#modal_editbalance').modal();
     });
 
-    Charts.Balances.options.height = ($(window).height() - $('#balancechart').offset().top) + 'px';
-    Charts.Balances.options.width = ($(window).width() / 6 * 5 - 40) + 'px';
-    $('#balancechart_accountlist').on('change', 'input', Charts.Balances.Draw);
+    $('#balancechart').height(($(window).height() - $('#balancechart').offset().top) + 'px');
 
     if (!$('body').hasClass('login')) {
         setTimeout(function () {
@@ -195,7 +193,6 @@ var DataUI = {
             $('#addbalance_accountlist div').empty();
             $('#editbalance_account optgroup').empty();
             $('#balancetable tbody tr[data-accountid]').remove();
-            $('#balancechart_accountlist div.col div label').remove();
             DB.accounts.orderBy('name').each(function (v) {
                 $('#accountlist div[data-accounttypeid=' + v.type_id + '] ul').append('<li data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '" data-accountactive="' + v.active + '"><span>' + v.name + '</span><a href="#" class="fas fa-pencil-alt ml-2 text-dark light" data-toggle="modal" data-target="#modal_editaccount"></a></li>');
                 if (v.active == '1') {
@@ -203,7 +200,6 @@ var DataUI = {
                 }
                 $('#balancetable tbody[data-accounttypeid=' + v.type_id + ']').append('<tr data-accountid="' + v.id + '" data-accountexcludenetworth="' + v.excludenetworth + '"><td>' + v.name + '</td></tr>');
                 $('#editbalance_account optgroup[data-accounttypeid=' + v.type_id + ']').append('<option value="' + v.id + '">' + v.name + '</option>');
-                $('#balancechart_accountlist div.col[data-accounttypeid=' + v.type_id + '] div').append('<label class="d-block" for="bca' + v.id + '"><input type="checkbox" data-accountid="' + v.id + '" id="bca' + v.id + '"> ' + v.name + '</label></div>');
             });
             DB.accounts.count().then(c => {
                 updateCardStats('accounts', c);
@@ -224,7 +220,6 @@ var DataUI = {
             $('#addbalance_accountlist').empty();
             $('#editbalance_account').empty();
             $('#balancetable tbody').remove();
-            $('#balancechart_accountlist div.col').remove();
             DB.accounttypes.orderBy('name').each(function (v) {
                 DataReference.AccountTypeNames.push(v.name);
                 DataReference.AccountTypeNamesById[v.id] = v.name;
@@ -234,7 +229,6 @@ var DataUI = {
                 $('#addbalance_accountlist').append('<div id="addbalance_accountlist_' + v.id + '"></div>');
                 $('#balancetable tfoot').before('<tbody data-accounttypeid="' + v.id + '" data-accounttypeasset="' + v.asset + '"><tr class="table-secondary"><th>' + v.name + '</th></tr></tbody>');
                 $('#editbalance_account').append('<optgroup data-accounttypeid="' + v.id + '" label="' + v.name + '" />');
-                $('#balancechart_accountlist').append('<div class="col px-0" data-accounttypeid="' + v.id + '"><i class="fas fa-chevron-down float-right mt-2 pointer"></i><h5><input type="checkbox" data-accounttypeid="' + v.id + '" id="bcat' + v.id + '" checked /> <label for="bcat' + v.id + '">' + v.name + '</label></h5><div class="collapse"></div></div>');
             });
             DB.accounttypes.count().then(c => {
                 updateCardStats('accounttypes', c);

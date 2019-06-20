@@ -12,12 +12,13 @@ foreach ($accountBeans as $account) {
 		$bean->netgain = 0;
 		$bean->account = $account;
 		$bean->accounttype = $accountType;
-		
-		if($bean->amount != $lastBean->amount)
-		if($accountType->asset) {
-			$bean->netgain = $bean->amount > $lastBean->amount ? 1 : -1;
-		} else {
-			$bean->netgain = $bean->amount < $lastBean->amount ? -1 : 1;
+
+		if ($bean->amount != $lastBean->amount) {
+			if ($accountType->asset) {
+				$bean->netgain = $bean->amount > $lastBean->amount ? 1 : -1;
+			} else {
+				$bean->netgain = $bean->amount > $lastBean->amount ? -1 : 1;
+			}
 		}
 		$lastBean = $bean;
 		$allDates[$bean->date] = $bean->date;

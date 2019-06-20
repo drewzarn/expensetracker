@@ -1,5 +1,8 @@
 const DB = new Dexie('expensedata');
 if(!DB.isOpen()) {
+    DB.version(3).stores({
+        balances: 'id,account_id,accounttype_id,date',
+    });
     DB.version(2).stores({
         accounts: 'id,accounttype_id,name',
         transactions: 'id,payee_id,category_id,date,year,month,day,monthyear,weekday'
@@ -14,24 +17,3 @@ if(!DB.isOpen()) {
         metadata: 'table'
     });
 }
-
-const DBWrapper = {
-    bulkAdd: function(table, data, force = false) {
-        return;
-        DB.metadata.get(table).then(function(meta){
-            if(force==true || new Date().getTime() - meta.lastBulk.getTime() > 60 * 60 * 1000) {
-                DB[table].clear();
-                DB[table].bulkAdd(data);
-                DB.metadata.put({table: table, lastBulk: new Date()});
-            } else {
-                console.log("Skipping bulk add for " + table + " due to freshness");
-                DataUI[table]();
-            }
-        })
-        .catch(function(){
-            DB[table].clear();
-            DB[table].bulkAdd(data);
-            DB.metadata.put({table: table, lastBulk: new Date()});
-        });
-    }
-};

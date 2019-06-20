@@ -5,8 +5,8 @@
 	<title>Expense Tracker</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 	<link rel="manifest" href="/manifest.json">
-	<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.js"></script>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/jquery.validate.js"></script>
 
 	<link rel="stylesheet" href="css/bootstrap.4.1.3.min.css" />
 	<script src="js/bootstrap.popper.4.1.3.min.js"></script>
@@ -16,12 +16,9 @@
 	<script src="js/datatables.min.js"></script>
 	<script src="js/TransactionTable.Filter.js"></script>
 
-	<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous" />
+	<link rel="stylesheet" href="css/fontawesome.css"/>
 
-	<link rel="stylesheet" href="css/chartist.css">
-	<script src="js/chartist.js"></script>
-	<link rel="stylesheet" href="css/chartist-plugin-tooltip.css">
-	<script src="js/chartist-plugin-tooltip.js"></script>
+	<script src="js/jscharting.js"></script>
 
 	<link rel="stylesheet" href="css/bootstrap-datepicker.min.css" />
 	<link rel="stylesheet" href="css/bootstrap.css" />

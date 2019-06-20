@@ -10,11 +10,8 @@
 	<div class="tab-content" id="balanceTabContent">
 		<div class="tab-pane fade show active container-fluid" id="balancedashboard" role="tabpanel" aria-labelledby="balancedashboard-tab">
 			<div class="row">
-				<div class="col-10">
+				<div class="col-12">
 					<div class="ct-chart" id="balancechart"></div>
-				</div>
-				<div class="col-2" id="balancechart_accountlist">
-					<h5><input type="checkbox" id="bcnet" checked> <label for="bcnet">Net</label></h5>
 				</div>
 			</div>
 		</div>

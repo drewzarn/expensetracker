@@ -10,6 +10,9 @@ foreach ($accountBeans as $account) {
 	$lastBean = null;
 	foreach ($balanceBeans as $bean) {
 		$bean->netgain = 0;
+		$bean->account = $account;
+		$bean->accounttype = $accountType;
+		
 		if($bean->amount != $lastBean->amount)
 		if($accountType->asset) {
 			$bean->netgain = $bean->amount > $lastBean->amount ? 1 : -1;

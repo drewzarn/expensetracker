@@ -109,6 +109,9 @@ async function ProcessDataList(data) {
         for (const i in data.list) {
             let obj = data.list[i];
             switch(data.object) {
+                case 'balances':
+                    obj.accounttype_id = obj.accounttype.id;
+                    break;
                 case 'transactions':
                     let trnDate = new moment(obj.date);
                     obj.monthyear = trnDate.format("MMYYYY");

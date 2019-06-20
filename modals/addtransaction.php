@@ -13,6 +13,7 @@
 						<input type="text" class="form-control w-75 float-left typeahead" data-provide="typeahead" id="addtransaction_payee" name="addtransaction_payee" placeholder="Payee" required />
 						<input data-type="date" class="form-control w-25 float-left" id="addtransaction_date" name="addtransaction_date" placeholder="Date" required />
 					</div>
+					<div class="form-group clearfix categorybuttons"></div>
 					<div class="splitwrapper">
 						<div class="form-group clearfix">
 							<input type="text" class="form-control w-75 float-left typeahead" data-provide="typeahead" id="addtransaction_category" name="addtransaction_category" placeholder="Category" required />

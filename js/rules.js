@@ -19,9 +19,9 @@ channel.addEventListener('message', event => {
             case 'accounttypes':
                 LoadData('accounts');
                 break;
-                case 'accounts':
-                    LoadData('balances');
-                    break;
+            case 'accounts':
+                LoadData('balances');
+                break;
         }
     }
     if (event.data.fetch) {
@@ -130,6 +130,11 @@ $(document).ready(async function () {
             $this.nextAll('div').hide();
             $this.removeClass('fa-chevron-up').addClass('fa-chevron-down');
         }
+    });
+
+    $('body').on('click', '.categorybuttons a.btn', function() {
+        var $this = $(this);
+        $this.closest('div.modal-body').find('input[placeholder=Category]:valueEquals("")').first().val($this.text()).next().focus();
     });
 
     Utils.TransactionSplit.Init();
@@ -1000,6 +1005,7 @@ function formAjaxSubmit(form, event) {
     switch (form.id) {
         case 'frm_addtransaction':
             doneHandler = function (d) {
+                $('.payee_transactions tbody').empty();
                 Utils.ShowFormMessage($form.find('div.formmsg'), 'Transaction added');
                 $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
                 $form.find('input[type=checkbox]').prop('checked', false);
@@ -1021,6 +1027,7 @@ function formAjaxSubmit(form, event) {
             break;
         case 'frm_edittransaction':
             doneHandler = function (d) {
+                $('.payee_transactions tbody').empty();
                 Utils.ShowFormMessage($form.find('div.formmsg'), 'Transaction Updated');
                 $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
                 $form.find('input[type=checkbox]').prop('checked', false);
@@ -1047,18 +1054,36 @@ function loadTransactionToEdit() {
 }
 
 async function showTransactionsByPayee(payeeName) {
-    var payeeId = 7; //(await IDBInterface.GetRecordsByIndex('payee', 'name', payeeName))[0].id;
-    var records = []; //await IDBInterface.GetRecordsByIndex('transaction', 'payee', payeeId);
-    var sortedTransactions = Utils.SortBeans(records, 'date').reverse();
-    var count = 0;
     $('.payee_transactions tbody').empty();
-    $.each(sortedTransactions, function (i, v) {
-        if (count++ > 9)
-            return;
-        $('.payee_transactions tbody').append('<tr><td>' + moment(v.date).format('M/D/YY') + '</td><td>' + v.category.name + '</td><td>' + (v.grouptotal == null ? Utils.CurrencyFormatter.format(v.amount) : Utils.CurrencyFormatter.format(v.amount) + ' of ' + Utils.CurrencyFormatter.format(v.grouptotal)) + '</td></tr>');
-    });
+    $('.categorybuttons').empty();
+    var payee = await DB.payees.where("name").equals(payeeName).toArray();
+    if (payee.length == 0) return;
+    payee = payee[0];
+
+    var transactions = await DB.transactions.where("payee_id").equals(payee.id).sortBy('date');
+    transactions.reverse();
+    for (var t = 0; t < transactions.length; t++) {
+        var transaction = transactions[t];
+        if(t < 10) {
+            $('.payee_transactions tbody').append('<tr><td>' + moment(transaction.date).format('M/D/YY') + '</td><td>' + transaction.category.name + '</td><td>' + (transaction.grouptotal == null ? Utils.CurrencyFormatter.format(transaction.amount) : Utils.CurrencyFormatter.format(transaction.amount) + ' of ' + Utils.CurrencyFormatter.format(transaction.grouptotal)) + '</td></tr>');
+        }
+        if ($('.categorybuttons a:textEquals(' + transaction.category.name + ')').length == 0) {
+            $('.categorybuttons').append('<a class="btn btn-outline-secondary btn-sm">' + transaction.category.name + '</a>');
+        }
+    }
 }
 
 String.prototype.capitalize = function () {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
+
+$.expr[':'].textEquals = $.expr.createPseudo(function (arg) {
+    return function (elem) {
+        return $(elem).text().match("^" + arg + "$");
+    };
+});
+$.expr[':'].valueEquals = $.expr.createPseudo(function (arg) {
+    return function (elem) {
+        return $(elem).val().match("^" + arg + "$");
+    };
+});

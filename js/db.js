@@ -8,6 +8,10 @@ DB.version(1).stores({
     transactions: 'id,payee,category,date,year,month,day,monthyear,weekday',
     metadata: 'table'
 });
+DB.version(2).stores({
+    accounts: 'id,accounttype_id,name',
+    transactions: 'id,payee_id,category_id,date,year,month,day,monthyear,weekday'
+});
 DB.open().then(function(){
     console.log("DB opened");
 })

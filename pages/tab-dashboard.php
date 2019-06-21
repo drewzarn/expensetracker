@@ -11,10 +11,10 @@
 				</table>
 			</div>
 		</div>
-		<div class="col-sm-2"></div>
-		<div class="col-sm-2"></div>
-		<div class="col-sm-2"></div>
-		<div class="col-sm-2">
+		<div class="col-sm-5">
+			<div id="spendtree"></div>
+		</div>
+		<div class="col-sm-3">
 			<div class="card my-3">
 				<h3 class="card-header">Data Stats</h3>
 				<ul class="list-group list-group-flush" id="card_datastats">

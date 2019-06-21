@@ -41,7 +41,7 @@ function LoadData(item) {
     if ($('#card_datastats li[data-ref=' + item + '] i').hasClass('fa-spin')) return;
     console.log("LoadData -> " + item);
     $('#card_datastats li[data-ref=' + item + '] i').addClass('fa-spin');
-    fetch(item + '/list');
+    fetch(item + '/list/all');
 }
 
 

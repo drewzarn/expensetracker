@@ -40,6 +40,7 @@ var Charts = {
                     series: seriesArray,
                     defaultSeries_type: 'spline',
                     legend_template: '%icon %name',
+                    defaultPoint_tooltip: function(point){ return '<strong>' + moment(point.options("x")).format("MM/DD/YYYY") + '</strong><br/>' + point.series.name + '<br/>' + Utils.CurrencyFormatter.format(point.options("y")); },
                     yAxis_formatString: 'c',
                   });
             });

@@ -6,6 +6,9 @@
 		<li class="nav-item">
 			<a class="nav-link" id="managecatpayees-tab" data-toggle="tab" href="#managecatpayees" role="tab" aria-controls="contact" aria-selected="false">Categories/Payees</a>
 		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="manageutils-tab" data-toggle="tab" href="#manageutils" role="tab" aria-controls="contact" aria-selected="false">Utils</a>
+		</li>
 	</ul>
 	<div class="tab-content" id="manageTabContent">
 		<div class="tab-pane fade show active" id="manageaccounts" role="tabpanel" aria-labelledby="manageaccounts-tab">
@@ -35,6 +38,16 @@
 						</table>
 					</div>
 				</div>
+			</div>
+		</div>
+		<div class="tab-pane fade" id="manageutils" role="tabpanel" aria-labelledby="manageutils-tab">
+			<div class="mt-3 container-fluid">
+					<div class="row">
+						<div class="col">
+							<h5>Utilities</h5>
+							<button id="util-nukeDB" class="btn btn-danger m-3">Delete DB</button>
+						</div>
+					</div>
 			</div>
 		</div>
 	</div>

@@ -132,7 +132,7 @@ $(document).ready(async function () {
         }
     });
 
-    $('body').on('click', '.categorybuttons a.btn', function() {
+    $('body').on('click', '.categorybuttons a.btn', function () {
         var $this = $(this);
         $this.closest('div.modal-body').find('input[placeholder=Category]:valueEquals("")').first().val($this.text()).next().focus();
     });
@@ -163,6 +163,20 @@ $(document).ready(async function () {
     });
 
     $('#balancechart').height(($(window).height() - $('#balancechart').offset().top) + 'px');
+
+    $('#util-nukeDB').click(function () {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+            for (let registration of registrations) {
+                registration.unregister()
+            }
+
+            DB.delete()
+                .then(() => {
+                    alert('DB deleted');
+                });
+        })
+
+    });
 
     if (!$('body').hasClass('login')) {
         setTimeout(function () {
@@ -1058,7 +1072,7 @@ async function showTransactionsByPayee(payeeName) {
     transactions.reverse();
     for (var t = 0; t < transactions.length; t++) {
         var transaction = transactions[t];
-        if(t < 10) {
+        if (t < 10) {
             $('.payee_transactions tbody').append('<tr><td>' + moment(transaction.date).format('M/D/YY') + '</td><td>' + transaction.category.name + '</td><td>' + (transaction.grouptotal == null ? Utils.CurrencyFormatter.format(transaction.amount) : Utils.CurrencyFormatter.format(transaction.amount) + ' of ' + Utils.CurrencyFormatter.format(transaction.grouptotal)) + '</td></tr>');
         }
         if ($('.categorybuttons a:textEquals(' + transaction.category.name + ')').length == 0) {

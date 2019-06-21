@@ -531,6 +531,7 @@ var DataUI = {
                 updateCardStats('transactions', c, !finalData);
             });
             DataUI.transactions.rendering = false;
+            Charts.SpendTree.Draw();
         }
     }
 };

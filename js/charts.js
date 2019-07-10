@@ -70,7 +70,7 @@ var Charts = {
                 0: 'Transfers',
                 '-1': 'Expenses'
             };
-            DB.transactions.where('monthyear').equals('062019').toArray().then(trans => {
+            DB.transactions.where('monthyear').equals(new moment().format('MMYYYY')).toArray().then(trans => {
                 trans.forEach(tran => {
                     if (series[paritySeries[tran.category.parity]][tran.category.name] == null) {
                         series[paritySeries[tran.category.parity]][tran.category.name] = {
@@ -98,8 +98,9 @@ var Charts = {
                 var chart = JSC.chart('spendtree', {
                     debug: true,
                     type: 'treemapCushion',
-                    title_label_text: 'Amount by Category',
-                    series: seriesArray
+                    title_label_text: 'Amount by Category for ' + new moment().format('MMMM'),
+                    series: seriesArray,
+                    yAxis_formatString: 'c',
                 });
             });
         }

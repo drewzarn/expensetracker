@@ -93,7 +93,7 @@ $(document).ready(async function () {
     $('#modal_addtransaction').on('shown.bs.modal', ModalHandler.Shown.addtransaction);
     $('#modal_edittransaction').on('shown.bs.modal', ModalHandler.Shown.edittransaction);
 
-    $('#mainnav ul .nav-link').click(function () {
+    $('#mainnav .nav-link').click(function () {
         var $this = $(this);
         $('.nav-link').removeClass('border-bottom border-success');
         $this.addClass('border-bottom border-success');
@@ -656,8 +656,6 @@ var Utils = {
         Received: function (position) {
             Utils.GeoLocation.Coordinates.latitude = position.coords.latitude;
             Utils.GeoLocation.Coordinates.longitude = position.coords.longitude;
-
-            $('#status_location').removeClass('text-light');
         }
     },
     TransactionSplit: {
@@ -683,6 +681,7 @@ var Utils = {
             });
             newSplit.insertAfter('#frm_addtransaction div.splitwrapper:last');
             newSplit.find('input:first').focus();
+            Utils.TransactionSplit.Update();
         },
         Remove: function () {
             $('div.splitwrapper:last').remove();

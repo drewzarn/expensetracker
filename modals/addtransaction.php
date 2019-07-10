@@ -3,7 +3,8 @@
 		<form id="frm_addtransaction" action="transaction/add" method="POST" autocomplete="off" data-reload="transactions">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title">Add Transaction</h5>
+					<h5 class="modal-title" style="flex-grow: 1;">Add Transaction</h5>
+					<button class="btn btn-sm btn-primary float-right">Add Trx</button>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>

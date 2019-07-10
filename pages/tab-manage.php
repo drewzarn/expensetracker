@@ -45,7 +45,8 @@
 					<div class="row">
 						<div class="col">
 							<h5>Utilities</h5>
-							<button id="util-nukeDB" class="btn btn-danger m-3">Delete DB</button>
+							<a href="user/logout" class="btn btn-warning m-3">Logout</a>
+							<button id="util-nukeDB" class="btn btn-danger m-3">Delete Local DB</button>
 						</div>
 					</div>
 			</div>

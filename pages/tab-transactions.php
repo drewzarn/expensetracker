@@ -1,5 +1,15 @@
 <div id="content-transactions" class="container-fluid">
 	<div class="row">
+		<div class="col-sm-8" id="transactionlist">
+			<div class="card my-3">
+				<h3 class="card-header">Transactions</h3>
+				<table id="transactionlisttable" class="display table table-sm table-striped" style="width:100%">
+					<thead>
+						<tr><th>Date</th><th>Payee</th><th>Category</th><th>Description</th><th>Amount</th></tr>
+					</thead>
+				</table>
+			</div>
+		</div>
 		<div class="col-sm-4">
 			<div class="card my-3">
 				<h3 class="card-header">Spending by Period</h3>
@@ -30,16 +40,6 @@
 						</table>
 					</div>
 				</div>
-			</div>
-		</div>
-		<div class="col-sm-8" id="transactionlist">
-			<div class="card my-3">
-				<h3 class="card-header">Transactions</h3>
-				<table id="transactionlisttable" class="display table table-sm table-striped" style="width:100%">
-					<thead>
-						<tr><th>Date</th><th>Payee</th><th>Category</th><th>Description</th><th>Amount</th></tr>
-					</thead>
-				</table>
 			</div>
 		</div>
 	</div>

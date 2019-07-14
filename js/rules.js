@@ -572,7 +572,6 @@ var ModalHandler = {
             $('#addtransaction_payee').focus();
             $('#addtransaction_date').datepicker('update', new Date().toLocaleDateString());
             Utils.TransactionSplit.Reset();
-            $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
         },
         editaccount: function (e) {
             $('#editaccount_name').val($(e.relatedTarget).prev().text());
@@ -1017,7 +1016,6 @@ function formAjaxSubmit(form, event) {
                 Utils.ShowFormMessage($form.find('div.formmsg'), 'Transaction added');
                 $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
                 $form.find('input[type=checkbox]').prop('checked', false);
-                $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
                 $('#addtransaction_date').datepicker('update', new Date().toLocaleDateString());
                 $('#addtransaction_payee').focus();
                 Utils.TransactionSplit.Reset();
@@ -1025,12 +1023,6 @@ function formAjaxSubmit(form, event) {
             };
             failHandler = function (d) {
                 d = JSON.parse(d.responseText);
-                var dupe = d.dupe;
-                var msg = 'Allow dupe? On ' + dupe.date.substring(0, 10);
-                if (dupe.description != '') {
-                    msg += ' (<em>' + dupe.description + '</em>)';
-                }
-                $form.find('label[for=addtransaction_allowdupe]').html(msg).parent().removeClass('d-none');
             };
             break;
         case 'frm_edittransaction':

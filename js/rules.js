@@ -69,23 +69,6 @@ $(document).ready(async function () {
 
     Utils.GeoLocation.Init();
 
-    /*DBClass.DB.on('changes', function (changes) {
-        var changedObjects = [];
-        console.log('Changes fired for ' + changes.length + ' items');
-        changes.forEach(function (change) {
-            if(changedObjects.indexOf(change.table) < 0) {
-                changedObjects.push(change.table);
-            }
-        });
-        console.log(changedObjects);
-        changedObjects.forEach(function(changeObject){
-            DataUI[changeObject]();
-        });
-    });
-    DBClass.DB.open().catch(function (e) {
-        console.error("Open failed: " + e.stack);
-    });*/
-
     $('div.modal').on('hidden.bs.modal', ModalHandler.Hidden.default);
     $('#modal_editaccount').on('shown.bs.modal', ModalHandler.Shown.editaccount);
     $('#modal_editcategory').on('shown.bs.modal', ModalHandler.Shown.editcategory);
@@ -95,9 +78,10 @@ $(document).ready(async function () {
 
     $('#mainnav .nav-link').click(function () {
         var $this = $(this);
+        var content = $this.attr('href').substring(1);
+        if(content == "") return;
         $('.nav-link').removeClass('border-bottom border-success');
         $this.addClass('border-bottom border-success');
-        var content = $this.attr('href').substring(1);
         $('div[id^="content-"]').hide();
         $('div[id^="content-' + content + '"]').show();
     });
@@ -135,6 +119,12 @@ $(document).ready(async function () {
     $('body').on('click', '.categorybuttons a.btn', function () {
         var $this = $(this);
         $this.closest('div.modal-body').find('input[placeholder=Category]:valueEquals("")').first().val($this.text()).next().focus();
+    });
+
+    $('body').on('click', '.payeebuttons a.btn', function () {
+        var $this = $(this);
+        $this.closest('div.modal-body').find('input[placeholder=Payee]:valueEquals("")').first().val($this.text()).next().focus();
+        showTransactionsByPayee($this.text());
     });
 
     Utils.TransactionSplit.Init();
@@ -569,10 +559,19 @@ var ModalHandler = {
     },
     Shown: {
         addtransaction: function (e) {
+            $('div.payeebuttons').empty().html("<em><small>Checking nearby payees...</small></em>");;
             $('#addtransaction_payee').focus();
             $('#addtransaction_date').datepicker('update', new Date().toLocaleDateString());
             Utils.TransactionSplit.Reset();
-            $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
+
+            if(Utils.GeoLocation.NearbyPayees.length == 0) {
+                $('div.payeebuttons').html("<em><small>No nearby payees</small></em>");
+            } else {
+                $('div.payeebuttons').empty();
+                Utils.GeoLocation.NearbyPayees.forEach(payee => {
+                    $('.payeebuttons').append('<a class="btn btn-outline-secondary btn-sm">' + payee + '</a>');
+                });
+            }
         },
         editaccount: function (e) {
             $('#editaccount_name').val($(e.relatedTarget).prev().text());
@@ -652,10 +651,44 @@ var Utils = {
         Init: function () {
             navigator.geolocation.getCurrentPosition(Utils.GeoLocation.Received);
             navigator.geolocation.watchPosition(Utils.GeoLocation.Received);
+
+            Number.prototype.toRadians = function() { return this * Math.PI / 180; };
+            Number.prototype.toDegrees = function() { return this * 180 / Math.PI; };
         },
         Received: function (position) {
             Utils.GeoLocation.Coordinates.latitude = position.coords.latitude;
             Utils.GeoLocation.Coordinates.longitude = position.coords.longitude;
+            Utils.GeoLocation.UpdateNearbyPayees();
+        },
+        Haversine: function (lat1, lon1, lat2, lon2) {
+            var R = 20902230.97; // feet
+            var φ1 = lat1.toRadians();
+            var φ2 = lat2.toRadians();
+            var Δφ = (lat2 - lat1).toRadians();
+            var Δλ = (lon2 - lon1).toRadians();
+
+            var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            var d = R * c;
+            return d;
+        },
+        HaversineFromHere: function(lat1, lon1) {
+            return Utils.GeoLocation.Haversine( lat1, lon1, Utils.GeoLocation.Coordinates.latitude, Utils.GeoLocation.Coordinates.longitude);
+        },
+        NearbyPayees: [],
+        UpdateNearbyPayees: function() {
+            Utils.GeoLocation.NearbyPayees = [];
+            DB.transactions.filter(trx => {
+                if (trx.latitude == null || trx.longitude == null) return false;
+                return (Utils.GeoLocation.HaversineFromHere(trx.latitude, trx.longitude) < 26040);
+            }).each(trx => {
+                if (Utils.GeoLocation.NearbyPayees.indexOf(trx.payee.name) < 0) {
+                    Utils.GeoLocation.NearbyPayees.push(trx.payee.name);
+                }
+            });
         }
     },
     TransactionSplit: {
@@ -692,7 +725,7 @@ var Utils = {
             var newSplit = $('#frm_addtransaction div.splitwrapper:first').clone();
             $('#frm_addtransaction div.splitwrapper').remove();
             newSplit.find('input').val('');
-            newSplit.insertAfter('#frm_addtransaction div.form-group:first');
+            newSplit.insertAfter('#frm_addtransaction div.payeebuttons');
             $('#splittotal').text('Total: $0.00');
             $('input[name^=addtransaction_category]').typeahead({
                 source: DataReference.CategoryNames
@@ -1017,7 +1050,6 @@ function formAjaxSubmit(form, event) {
                 Utils.ShowFormMessage($form.find('div.formmsg'), 'Transaction added');
                 $form.find('input').not(':input[type=button], :input[type=submit], :input[type=reset]').val('');
                 $form.find('input[type=checkbox]').prop('checked', false);
-                $('#addtransaction_allowdupe').prop('checked', false).parent().addClass('d-none');
                 $('#addtransaction_date').datepicker('update', new Date().toLocaleDateString());
                 $('#addtransaction_payee').focus();
                 Utils.TransactionSplit.Reset();
@@ -1025,12 +1057,6 @@ function formAjaxSubmit(form, event) {
             };
             failHandler = function (d) {
                 d = JSON.parse(d.responseText);
-                var dupe = d.dupe;
-                var msg = 'Allow dupe? On ' + dupe.date.substring(0, 10);
-                if (dupe.description != '') {
-                    msg += ' (<em>' + dupe.description + '</em>)';
-                }
-                $form.find('label[for=addtransaction_allowdupe]').html(msg).parent().removeClass('d-none');
             };
             break;
         case 'frm_edittransaction':

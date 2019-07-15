@@ -14,14 +14,15 @@
 						<input type="text" class="form-control w-75 float-left typeahead" data-provide="typeahead" id="addtransaction_payee" name="addtransaction_payee" placeholder="Payee" required />
 						<input data-type="date" class="form-control w-25 float-left" id="addtransaction_date" name="addtransaction_date" placeholder="Date" required />
 					</div>
-					<div class="form-group clearfix categorybuttons"></div>
+					<div class="form-group clearfix payeebuttons"></div>
 					<div class="splitwrapper">
 						<div class="form-group clearfix">
 							<input type="text" class="form-control w-75 float-left typeahead" data-provide="typeahead" id="addtransaction_category" name="addtransaction_category" placeholder="Category" required />
 							<input type="number" class="form-control w-25 float-left" id="addtransaction_amount" name="addtransaction_amount" step="0.01" placeholder="Amount" required />
-						</div> 
+						</div>
 						<div class="form-group"><input type="text" class="form-control" id="addtransaction_description" name="addtransaction_description" placeholder="Description" /></div>
 					</div>
+					<div class="form-group clearfix categorybuttons"></div>
 					<div class="form-group"><span id="splittotal" class="float-left"></span>
 						<br />
 						<a class="btn btn-info btn-sm text-light" id="splittransaction">Add Split</a>
@@ -32,7 +33,11 @@
 					<div class="formmsg rounded border bg-light p-2 my-3 invisible"></div><input type="submit" class="btn btn-primary" value="Add Transaction" />
 					<table class="payee_transactions table table-sm mt-3">
 						<thead>
-							<tr><th>Date</th><th>Category</th><th>Amount</th></tr>
+							<tr>
+								<th>Date</th>
+								<th>Category</th>
+								<th>Amount</th>
+							</tr>
 						</thead>
 						<tbody></tbody>
 					</table>

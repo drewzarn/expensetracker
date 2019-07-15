@@ -1,20 +1,27 @@
 body.dev {
     background-image: url('../img/development.png');
 }
-body.sandbox #mainnav, body.sandbox div.modal-header {
+
+body.sandbox #mainnav,
+body.sandbox div.modal-header {
     border-bottom: double .5em red;
 }
 
-a.fas:hover, a.fas:focus {
+a.fas:hover,
+a.fas:focus {
     text-decoration: none;
 }
+
 .fas.light {
     opacity: .5;
 }
+
 i.fas.pointer {
     cursor: pointer;
 }
-.categorybuttons a.btn {
+
+.categorybuttons a.btn,
+.payeebuttons a.btn {
     margin: 0 .75em .75em 0;
 }
 
@@ -26,22 +33,26 @@ div#transactionlistrange input {
     width: 12em;
     flex: none;
 }
+
 div#transactionlistrange span.input-group-addon {
     padding: .25em .5em;
 }
+
 div#transactionlistrange button {
     width: 8em;
     margin-left: .5em;
 }
+
 #transactionlisttable_wrapper {
     margin-top: .5em;
     margin-right: 1em;
 }
+
 #transactionlisttable tr td:first-of-type {
     min-width: 8em;
 }
 
-#addbalance_accountlist > div {
+#addbalance_accountlist>div {
     display: grid;
     grid-template-columns: 49% 49%;
     grid-column-gap: 2%;
@@ -54,12 +65,15 @@ div#transactionlistrange button {
 #balancetable tbody {
     border-bottom: solid 2px black;
 }
+
 th.balancedate {
     min-width: 7em;
 }
-tr[data-accountid] > td:first-of-type {
+
+tr[data-accountid]>td:first-of-type {
     min-width: 15em;
 }
+
 td.dupebalance::after {
     content: " DUPE ENTRY";
 }
@@ -74,9 +88,11 @@ td.dupebalance::after {
     cursor: pointer;
 }
 
-#spendingbyperiod thead.steppable th, #spendingbyperiod td {
+#spendingbyperiod thead.steppable th,
+#spendingbyperiod td {
     text-align: center;
 }
+
 thead.steppable th span {
     display: block;
 }
@@ -85,8 +101,10 @@ table.stepper tbody {
     display: block;
     overflow: auto;
 }
-table.stepper thead, table.stepper tbody tr {
-    display:table;
-    width:100%;
-    table-layout:fixed;
+
+table.stepper thead,
+table.stepper tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
 }

@@ -566,6 +566,8 @@ var ModalHandler = {
 
             if(Utils.GeoLocation.NearbyPayees.length == 0) {
                 $('div.payeebuttons').html("<em><small>No nearby payees</small></em>");
+            } else if(Utils.GeoLocation.NearbyPayees.length > 5) {
+                $('div.payeebuttons').html("<em><small>Too many nearby payees</small></em>");
             } else {
                 $('div.payeebuttons').empty();
                 Utils.GeoLocation.NearbyPayees.forEach(payee => {
@@ -683,7 +685,7 @@ var Utils = {
             Utils.GeoLocation.NearbyPayees = [];
             DB.transactions.filter(trx => {
                 if (trx.latitude == null || trx.longitude == null) return false;
-                return (Utils.GeoLocation.HaversineFromHere(trx.latitude, trx.longitude) < 26040);
+                return (Utils.GeoLocation.HaversineFromHere(trx.latitude, trx.longitude) < 2640);
             }).each(trx => {
                 if (Utils.GeoLocation.NearbyPayees.indexOf(trx.payee.name) < 0) {
                     Utils.GeoLocation.NearbyPayees.push(trx.payee.name);

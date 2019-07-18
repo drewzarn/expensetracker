@@ -68,6 +68,7 @@ $(document).ready(async function () {
     }
 
     Utils.GeoLocation.Init();
+    Utils.TypeAhead.Init();
 
     $('div.modal').on('hidden.bs.modal', ModalHandler.Hidden.default);
     $('#modal_editaccount').on('shown.bs.modal', ModalHandler.Shown.editaccount);
@@ -123,6 +124,7 @@ $(document).ready(async function () {
 
     $('body').on('click', '.payeebuttons a.btn', function () {
         var $this = $(this);
+        if($this.closest('div.modal-body').find('input[placeholder=Payee]:valueEquals("")').length == 0) return;
         $this.closest('div.modal-body').find('input[placeholder=Payee]:valueEquals("")').first().val($this.text()).next().focus();
         showTransactionsByPayee($this.text());
     });
@@ -389,12 +391,8 @@ var DataUI = {
                 $('#categorylist tbody').find('a[data-categoryid=' + v.id + ']').data('details', v);
             });
             DataReference.CategoryNames.sort();
-            $("#addtransaction_category").typeahead({
-                source: DataReference.CategoryNames
-            });
-            $("#edittransaction_category").typeahead({
-                source: DataReference.CategoryNames
-            });
+            Utils.TypeAhead.Attach($("#addtransaction_category"), "categories", "name");
+            Utils.TypeAhead.Attach($("#edittransaction_category"), "categories", "name");
             $('#catlist').empty();
             $.each(DataReference.CategoryNames, function (i, v) {
                 $('#catlist').append('<button class="btn-sm">' + v + '</button>');
@@ -426,14 +424,14 @@ var DataUI = {
             });
 
             DataReference.PayeeNames.sort();
-            $("#addtransaction_payee").typeahead({
+            /*$("#addtransaction_payee").typeahead({
                 source: DataReference.PayeeNames,
                 afterSelect: showTransactionsByPayee
             });
             $("#edittransaction_payee").typeahead({
                 source: DataReference.PayeeNames,
                 afterSelect: showTransactionsByPayee
-            });
+            });*/
             DB.payees.count().then(c => {
                 updateCardStats('payees', c);
             });
@@ -708,9 +706,9 @@ var Utils = {
                 $el.val('');
             });
             $('input[name^=addtransaction_category]').each(function (i, el) {
-                $(el).typeahead({
+                /*$(el).typeahead({
                     source: DataReference.CategoryNames
-                });
+                });*/
             });
             newSplit.insertAfter('#frm_addtransaction div.splitwrapper:last');
             newSplit.find('input:first').focus();
@@ -727,9 +725,9 @@ var Utils = {
             newSplit.find('input').val('');
             newSplit.insertAfter('#frm_addtransaction div.payeebuttons');
             $('#splittotal').text('Total: $0.00');
-            $('input[name^=addtransaction_category]').typeahead({
+            /*$('input[name^=addtransaction_category]').typeahead({
                 source: DataReference.CategoryNames
-            });
+            });*/
         },
         Update: function () {
             var total = 0;
@@ -770,16 +768,6 @@ var Utils = {
             return;
         Utils.ShowFormError($(errorList[0].element).closest('form').find('div.formmsg'), 'You seem to be missing some data...');
     },
-    SortBeans: function (beans, sortBy = 'name') {
-        var sorted = [];
-        for (var bean in beans) {
-            sorted.push(beans[bean]);
-        }
-        sorted.sort(function (a, b) {
-            return a[sortBy].toLowerCase().localeCompare(b[sortBy].toLowerCase())
-        });
-        return sorted;
-    },
     TransactionListRender: {
         Amount: function (data, type, row) {
             if (type === 'display') {
@@ -806,6 +794,31 @@ var Utils = {
                 }
             }
             return data;
+        }
+    },
+    TypeAhead: {
+        Init: function() {
+            $('body').on('keypress', '.typeaheadinput', Utils.TypeAhead.Update);
+        },
+        Attach: function(element, sourceTable, sourceField) {
+            let $element = $(element);
+            if($element.data('taid') != null) return;
+            let taID = (Math.random()*0xFFFFFF<<0).toString(16);
+            $element.addClass('typeaheadinput');
+            $element.data("sourcetable", sourceTable).data("sourcefield", sourceField).data('taid', taID);
+            let pos = $element.offset();
+            $element.after('<ul class="tyepahead" id="ta-' + taID + '" style="top:' + pos.top + 'px; left:' + pos.left + 'px;"><li>One</li></ul>');
+        },
+        Update: function() {
+            let $this = $(this);
+            let taElement = $('ul#ta-' + $this.data('taid'));
+            taElement.empty();
+            DB[$this.data('sourcetable')].filter(item => {
+                return item[$this.data('sourcefield')].toLowerCase().indexOf($this.val().toLowerCase()) >= 0;
+            })
+            .each(item => {
+                taElement.append('<li>' + item[$this.data('sourcefield')] + '</li>');
+            });
         }
     }
 }

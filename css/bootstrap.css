@@ -108,3 +108,8 @@ table.stepper tbody tr {
     width: 100%;
     table-layout: fixed;
 }
+
+ul.typeahead {
+    position: absolute;
+    background: red;
+}

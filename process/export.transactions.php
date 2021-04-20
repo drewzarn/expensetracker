@@ -25,9 +25,10 @@ foreach ($beans as $transaction) {
         $groupTotals[$transaction->group] += $transaction->amount;
     }
 
-
     $exportTrans = [
-        'date' => strtotime($transaction->date),
+        //'id' => $transaction->id,
+        'date' => strtotime($transaction->date) * 1000,
+        //'fdate' => $transaction->date,
         'amount' => 0,
         'payee' => $transaction->payee->name,
         'latitude' => $transaction->latitude,
@@ -56,6 +57,7 @@ foreach ($beans as $transaction) {
             $exports[$groupId] = $exportTrans;
         }
         $exports[$groupId]['splits'][] = [
+            //'id' => $transaction->id,
             'amount' => $transaction->amount,
             'category' => $transaction->category->name,
             'description' => $transaction->description,
@@ -65,8 +67,9 @@ foreach ($beans as $transaction) {
 }
 foreach ($exports as $exportId => &$export) {
     if (count($export['splits']) > 1) {
-        foreach ($export['splits'] as $split) {
+        foreach ($export['splits'] as &$split) {
             $export['amount'] += $split['amount'];
+            unset($split['parity']);
         }
         $export['amount'] = round($export['amount'], 2);
     }

@@ -4,7 +4,7 @@
   "description": "",
   "main": "TransactionTable.Filter.js",
   "dependencies": {
-    "dexie": "^2.0.4",
+    "dexie": "^3.2.2",
     "dexie-observable": "^1.0.0-beta.5",
     "dexie-syncable": "^1.0.0-beta.4"
   },

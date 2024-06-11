@@ -36,7 +36,7 @@ if (!$_SESSION['user'] instanceof User && array_search($page, ['user', 'reset'])
 
 	$files = scandir(getcwd() . '/modals/');
 	foreach ($files as $file) {
-		if ($file == '.' || $file == '..' || file == 'modals.php')
+		if ($file == '.' || $file == '..' || $file == 'modals.php')
 			continue;
 		$modalContent .= file_get_contents(getcwd() . '/modals/' . $file);
 	}

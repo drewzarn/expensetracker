@@ -9,7 +9,7 @@
 					<input type="text" class="form-control" id="sankeydateend">
 					<input type="button" id="loadsankey" value="Load" />
 				</div>
-				<div class="sankeychart">
+				<div id="sankeychart">
 				</div>
 			</div>
 		</div>

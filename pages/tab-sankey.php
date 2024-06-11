@@ -6,7 +6,11 @@
 				<div class="input-daterange input-group ml-3">
 					<input type="text" class="input-sm form-control" id="sankeydatestart">
 					<span class="input-group-text">to</span>
-					<input type="text" class="form-control" id="sankeydateend"></div>
+					<input type="text" class="form-control" id="sankeydateend">
+					<input type="button" id="loadsankey" value="Load" />
+				</div>
+				<div class="sankeychart">
+				</div>
 			</div>
 		</div>
 	</div>

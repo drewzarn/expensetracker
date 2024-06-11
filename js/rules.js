@@ -97,6 +97,7 @@ $(document).ready(async function () {
     Utils.InitDateInputs();
     StepperTable.Init();
     TransactionListTable.Init();
+    SankeyChart.Init();
 
     $('a#logout:contains("Sandbox")').closest('body').addClass('sandbox');
 
@@ -1007,6 +1008,23 @@ var TransactionListTable = {
     Draw: function () {
         TransactionListTable.TableRef.draw();
     }
+}
+
+var SankeyChart = {
+    Init: function () {
+        $('#sankeydatestart').datepicker({
+            format: "m/d/yyyy"
+        });
+        $('#sankeydateend').datepicker({
+            format: "m/d/yyyy"
+        });
+        $('#loadsankey').on('click', function () {
+            SANKEY = document.getElementById('sankeychart');
+                Plotly.newPlot( SANKEY, [{
+                x: [1, 2, 3, 4, 5],
+                y: [1, 2, 4, 8, 16] }], {
+                margin: { t: 0 } } );
+        });
 }
 
 function formAjaxSubmit(form, event) {

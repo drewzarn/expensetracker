@@ -3,7 +3,7 @@ $beanCount = R::count('transaction', "site=:site", [':site' => SITE]);
 
 $beans = R::find('transaction', "site=:site ORDER BY date DESC LIMIT :pagestart, :pagesize", [':site' => SITE, ':pagestart' => $paging->start, 'pagesize' => $paging->size]);
 $transactions = ['timestamp' => time(), 'object' => 'transactions', 'paged' => $paging->start > 0, 'nextpage' => $paging->last > $beanCount ? null : ('transactions/list/' . $paging->next), 'list' => []];
-transactions['nextpage'] = null;
+$transactions['nextpage'] = null;
 $groupTotals = [];
 
 $payees = [];

@@ -5,7 +5,7 @@ if(isset($_REQUEST['cmd'])) $command = $_REQUEST['cmd'];
 
 $paging = (object)[
 	'page' => isset($_REQUEST['pagenum']) && is_int($_REQUEST['pagenum']) ? $_REQUEST['pagenum'] : 0,
-	'size' => $_REQUEST['pagenum'] == 'all' ? 100000 : 500
+	'size' => $_REQUEST['pagenum'] == 'all' ? ($page == 'transactions' ? 500 : 100000) : 500
 ];
 $paging->next = isset($_REQUEST['pagenum']) ? (int)$_REQUEST['pagenum'] + 1 : 1;
 $paging->start = isset($_REQUEST['pagenum']) ? $paging->size * (int)$_REQUEST['pagenum'] : 0;
